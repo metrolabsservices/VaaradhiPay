@@ -1,0 +1,184 @@
+﻿@page "/coin"
+@using VaaradhiPay.Data
+@using BlazorBootstrap
+@using VaaradhiPay.Services.Interfaces
+
+@rendermode InteractiveServer
+
+@inject ICoinTypeService CoinTypeService
+@inject ToastService ToastService
+
+
+<h3>Coin Types</h3>
+
+<!-- Add Button -->
+<Button Color="ButtonColor.Primary" @onclick="OnShowModalClick">Add Coin Type</Button>
+
+<!-- Search -->
+<input @bind="SearchTerm" placeholder="Search..." class="form-control my-2" />
+<Button Color="ButtonColor.Secondary" @onclick="SearchCoinTypes">Search</Button>
+
+<!-- CoinType List -->
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Symbol</th>
+            <th>Activity</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var coinType in CoinTypeList)
+        {
+            <tr>
+                <td>@coinType.Name</td>
+                <td>@coinType.Symbol</td>
+                <td>@(coinType.IsActive ? "Active" : "In-Active")</td>
+                <td>
+                    <Button Color="ButtonColor.Primary" @onclick="() => EditCoinType(coinType.CoinTypeId)">Edit</Button>
+                    <Button Color="ButtonColor.Danger" @onclick="() => DeleteCoinType(coinType.CoinTypeId)">Delete</Button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Pagination -->
+<p>Page: @CurrentPage</p>
+<Button Color="ButtonColor.Secondary" @onclick="PrevPage" Disabled="@(!CanPrevPage)">Previous</Button>
+<Button Color="ButtonColor.Secondary" @onclick="NextPage" Disabled="@(!CanNextPage)">Next</Button>
+
+<!-- Modal for Add/Create CoinType -->
+<Modal @ref="AddCoinTypeModal" title="Add Coin Type">
+    <BodyTemplate>
+        <EditForm Model="NewCoinType" OnValidSubmit="OnAddCoinTypeSubmit" OnInvalidSubmit="OnFormInvalidSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <InputText id="name" class="form-control" @bind-Value="NewCoinType.Name" />
+                <ValidationMessage For="@(() => NewCoinType.Name)" />
+            </div>
+            <div class="mb-3">
+                <label for="symbol" class="form-label">Symbol</label>
+                <InputText id="symbol" class="form-control" @bind-Value="NewCoinType.Symbol" />
+                <ValidationMessage For="@(() => NewCoinType.Symbol)" />
+            </div>
+        </EditForm>
+    </BodyTemplate>
+    <FooterTemplate>
+        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">Close</Button>
+        <Button Color="ButtonColor.Primary" FormSubmit="true" @onclick="OnAddCoinTypeSubmit">Save</Button>
+    </FooterTemplate>
+</Modal>
+
+<!-- Toast Notifications -->
+<Toasts class="p-3" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopRight" />
+
+@code {
+    private List<CoinType> CoinTypeList = new();
+    private CoinType NewCoinType = new();
+    private Modal AddCoinTypeModal = default!;
+    private string SearchTerm = string.Empty;
+    private int CurrentPage = 1;
+    private int PageSize = 10;
+
+    private bool CanPrevPage => CurrentPage > 1;
+    private bool CanNextPage => CoinTypeList.Count == PageSize;
+
+    protected override async Task OnInitializedAsync()
+    {
+    // C: \Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\wwwroot\CurrencieCodes.json
+        await CoinTypeService.BulkAddCoinTypesAsync("wwwroot/CurrencieCodes.json");
+
+        await LoadCoinTypes();
+    }
+
+    private async Task LoadCoinTypes()
+    {
+        CoinTypeList = await CoinTypeService.GetPaginatedCoinTypesAsync(SearchTerm, CurrentPage, PageSize);
+    }
+
+    private async Task SearchCoinTypes()
+    {
+        CurrentPage = 1;
+        await LoadCoinTypes();
+    }
+
+    private async Task PrevPage()
+    {
+        if (CanPrevPage)
+        {
+            CurrentPage--;
+            await LoadCoinTypes();
+        }
+    }
+
+    private async Task NextPage()
+    {
+        if (CanNextPage)
+        {
+            CurrentPage++;
+            await LoadCoinTypes();
+        }
+    }
+
+    private async Task OnShowModalClick()
+    {
+        NewCoinType = new CoinType(); // Reset the model
+        await AddCoinTypeModal.ShowAsync();
+    }
+
+    private async Task OnHideModalClick()
+    {
+        await AddCoinTypeModal.HideAsync();
+    }
+
+    private async Task OnAddCoinTypeSubmit()
+    {
+
+        try
+        {
+            // Add new CoinType
+            await CoinTypeService.AddCoinTypeAsync(NewCoinType);
+            ToastService.Notify(new ToastMessage { Type = ToastType.Success, Message = "Coin Type added successfully!" });
+
+            // Reload list and close modal
+            await AddCoinTypeModal.HideAsync();
+            await LoadCoinTypes();
+        }
+        catch (Exception ex)
+        {
+            ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = $"Error adding Coin Type: {ex.Message}" });
+
+        }
+    }
+
+    private void OnFormInvalidSubmit()
+    {
+        ToastService.Notify(new ToastMessage { Type = ToastType.Warning, Message = "Validation failed. Please correct the errors and try again." });
+
+    }
+
+    private async Task DeleteCoinType(int id)
+    {
+        try
+        {
+            await CoinTypeService.DeleteCoinTypeAsync(id);
+            ToastService.Notify(new ToastMessage { Type = ToastType.Success, Message = "Coin Type deleted successfully." });
+
+            await LoadCoinTypes();
+        }
+        catch (Exception ex)
+        {
+            ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = $"Error deleting Coin Type: {ex.Message}" });
+
+        }
+    }
+
+    private void EditCoinType(int id)
+    {
+        // Navigate to edit page or show edit modal
+    }
+}

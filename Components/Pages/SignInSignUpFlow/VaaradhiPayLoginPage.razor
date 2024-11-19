@@ -1,0 +1,239 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using VaaradhiPay.Components.Account.Pages
+@using VaaradhiPay.Data
+@using System.ComponentModel.DataAnnotations
+
+<div class="login-card-container">
+    <div class="login-card">
+        <!-- Login Form -->
+        <form @onsubmit="HandleLogin">
+            <div class="login-field">
+                <label class="login-label">Email</label>
+                <input @bind="Input.Email" type="email" class="login-input" required />
+            </div>
+            <div class="login-field">
+                <label class="login-label">Password</label>
+                <input @bind="Input.Password" type="password" class="login-input" required />
+            </div>
+            <div class="login-submit-container">
+                <button type="submit" class="login-submit-button">Login</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@code {
+    private LoginInputModel Input { get; set; } = new();
+
+    [Inject] private SignInManager<ApplicationUser> SignInManager { get; set; } = default!;
+    [Inject] private ILogger<Login> Logger { get; set; } = default!;
+    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+    [Inject] private ToastService ToastService { get; set; } = default!;
+
+    private async Task HandleLogin()
+    {
+        // Ensure headers are sent before the response body starts
+        if (!IsResponsePending())
+        {
+            return; // Prevent further processing if response is invalid
+        }
+
+        var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, isPersistent: false, lockoutOnFailure: false);
+
+        if (result.Succeeded)
+        {
+            Logger.LogInformation("User logged in.");
+            ToastService.Notify(new ToastMessage { Type = ToastType.Success, Message = "Login successful!" });
+            NavigationManager.NavigateTo("/");
+        }
+        else if (result.IsLockedOut)
+        {
+            Logger.LogWarning("User account locked out.");
+            ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = "Your account is locked. Please contact support." });
+        }
+        else
+        {
+            Logger.LogWarning("Invalid login attempt.");
+            ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = "Invalid login attempt. Please try again." });
+        }
+    }
+
+    private bool IsResponsePending()
+    {
+        var response = HttpContextAccessor.HttpContext?.Response;
+        return response != null && !response.HasStarted;
+    }
+
+    private class LoginInputModel
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+
+        [Required]
+        public string Password { get; set; } = string.Empty;
+    }
+}
+
+<style>
+    /* Container and Card */
+    .login-card-container {
+        display: flex;
+        justify-content: center;
+        align-items: start;
+        width: 100%;
+        min-height: 100%;
+        background-color: white;
+    }
+
+    .login-card {
+        max-height: calc(100vh - 150px);
+        width: 100%;
+        background-color: white;
+        padding: 2rem;
+        border-radius: 1rem;
+        /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); */
+        text-align: center;
+    }
+
+    /* Title */
+    .login-title {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        font-weight: bold;
+    }
+
+    /* Google Login Button */
+    .google-login-container {
+        margin-bottom: 3rem;
+        align-items: center;
+    }
+
+    .google-login-button {
+        width: auto;
+        padding: 5px 20px;
+        background-color: #0103AA;
+        color: white;
+        border: none;
+        border-radius: 0.5rem;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 21px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .google-login-button i {
+            margin-right: 5px;
+        }
+
+    /* Divider with "or" */
+    .hr-text {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        color: #818078;
+        font-weight: bold;
+        font-size: 14px;
+        margin: 1rem 0;
+        opacity: 0.7;
+        position: relative;
+    }
+
+        .hr-text::before,
+        .hr-text::after {
+            content: '';
+            flex: 1;
+            border-top: 1px solid #ccc;
+        }
+
+        .hr-text span {
+            position: relative;
+            z-index: 1;
+            padding: 0 10px;
+            background-color: #fff;
+            border-radius: 50%;
+            border: 1px solid #ccc;
+            line-height: 1.5rem;
+            height: 1.5rem;
+            width: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #818078;
+        }
+
+    /* Form Fields */
+    .login-field {
+        margin-bottom: 0.5rem;
+    }
+
+    .login-input {
+        width: 100%;
+        padding: 10px;
+        font-size: 1rem;
+        border: none;
+        border-bottom: 1px solid #ccc;
+        outline: none;
+    }
+
+    .login-label {
+        display: block;
+        text-align: left;
+        font-size: 0.9rem;
+        margin-bottom: 0.3rem;
+        color: #67757C;
+    }
+
+    /* Forgot Password */
+    .forgot-password-container {
+        text-align: right;
+        margin: 0.5rem 0;
+    }
+
+    .forgot-password-link {
+        font-size: 0.9rem;
+        color: #000;
+        text-decoration: none;
+    }
+
+        .forgot-password-link:hover {
+            text-decoration: underline;
+        }
+
+    /* Submit Button */
+    .login-submit-container {
+        margin-top: 1rem;
+    }
+
+    .login-submit-button {
+        width: 100%;
+        padding: 10px;
+        font-size: 1rem;
+        font-weight: bold;
+        color: white;
+        background-color: #e63946;
+        border: none;
+        border-radius: 1.5rem;
+    }
+
+    /* Redirect to Signup */
+    .login-redirect {
+        margin-top: 1rem;
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .signup-link {
+        color: #e63946;
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+        .signup-link:hover {
+            text-decoration: underline;
+        }
+
+</style>

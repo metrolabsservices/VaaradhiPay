@@ -1,0 +1,56 @@
+﻿@rendermode InteractiveServer
+
+
+<div class="exchange-card">
+    <div class="exchange-tabs">
+        <span class="tab-button @CssClassActive">@(IsBuying ? "Buy USDT" : "Sell USDT")</span>
+    </div>
+    <div class="exchange-rate">
+        1 USDT is Roughly <strong>@ExchangeRate @Currency</strong>
+    </div>
+    <form class="exchange-form" @onsubmit="HandleExchange">
+        <div class="form-group">
+            <label>You Pay</label>
+            <div class="input-group">
+                <input type="number" @bind="PayAmount" class="form-control" required />
+                <select @bind="PayCurrency" class="form-select">
+                    @foreach (var currency in AvailableCurrencies)
+                    {
+                        <option value="@currency">@currency</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>You Will Receive Roughly</label>
+            <div class="input-group">
+                <input type="number" value="@ReceiveAmount" class="form-control" disabled />
+                <select @bind="ReceiveCurrency" class="form-select">
+                    @foreach (var currency in AvailableCurrencies)
+                    {
+                        <option value="@currency">@currency</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <button type="submit" class="exchange-button">Exchange</button>
+    </form>
+</div>
+
+@code {
+    [Parameter] public bool IsBuying { get; set; }
+
+    private string CssClassActive => IsBuying ? "text-danger" : "text-muted";
+    private string Currency => "INR";
+    private decimal ExchangeRate => IsBuying ? 90.82m : 86.22m;
+    private decimal PayAmount { get; set; } = 100;
+    private decimal ReceiveAmount => IsBuying ? PayAmount / ExchangeRate : PayAmount * ExchangeRate;
+    private string PayCurrency { get; set; } = "INR";
+    private string ReceiveCurrency { get; set; } = "USDT";
+    private List<string> AvailableCurrencies { get; set; } = new() { "INR", "USDT" };
+
+    private void HandleExchange()
+    {
+        // Logic for exchange action goes here
+    }
+}

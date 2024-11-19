@@ -1,0 +1,49 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\teaml\\source\\repos\\VaaradhiPay\\VaaradhiPay\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\VaaradhiPay.bundle.scp.css",
+      "PackagePath": "staticwebassets\\VaaradhiPay.bundle.scp.css"
+    },
+    {
+      "Id": "C:\\Users\\teaml\\source\\repos\\VaaradhiPay\\VaaradhiPay\\wwwroot\\CurrencieCodes.json",
+      "PackagePath": "staticwebassets\\CurrencieCodes.json"
+    },
+    {
+      "Id": "C:\\Users\\teaml\\source\\repos\\VaaradhiPay\\VaaradhiPay\\wwwroot\\MediaFiles\\Logos\\VaaradhiPay_Logo.png",
+      "PackagePath": "staticwebassets\\MediaFiles\\Logos\\VaaradhiPay_Logo.png"
+    },
+    {
+      "Id": "C:\\Users\\teaml\\source\\repos\\VaaradhiPay\\VaaradhiPay\\wwwroot\\app.css",
+      "PackagePath": "staticwebassets\\app.css"
+    },
+    {
+      "Id": "C:\\Users\\teaml\\source\\repos\\VaaradhiPay\\VaaradhiPay\\wwwroot\\bootstrap\\bootstrap.min.css",
+      "PackagePath": "staticwebassets\\bootstrap\\bootstrap.min.css"
+    },
+    {
+      "Id": "C:\\Users\\teaml\\source\\repos\\VaaradhiPay\\VaaradhiPay\\wwwroot\\bootstrap\\bootstrap.min.css.map",
+      "PackagePath": "staticwebassets\\bootstrap\\bootstrap.min.css.map"
+    },
+    {
+      "Id": "C:\\Users\\teaml\\source\\repos\\VaaradhiPay\\VaaradhiPay\\wwwroot\\favicon.png",
+      "PackagePath": "staticwebassets\\favicon.png"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.VaaradhiPay.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.VaaradhiPay.props",
+      "PackagePath": "build\\VaaradhiPay.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.VaaradhiPay.props",
+      "PackagePath": "buildMultiTargeting\\VaaradhiPay.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.VaaradhiPay.props",
+      "PackagePath": "buildTransitive\\VaaradhiPay.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

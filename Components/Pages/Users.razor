@@ -1,0 +1,128 @@
+﻿@page "/users"
+@using Microsoft.AspNetCore.Identity
+@using VaaradhiPay.Data
+@using VaaradhiPay.Services
+@using VaaradhiPay.Services.Interfaces
+@inject IUserService UserService
+@inject IRoleService RoleService
+@inject ToastService ToastService
+
+<h3>User Management</h3>
+
+<div class="mb-3">
+    <input @bind="SearchTerm" class="form-control" placeholder="Search by Name or Email..." />
+    <button class="btn btn-primary mt-2" @onclick="SearchUsers">Search</button>
+</div>
+
+<!-- User List -->
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>KYC Status</th>
+            <th>UPI Linked</th>
+            <th>Tether Wallet</th>
+            <th>Bank Account</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (UserList?.Any() == true)
+        {
+            @foreach (var user in UserList)
+            {
+                <tr>
+                    <td>@user.FirstName</td>
+                    <td>@user.LastName</td>
+                    <td>@user.Email</td>
+                    <td>@(user.KYCDetails?.Any(k => k.IsVerified) == true ? "Verified" : "Pending")</td>
+                    <td>@(user.UPIAddresses?.Any(u => u.IsActive) == true ? "Available" : "None")</td>
+                    <td>@(user.TetherWallets?.Any(w => w.IsActive) == true ? "Available" : "None")</td>
+                    <td>@(user.BankAccounts?.Any(b => b.IsActive) == true ? "Available" : "None")</td>
+                    <td>
+                        <button class="btn btn-info btn-sm" @onclick="() => EditUser(user.Id)">Edit</button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteUser(user.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="8" class="text-center">No users found.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Pagination -->
+<div class="mt-3">
+    <button class="btn btn-secondary" @onclick="PrevPage" disabled="@(!CanPrevPage)">Previous</button>
+    <button class="btn btn-secondary" @onclick="NextPage" disabled="@(!CanNextPage)">Next</button>
+    <span class="ms-2">Page: @CurrentPage</span>
+</div>
+
+@code {
+    private string SearchTerm { get; set; } = string.Empty;
+    private List<ApplicationUser> UserList { get; set; } = new();
+    private int CurrentPage { get; set; } = 1;
+    private int PageSize { get; set; } = 10;
+
+    private bool CanPrevPage => CurrentPage > 1;
+    private bool CanNextPage => UserList?.Count == PageSize;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        UserList = await UserService.GetUsersWithDetailsAsync(SearchTerm, CurrentPage, PageSize);
+    }
+
+    private async Task SearchUsers()
+    {
+        CurrentPage = 1;
+        await LoadUsers();
+    }
+
+    private async Task PrevPage()
+    {
+        if (CanPrevPage)
+        {
+            CurrentPage--;
+            await LoadUsers();
+        }
+    }
+
+    private async Task NextPage()
+    {
+        if (CanNextPage)
+        {
+            CurrentPage++;
+            await LoadUsers();
+        }
+    }
+
+    private void EditUser(string userId)
+    {
+        // Navigate to user edit page or show modal for user details
+    }
+
+    private async Task DeleteUser(string userId)
+    {
+        var success = await UserService.DeleteUserAsync(userId);
+        if (success)
+        {
+            ToastService.Notify(new ToastMessage { Type = ToastType.Success, Message = "User deleted successfully." });
+            await LoadUsers();
+        }
+        else
+        {
+            ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = "Failed to delete user." });
+        }
+    }
+}

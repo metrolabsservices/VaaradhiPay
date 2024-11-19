@@ -1,0 +1,70 @@
+﻿@page "/role"
+
+@using Microsoft.AspNetCore.Identity
+@using VaaradhiPay.Data
+@using VaaradhiPay.Services.Interfaces
+
+@rendermode InteractiveServer
+
+@inject IRoleService RoleService
+@inject IUserRoleService UserRoleService
+@inject UserManager<ApplicationUser> UserManager
+
+<h3>Manage Roles</h3>
+
+<!-- List roles -->
+<h4>Existing Roles</h4>
+<ul>
+    @foreach (var role in Roles)
+    {
+        <li class="my-2">
+            @role.Name
+            <button @onclick="() => DeleteRole(role.Id)">Delete</button>
+        </li>
+    }
+</ul>
+
+<!-- Add role -->
+<h4>Add Role</h4>
+<input @bind="NewRoleName" placeholder="Role name" />
+<button @onclick="AddRole">Add Role</button>
+
+@code {
+    private List<IdentityRole> Roles = new();
+    private string NewRoleName = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Roles = await RoleService.GetRolesAsync();
+    }
+
+    private async Task AddRole()
+    {
+        if (!string.IsNullOrWhiteSpace(NewRoleName))
+        {
+            var result = await RoleService.CreateRoleAsync(NewRoleName);
+            if (result.Succeeded)
+            {
+                Roles = await RoleService.GetRolesAsync();
+                NewRoleName = string.Empty;
+            }
+            else
+            {
+                // Handle errors
+            }
+        }
+    }
+
+    private async Task DeleteRole(string roleId)
+    {
+        var result = await RoleService.DeleteRoleAsync(roleId);
+        if (result.Succeeded)
+        {
+            Roles = await RoleService.GetRolesAsync();
+        }
+        else
+        {
+            // Handle errors
+        }
+    }
+}

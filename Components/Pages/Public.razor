@@ -1,0 +1,111 @@
+﻿@page "/public"
+
+@using Microsoft.AspNetCore.Components
+@using VaaradhiPay.Components.Layout
+@using VaaradhiPay.Components.Pages.L3.ExchangeCard
+@using VaaradhiPay.Components.Pages.SignInSignUpFlow
+
+@rendermode InteractiveServer
+
+@layout EmptyLayout
+
+<Modal @ref="signin_signup_modal" IsScrollable="true" />
+
+<header class="public-layout-header">
+        <nav class="navbar navbar-expand-lg">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/home">
+                <img class="public-layout-logo" alt="Vaaradhi pay img" src="MediaFiles/Logos/VaaradhiPay_Logo.png" />
+                </a>
+                <div class="d-flex">
+                <Button Size="ButtonSize.Small" Class="public-layout-buttons public-layout-button-odd" @onclick="@(() => NavigateToPage("login"))"> Login </Button>
+                <Button Size="ButtonSize.Small" Class="public-layout-buttons" @onclick="@(() => NavigateToPage("register"))"> SIGN UP </Button>
+                </div>
+            </div>
+        </nav>
+</header>
+
+<main class="public-layout-content">
+        <Exchange />
+</main>
+<footer class="public-layout-footer d-flex justify-content-evenly align-items-center py-2 bg-black text-white">
+    <p class="mb-0">&copy; 2024 VaaradhiPay. All Rights Reserved.</p>
+    <p class="mb-0">Terms of Use | Privacy Policy</p>
+</footer>
+
+@code{
+    private Modal signin_signup_modal = default!;
+
+    public async Task NavigateToPage(string message)
+    {
+        if (message == "login")
+        {
+            var parameters = new Dictionary<string, object>();
+            await signin_signup_modal.ShowAsync<VaaradhiPayLoginPage>(
+                title: "Login",
+                parameters: parameters
+            );
+        }
+        else if (message == "register")
+        {
+            var parameters = new Dictionary<string, object>();
+            await signin_signup_modal.ShowAsync<VaaradhiPayRegisterPage>(
+                title: "Sign Up",
+                parameters: parameters
+            );
+        }
+
+        Console.WriteLine($"Navigated to: {message}");
+    }
+
+
+}
+
+
+<style>
+
+    .public-layout-buttons{
+        background-color: #DF0A0A;
+        color: white;
+        font-size: 10px;
+        font-weight: 600;
+        padding: 5px 20px;
+        border-radius: 15px;
+    }
+
+    .public-layout-button-odd{
+        background-color: transparent !important;
+        color: black;
+        font-size: 12px;
+    }
+
+    /* Public Layout Header */
+    .public-layout-header {
+        position: sticky;
+        top: 0;
+        border-bottom: 1px solid white;
+        background-color: #FCE2E0;
+    }
+
+    /* Public Layout Logo */
+    .public-layout-logo {
+        height: 2.8rem;
+        width: 6rem;
+    }
+     /* Public Layout Content */
+    .public-layout-content {
+        min-height: 80vh;
+        padding: 2rem;
+        background-color: #FFF5F4;
+        overflow: auto;
+    }
+
+    /* Public Layout Footer */
+    .public-layout-footer {
+        position: sticky;
+        bottom: 0;
+        border-top: 1px solid white;
+        font-size: 0.9rem;
+    }
+
+</style>

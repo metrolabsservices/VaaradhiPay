@@ -1,0 +1,312 @@
+﻿@page "/register"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using System.Text
+@using System.Text.Encodings.Web
+@using VaaradhiPay.Data
+
+@rendermode InteractiveServer
+
+@inject RoleManager<IdentityRole> RoleManager
+@inject UserManager<ApplicationUser> UserManager
+@inject IUserStore<ApplicationUser> UserStore
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IEmailSender<ApplicationUser> EmailSender
+@inject NavigationManager NavigationManager
+@inject ILogger<Register> Logger
+@inject IdentityRedirectManager RedirectManager
+@inject ToastService ToastService
+
+<div class="register-card-container">
+    <div class="register-card">
+        <h3 class="register-title">Sign Up</h3>
+
+        <!-- Google Sign-Up Button -->
+        <div class="google-signup-container">
+            <button class="google-signup-button">
+                <i class="bi bi-google"></i> Sign Up with Gmail
+            </button>
+        </div>
+
+        <div class="register-divider">or</div>
+
+        <!-- Registration Form -->
+        <form @onsubmit="RegisterUser">
+            <!-- Row for First Name and Last Name -->
+            <div class="register-row">
+                <div class="register-column">
+                    <label class="register-label">First Name</label>
+                    <input @bind="Input.FirstName" class="register-input" required />
+                </div>
+                <div class="register-column">
+                    <label class="register-label">Last Name</label>
+                    <input @bind="Input.LastName" class="register-input" required />
+                </div>
+            </div>
+
+            <!-- Email Field -->
+            <div class="register-field">
+                <label class="register-label">Email</label>
+                <input @bind="Input.Email" type="email" class="register-input" required />
+            </div>
+
+            <!-- Password Field -->
+            <div class="register-field">
+                <label class="register-label">Password</label>
+                <input @bind="Input.Password" type="password" class="register-input" required />
+            </div>
+
+            <!-- Confirm Password Field -->
+            <div class="register-field">
+                <label class="register-label">Confirm Password</label>
+                <input @bind="Input.ConfirmPassword" type="password" class="register-input" required />
+            </div>
+
+            <!-- Submit Button -->
+            <div class="register-submit-container">
+                <button type="submit" class="register-submit-button">Sign Up</button>
+            </div>
+        </form>
+
+        <p class="register-terms">
+            By signing up you agree with terms and conditions of the service
+        </p>
+    </div>
+
+</div>
+
+<Toasts class="p-3" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopRight" />
+
+
+@code {
+    private InputModel Input { get; set; } = new();
+
+    private async Task RegisterUser()
+    {
+        if (Input.Password != Input.ConfirmPassword)
+        {
+            ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = $"Passwords do not match. Please try again" });
+
+            return;
+        }
+
+        var user = CreateUser();
+
+        try
+        {
+            await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+            var emailStore = GetEmailStore();
+            await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+
+            user.FirstName = Input.FirstName;
+            user.LastName = Input.LastName;
+
+            var result = await UserManager.CreateAsync(user, Input.Password);
+
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = $"Error: {error.Description}" });
+
+                }
+                return;
+            }
+
+            // **Assign Default Role:**
+            if (await RoleManager.RoleExistsAsync("user"))
+            {
+                var roleResult = await UserManager.AddToRoleAsync(user, "user");
+                if (!roleResult.Succeeded)
+                {
+                    ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = $"Failed to assign default role: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}" });
+                    return;
+                }
+            }
+            else
+            {
+                ToastService.Notify(new ToastMessage { Type = ToastType.Warning, Message = "Default role 'user' does not exist. Please create it." });
+            }
+
+            // Generate email confirmation link
+            var userId = await UserManager.GetUserIdAsync(user);
+            var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+            var callbackUrl = $"{NavigationManager.BaseUri}Account/ConfirmEmail?userId={userId}&code={code}";
+
+            await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
+            ToastService.Notify(new ToastMessage { Type = ToastType.Success, Message = "Account created successfully. Please confirm your email" });
+
+            // if (UserManager.Options.SignIn.RequireConfirmedAccount)
+            // {
+            //     NavigationManager.NavigateTo($"/Account/RegisterConfirmation?email={Input.Email}");
+            //     return;
+            // }
+
+            await SignInManager.SignInAsync(user, isPersistent: false);
+            ToastService.Notify(new ToastMessage { Type = ToastType.Success, Message = "Successfully signed in!" });
+
+            NavigationManager.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = $"An unexpected error occurred: {ex.Message}" });
+        }
+    }
+
+    private ApplicationUser CreateUser()
+    {
+        try
+        {
+            return Activator.CreateInstance<ApplicationUser>();
+        }
+        catch
+        {
+            throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. Ensure that it is not abstract and has a parameterless constructor.");
+        }
+    }
+
+    private IUserEmailStore<ApplicationUser> GetEmailStore()
+    {
+        if (!UserManager.SupportsUserEmail)
+        {
+            throw new NotSupportedException("The user store doesn't support email.");
+        }
+        return (IUserEmailStore<ApplicationUser>)UserStore;
+    }
+
+    private class InputModel
+    {
+        [Required]
+        public string FirstName { get; set; } = string.Empty;
+
+        [Required]
+        public string LastName { get; set; } = string.Empty;
+
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+
+        [Required]
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be at least 6 characters long.")]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = string.Empty;
+
+        [Required]
+        [Compare("Password", ErrorMessage = "Passwords do not match.")]
+        [DataType(DataType.Password)]
+        public string ConfirmPassword { get; set; } = string.Empty;
+    }
+}
+<style>
+    /* Container and Card */
+    .register-card-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height:  100vh;
+        background-color: #f9f9f9;
+    }
+
+    .register-card {
+        max-height: calc(100vh - 100px);
+        max-width: 400px;
+        background-color: white;
+        padding: 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    /* Title */
+    .register-title {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        font-weight: bold;
+    }
+
+    /* Google Sign-Up Button */
+    .google-signup-container {
+        margin-bottom: 1rem;
+    }
+
+    .google-signup-button {
+        width: auto;
+        padding: 5px 20px;
+        background-color: #0103AA;
+        color: white;
+        border: none;
+        border-radius: 0.5rem;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 21px;
+    }
+
+        .google-signup-button i {
+            margin-right: 5px;
+        }
+
+    /* Divider */
+    .register-divider {
+        margin: 1rem 0;
+        font-size: 0.9rem;
+        color: #aaa;
+    }
+
+    /* Form Fields */
+    .register-row {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .register-column {
+        flex: 1;
+    }
+
+    .register-field {
+        margin-bottom: 0.5rem;
+    }
+
+    .register-input {
+        width: 100%;
+        padding: 10px;
+        font-size: 1rem;
+        border: none;
+        border-bottom: 1px solid #ccc;
+        outline: none;
+    }
+
+    .register-label {
+        display: block;
+        text-align: left; /* Aligns the label to the start */
+        font-size: 0.9rem;
+        margin-bottom: 0.3rem; /* Adds spacing between label and input */
+        color: #67757C;
+        margin: 0.5rem 0px 0px 0px;
+    }
+
+
+    /* Submit Button */
+    .register-submit-container {
+        margin-top: 1rem;
+    }
+
+    .register-submit-button {
+        width: 100%;
+        padding: 10px;
+        font-size: 1rem;
+        font-weight: bold;
+        color: white;
+        background-color: #e63946;
+        border: none;
+        border-radius: 1.5rem;
+    }
+
+    /* Terms */
+    .register-terms {
+        margin-top: 1rem;
+        font-size: 0.9rem;
+        color: #666;
+    }
+</style>

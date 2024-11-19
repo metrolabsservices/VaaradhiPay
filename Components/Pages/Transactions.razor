@@ -1,0 +1,160 @@
+﻿@page "/transactions"
+@using VaaradhiPay.Data
+@using VaaradhiPay.Services
+
+@inject ITransactionService TransactionService
+@inject NavigationManager NavigationManager
+
+<h3>Transactions</h3>
+
+<!-- Filter Section -->
+<div class="filters">
+    <div class="form-group">
+        <label for="searchTerm">Search by Reference</label>
+        <input id="searchTerm" @bind="SearchTerm" class="form-control" placeholder="Search..." />
+    </div>
+    <div class="form-group">
+        <label for="startDate">Start Date</label>
+        <InputDate id="startDate" @bind-Value="StartDate" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="endDate">End Date</label>
+        <InputDate id="endDate" @bind-Value="EndDate" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="transactionType">Transaction Type</label>
+        <select id="transactionType" @bind="TransactionType" class="form-control">
+            <option value="All">All</option>
+            <option value="Buy">Buy</option>
+            <option value="Sell">Sell</option>
+        </select>
+    </div>
+    <button class="btn btn-primary" @onclick="SearchTransactions">Search</button>
+</div>
+
+<!-- Transactions Table -->
+<table class="table table-striped mt-3">
+    <thead>
+        <tr>
+            <th>Reference</th>
+            <th>Coin</th>
+            <th>Volume</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (TransactionList.Any())
+        {
+            @foreach (var transaction in TransactionList)
+            {
+                <tr>
+                    <td>@transaction.ReferenceNumber</td>
+                    <td>@transaction.CoinType?.Name (@transaction.CoinType?.Symbol)</td>
+                    <td>@transaction.Volume</td>
+                    <td>@transaction.Amount</td>
+                    <td>@transaction.TransactionDateTime.ToString("g")</td>
+                    <td>@transaction.TransactionType</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => EditTransaction(transaction.TransactionId)">Edit</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteTransaction(transaction.TransactionId)">Delete</button>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="7" class="text-center">No transactions found.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Pagination -->
+<div class="pagination mt-3">
+    <button class="btn btn-secondary" @onclick="PrevPage" disabled="@(!CanPrevPage)">Previous</button>
+    <span class="mx-2">Page: @CurrentPage</span>
+    <button class="btn btn-secondary" @onclick="NextPage" disabled="@(!CanNextPage)">Next</button>
+</div>
+
+@code {
+    private List<Transaction> TransactionList = new(); // Renamed from 'Transactions'
+    private string SearchTerm = string.Empty; // Search term for reference number
+    private DateTime? StartDate; // Start date for filtering
+    private DateTime? EndDate; // End date for filtering
+    private string TransactionType = "All"; // Transaction type filter: All, Buy, Sell
+    private int CurrentPage = 1; // Current page for pagination
+    private int PageSize = 10; // Number of items per page
+
+    private bool CanPrevPage => CurrentPage > 1;
+    private bool CanNextPage => TransactionList.Count == PageSize;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTransactions();
+    }
+
+    private async Task LoadTransactions()
+    {
+        try
+        {
+            TransactionList = await TransactionService.GetPaginatedTransactionsAsync(
+                SearchTerm,
+                CurrentPage,
+                PageSize,
+                StartDate,
+                EndDate,
+                TransactionType
+            );
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading transactions: {ex.Message}");
+        }
+    }
+
+    private async Task SearchTransactions()
+    {
+        CurrentPage = 1; // Reset to first page when searching
+        await LoadTransactions();
+    }
+
+    private async Task PrevPage()
+    {
+        if (CanPrevPage)
+        {
+            CurrentPage--;
+            await LoadTransactions();
+        }
+    }
+
+    private async Task NextPage()
+    {
+        if (CanNextPage)
+        {
+            CurrentPage++;
+            await LoadTransactions();
+        }
+    }
+
+    private void EditTransaction(int id)
+    {
+        NavigationManager.NavigateTo($"/transactions/edit/{id}");
+    }
+
+    private async Task DeleteTransaction(int id)
+    {
+        try
+        {
+            await TransactionService.DeleteTransactionAsync(id);
+            await LoadTransactions();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting transaction: {ex.Message}");
+        }
+    }
+}
