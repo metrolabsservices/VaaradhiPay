@@ -1,0 +1,153 @@
+﻿@page "/nav"
+
+@using VaaradhiPay.Components.Layout
+@using VaaradhiPay.Components.Pages.L1
+@using VaaradhiPay.DTOs
+
+@rendermode InteractiveServer
+
+@layout EmptyLayout
+
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager NavigationManager
+@inject ToastService ToastService
+
+<div class="navbar_container">
+    <Image Class="logoWhiteProp NavleftWing" Src="MediaFiles/Logos/VaaradhiPay_WhiteLogo.png" Alt="Vaaradhi Pay Logo" IsResponsive="true" />
+    <div class="NavRightWing d-flex justify-content-lg-between align-items-center">
+        <CustomButtonGroup T="CustomButtonModel" ButtonItems="@buttons" OnButtonSelected="HandleButtonClick" />
+        <div>
+            <Dropdown Color="DropdownColor.None" Direction="DropdownDirection.DropdownCentered" Split="true">
+                <DropdownActionButton Class="shadow-none border-0 bg-transparent">
+                    <LetterAvatar Name="Robert Downey" Size="30"  />
+                </DropdownActionButton>
+                <DropdownToggleButton Class="shadow-none border-0 bg-transparent text-white" />
+                <DropdownMenu Class="p-0">
+                    <DropdownItem To="#" Type="DropdownItemType.Link" Class="ps-3 pe-0 px-2">
+                        <TextWithIcon IconName="bi bi-person" IconText="User Profile" />
+                    </DropdownItem>
+                    <DropdownDivider Class="m-0">Dropdown header</DropdownDivider>
+                    @* <DropdownItem Type="DropdownItemType.Button" Class="ps-3 pe-0 px-2">
+                    <form action="Account/Logout" method="post" class="d-inline">
+                    <AntiforgeryToken />
+                    <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                    <button type="submit" class="btn btn-link p-0 m-0 text-start">
+                    <TextWithIcon IconName="bi bi-power" IconText="Logout" />
+                    </button>
+                    </form>
+                    </DropdownItem> *@
+                    <DropdownItem Type="DropdownItemType.Button" Class="ps-3 pe-0 px-2" @onclick="HandleLogout">
+                        <TextWithIcon IconName="bi bi-power" IconText="Logout" />
+                    </DropdownItem>
+                </DropdownMenu>
+            </Dropdown>
+
+        </div>
+      
+    </div>
+    
+</div>
+
+@code {
+    // private string? currentUrl;
+
+    // protected override void OnInitialized()
+    // {
+    //     currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+    //     NavigationManager.LocationChanged += OnLocationChanged;
+    // }
+
+    // private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    // {
+    //     currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+    //     StateHasChanged();
+    // }
+
+    // public void Dispose()
+    // {
+    //     NavigationManager.LocationChanged -= OnLocationChanged;
+    // }
+    private List<CustomButtonModel> buttons = new()
+    {
+        new CustomButtonModel { DisplayText = "Dashboard", NavigationLink = "/dashboard" },
+        new CustomButtonModel { DisplayText = "Transactions", NavigationLink = "/transactions" },
+        // new CustomButtonModel { DisplayText = "Settings", NavigationLink = "/settings" }
+    };
+
+    private void HandleButtonClick(CustomButtonModel button)
+    {
+        NavigationManager.NavigateTo(button.NavigationLink);
+    }
+
+    private async Task HandleLogout()
+    {
+        Console.WriteLine("--------- Log out clicked ------------");
+
+        try
+        {
+            // Call the logout endpoint via HttpClient
+            var client = HttpClientFactory.CreateClient();
+            var response = await client.PostAsync("Account/Logout", null);
+            Console.WriteLine("--------- Log out clicked 1 ------------");
+
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("--------- Log out clicked 2 ------------");
+
+                // Navigate to a specific page after successful logout
+                NavigationManager.NavigateTo("/public", forceLoad: true);
+                ToastService.Notify(new ToastMessage
+                    {
+                        Type = ToastType.Success,
+                        Message = "Logged out successfully!"
+                    });
+
+            }
+            else
+            {
+                Console.WriteLine("--------- Log out clicked 3 ------------");
+
+                throw new Exception("Failed to logout.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"--------- Log out clicked 4 ------------ {ex}");
+            
+            // Display an error message if something goes wrong
+            ToastService.Notify(new ToastMessage
+                {
+                    Type = ToastType.Danger,
+                    Message = $"Logout failed: {ex.Message}"
+                });
+        }
+    }
+
+}
+
+<style>
+
+    .logoWhiteProp {
+        width: 130px;
+        height: auto;
+    }
+
+    @@media (min-width: 770px) {
+        .NavleftWing {
+            margin-left: 100px;
+        }
+
+        .NavRightWing{
+            margin-right: 100px;
+        }
+    }
+  
+    .navbar_container {
+        width: 100%;
+        background-color: #DF0A0A;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+</style>

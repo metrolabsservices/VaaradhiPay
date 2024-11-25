@@ -89,8 +89,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-    // C: \Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\wwwroot\CurrencieCodes.json
-        await CoinTypeService.BulkAddCoinTypesAsync("wwwroot/CurrencieCodes.json");
+    // unlock when bul coin data need to seed in DB
+    // await CoinTypeService.BulkAddCoinTypesAsync("wwwroot/CurrencieCodes.json");
 
         await LoadCoinTypes();
     }

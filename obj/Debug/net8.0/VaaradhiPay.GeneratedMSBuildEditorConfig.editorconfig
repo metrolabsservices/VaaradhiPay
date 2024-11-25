@@ -182,8 +182,12 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xMYXlvdXRcRW1wdHlMYXlvdXQucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/teaml/source/repos/VaaradhiPay/VaaradhiPay/Components/Layout/PublicLayout.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xMYXlvdXRcUHVibGljTGF5b3V0LnJhem9y
+[C:/Users/teaml/source/repos/VaaradhiPay/VaaradhiPay/Components/Layout/EndUserLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xMYXlvdXRcRW5kVXNlckxheW91dC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/teaml/source/repos/VaaradhiPay/VaaradhiPay/Components/Layout/NavBarTop.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xMYXlvdXRcTmF2QmFyVG9wLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/teaml/source/repos/VaaradhiPay/VaaradhiPay/Components/Pages/Auth.razor]
@@ -194,16 +198,28 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDb2luVHlwZXMucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/teaml/source/repos/VaaradhiPay/VaaradhiPay/Components/Pages/Counter.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xDb3VudGVyLnJhem9y
-build_metadata.AdditionalFiles.CssScope = 
-
 [C:/Users/teaml/source/repos/VaaradhiPay/VaaradhiPay/Components/Pages/Error.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xFcnJvci5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/teaml/source/repos/VaaradhiPay/VaaradhiPay/Components/Pages/Home.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xIb21lLnJhem9y
+[C:/Users/teaml/source/repos/VaaradhiPay/VaaradhiPay/Components/Pages/FileManager.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xGaWxlTWFuYWdlci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/teaml/source/repos/VaaradhiPay/VaaradhiPay/Components/Pages/L1/CustomButtonGroup.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xMMVxDdXN0b21CdXR0b25Hcm91cC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/teaml/source/repos/VaaradhiPay/VaaradhiPay/Components/Pages/L1/LetterAvatar.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xMMVxMZXR0ZXJBdmF0YXIucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/teaml/source/repos/VaaradhiPay/VaaradhiPay/Components/Pages/L1/ProfileImage.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xMMVxQcm9maWxlSW1hZ2UucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/teaml/source/repos/VaaradhiPay/VaaradhiPay/Components/Pages/L1/TextWithIcon.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xMMVxUZXh0V2l0aEljb24ucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/teaml/source/repos/VaaradhiPay/VaaradhiPay/Components/Pages/L2/ExchangeCard.razor]
@@ -238,16 +254,16 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xTaWduSW5TaWduVXBGbG93XFZhYXJhZGhpUGF5UmVnaXN0ZXJQYWdlLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/teaml/source/repos/VaaradhiPay/VaaradhiPay/Components/Pages/Transactions.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xUcmFuc2FjdGlvbnMucmF6b3I=
+[C:/Users/teaml/source/repos/VaaradhiPay/VaaradhiPay/Components/Pages/TransactionsPages/Transactions.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xUcmFuc2FjdGlvbnNQYWdlc1xUcmFuc2FjdGlvbnMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/teaml/source/repos/VaaradhiPay/VaaradhiPay/Components/Pages/TransactionsPages/TransactionsAddPage.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xUcmFuc2FjdGlvbnNQYWdlc1xUcmFuc2FjdGlvbnNBZGRQYWdlLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/teaml/source/repos/VaaradhiPay/VaaradhiPay/Components/Pages/Users.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xVc2Vycy5yYXpvcg==
-build_metadata.AdditionalFiles.CssScope = 
-
-[C:/Users/teaml/source/repos/VaaradhiPay/VaaradhiPay/Components/Pages/Weather.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xXZWF0aGVyLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/teaml/source/repos/VaaradhiPay/VaaradhiPay/Components/Routes.razor]

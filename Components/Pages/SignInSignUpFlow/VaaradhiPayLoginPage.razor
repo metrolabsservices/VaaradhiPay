@@ -1,67 +1,116 @@
 ﻿@using Microsoft.AspNetCore.Identity
+@using VaaradhiPay.Components.Account
 @using VaaradhiPay.Components.Account.Pages
 @using VaaradhiPay.Data
+@using Microsoft.AspNetCore.Authentication
 @using System.ComponentModel.DataAnnotations
+
+@rendermode InteractiveServer
+
 
 <div class="login-card-container">
     <div class="login-card">
+        <!-- Google Login Button -->
+        <div class="google-login-container d-flex justify-content-center">
+            <button class="google-login-button">
+                <i class="bi bi-google"></i> Login with Gmail
+            </button>
+        </div>
+
+        <!-- Divider with "or" -->
+        <div class="hr-text">
+            <span>or</span>
+        </div>
+
         <!-- Login Form -->
         <form @onsubmit="HandleLogin">
+            <!-- Email Field -->
             <div class="login-field">
-                <label class="login-label">Email</label>
+                <label class="login-label">Username</label>
                 <input @bind="Input.Email" type="email" class="login-input" required />
             </div>
+
+            <!-- Password Field -->
             <div class="login-field">
                 <label class="login-label">Password</label>
                 <input @bind="Input.Password" type="password" class="login-input" required />
             </div>
+
+            <!-- Forgot Password Link -->
+            <div class="forgot-password-container">
+                <a href="/forgot-password" class="forgot-password-link">
+                    <i class="bi bi-lock"></i> Forgot Password?
+                </a>
+            </div>
+
+            <!-- Submit Button -->
             <div class="login-submit-container">
                 <button type="submit" class="login-submit-button">Login</button>
             </div>
         </form>
+
+        <!-- Signup Redirect -->
+        <p class="login-redirect">
+            Don’t have an account? <a href="/register" class="signup-link">Sign Up</a>
+        </p>
     </div>
 </div>
 
+<Toasts class="p-3" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopRight" />
+
 @code {
     private LoginInputModel Input { get; set; } = new();
+    private bool IsSubmitting { get; set; }
 
-    [Inject] private SignInManager<ApplicationUser> SignInManager { get; set; } = default!;
-    [Inject] private ILogger<Login> Logger { get; set; } = default!;
-    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
-    [Inject] private ToastService ToastService { get; set; } = default!;
+    [Inject]
+    private SignInManager<ApplicationUser> SignInManager { get; set; } = default!;
+    [Inject]
+    private ILogger<VaaradhiPayLoginPage> Logger { get; set; } = default!;
+    [Inject]
+    private ToastService ToastService { get; set; } = default!;
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = default!;
 
     private async Task HandleLogin()
     {
-        // Ensure headers are sent before the response body starts
-        if (!IsResponsePending())
-        {
-            return; // Prevent further processing if response is invalid
-        }
 
-        var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, isPersistent: false, lockoutOnFailure: false);
+        IsSubmitting = false;
 
-        if (result.Succeeded)
+        try
         {
-            Logger.LogInformation("User logged in.");
-            ToastService.Notify(new ToastMessage { Type = ToastType.Success, Message = "Login successful!" });
-            NavigationManager.NavigateTo("/");
-        }
-        else if (result.IsLockedOut)
-        {
-            Logger.LogWarning("User account locked out.");
-            ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = "Your account is locked. Please contact support." });
-        }
-        else
-        {
-            Logger.LogWarning("Invalid login attempt.");
-            ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = "Invalid login attempt. Please try again." });
-        }
-    }
+            var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, IsSubmitting, lockoutOnFailure: false);
 
-    private bool IsResponsePending()
-    {
-        var response = HttpContextAccessor.HttpContext?.Response;
-        return response != null && !response.HasStarted;
+            if (result.Succeeded)
+            {
+                Logger.LogInformation("User logged in successfully.");
+                ToastService.Notify(new ToastMessage { Type = ToastType.Success, Message = "Login successful!" });
+                NavigationManager.NavigateTo("/");
+            }
+            else if (result.IsLockedOut)
+            {
+                Logger.LogWarning("User account is locked out.");
+                ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = "Your account is locked. Please contact support." });
+            }
+            else if (result.RequiresTwoFactor)
+            {
+                Logger.LogInformation("Two-factor authentication required.");
+                NavigationManager.NavigateTo("/Account/LoginWith2fa");
+            }
+            else
+            {
+                Logger.LogWarning("Invalid login attempt.");
+                ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = "Invalid login attempt. Please try again." });
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "An error occurred during login.");
+            ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = "An unexpected error occurred. Please try again later." });
+        }
+        finally
+        {
+            IsSubmitting = false;
+        }
     }
 
     private class LoginInputModel

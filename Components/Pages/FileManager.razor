@@ -1,0 +1,51 @@
+﻿@page "/filemanager"
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Components.Forms
+@using VaaradhiPay.Services.Interfaces
+
+@inject IFileStorageService FileStorageService
+@inject ToastService ToastService
+
+<h3>File Manager</h3>
+
+<InputFile OnChange="HandleFileUpload" />
+<p>@Message</p>
+
+@code {
+    private string Message;
+
+    private async Task HandleFileUpload(InputFileChangeEventArgs e)
+    {
+        if (e.File is null)
+        {
+            Message = "No file selected.";
+            ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = Message });
+            return;
+        }
+
+        var file = e.File;
+
+        try
+        {
+            // Open the file stream and upload it
+            using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // Example: Limit to 10 MB
+            await FileStorageService.UploadFileAsync(null, file.Name, stream, file.ContentType); // Default bucket
+
+            Message = $"Uploaded {file.Name} successfully!";
+            ToastService.Notify(new ToastMessage { Type = ToastType.Success, Message = Message });
+        }
+        catch (IOException ioEx)
+        {
+            // Handle file I/O issues specifically
+            Message = $"File I/O error: {ioEx.Message}";
+            ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = Message });
+        }
+        catch (Exception ex)
+        {
+            // Handle general errors
+            Message = $"Error uploading file: {ex.Message}";
+            ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = Message });
+        }
+    }
+}

@@ -1,0 +1,148 @@
+﻿@page "/transactionadd"
+
+
+@using VaaradhiPay.Data
+@using VaaradhiPay.Services
+@using VaaradhiPay.Services.Interfaces
+
+@rendermode InteractiveServer
+
+@inject ITransactionService TransactionService
+@inject ICoinTypeService CoinTypeService
+@inject NavigationManager NavigationManager
+@inject ILogger<TransactionsAddPage> Logger
+@inject ToastService ToastService
+
+<h1>Add Transaction</h1>
+
+<!-- Toast Notifications -->
+<Toasts class="p-3" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopRight" />
+
+<div class="transaction-form-container">
+    <h2>@(IsBuy ? "Buy USDT" : "Sell USDT")</h2>
+    <p>1 USDT is roughly <strong>@ExchangeRate</strong> INR</p>
+
+    <EditForm Model="TransactionModel" OnValidSubmit="HandleSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="text-danger" />
+
+        <div class="form-group">
+            <label>You Pay</label>
+            <input @bind="TransactionModel.Amount" type="number" class="form-control" placeholder="Enter amount" required />
+            <select @bind="SelectedCurrencyPay" class="form-control">
+                @foreach (var coin in AvailableCoins)
+                {
+                    <option value="@coin.Symbol">@coin.Name</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>You Will Receive</label>
+            <input @bind="TransactionModel.Volume" type="number" class="form-control" readonly />
+            <select @bind="SelectedCurrencyReceive" class="form-control">
+                @foreach (var coin in AvailableCoins)
+                {
+                    <option value="@coin.Symbol">@coin.Name</option>
+                }
+            </select>
+        </div>
+
+        <button type="button" class="btn btn-secondary" @onclick="ToggleTransactionType">
+            @TransactionType
+        </button>
+
+        <button type="submit" class="btn btn-primary">Exchange</button>
+    </EditForm>
+
+    <p class="text-danger">@ErrorMessage</p>
+</div>
+
+@code {
+    private List<CoinType> AvailableCoins = new();
+    private Transaction TransactionModel = new();
+    private string SelectedCurrencyPay = "INR";
+    private string SelectedCurrencyReceive = "USDT";
+    private string TransactionType = "Buy";
+    private bool IsBuy = true;
+    private decimal ExchangeRate = 90.82M; // Default to INR to USDT
+    private string ErrorMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            AvailableCoins = await CoinTypeService.GetActiveCoinsAsync();
+
+            // Set default exchange rate
+            var baseCurrency = AvailableCoins.FirstOrDefault(c => c.Symbol == "INR");
+            var targetCurrency = AvailableCoins.FirstOrDefault(c => c.Symbol == "USDT");
+
+            if (baseCurrency != null && targetCurrency != null)
+            {
+                ExchangeRate = targetCurrency.ExchangeRateToBaseCurrency ?? 0;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to load available coins.");
+            ErrorMessage = "Unable to load data. Please try again later.";
+        }
+    }
+
+    private void ToggleTransactionType()
+    {
+        IsBuy = !IsBuy;
+        TransactionType = IsBuy ? "Buy" : "Sell";
+
+        // Swap currencies
+        (SelectedCurrencyPay, SelectedCurrencyReceive) = (SelectedCurrencyReceive, SelectedCurrencyPay);
+
+        // Update exchange rate
+        UpdateExchangeRate();
+    }
+
+    private void UpdateExchangeRate()
+    {
+        var baseCurrency = AvailableCoins.FirstOrDefault(c => c.Symbol == SelectedCurrencyPay);
+        var targetCurrency = AvailableCoins.FirstOrDefault(c => c.Symbol == SelectedCurrencyReceive);
+
+        if (baseCurrency != null && targetCurrency != null)
+        {
+            ExchangeRate = targetCurrency.ExchangeRateToBaseCurrency ?? 0;
+        }
+
+        // Update the "You Will Receive" value
+        CalculateReceivedAmount();
+    }
+
+    private void CalculateReceivedAmount()
+    {
+        if (TransactionModel.Amount > 0 && ExchangeRate > 0)
+        {
+            TransactionModel.Volume = IsBuy
+                ? TransactionModel.Amount / ExchangeRate
+                : TransactionModel.Amount * ExchangeRate;
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        try
+        {
+            TransactionModel.TransactionType = IsBuy ? "Buy" : "Sell";
+            TransactionModel.TransactionDateTime = DateTime.UtcNow;
+
+            // Validate and save the transaction
+            await TransactionService.AddTransactionAsync(TransactionModel);
+
+            NavigationManager.NavigateTo("/transactions"); // Redirect to transactions list
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error while saving transaction.");
+            ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = $"Error adding Transaction Type: {ex.Message}" });
+            ErrorMessage = "An error occurred while processing your request.";
+        }
+    }
+}

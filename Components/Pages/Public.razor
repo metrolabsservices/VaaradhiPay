@@ -1,11 +1,14 @@
 ﻿@page "/public"
 
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components
 @using VaaradhiPay.Components.Layout
 @using VaaradhiPay.Components.Pages.L3.ExchangeCard
 @using VaaradhiPay.Components.Pages.SignInSignUpFlow
 
 @rendermode InteractiveServer
+
+@attribute [AllowAnonymous]
 
 @layout EmptyLayout
 

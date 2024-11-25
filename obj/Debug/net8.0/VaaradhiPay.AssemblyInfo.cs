@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VaaradhiPay")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+babca2da74846b4dd18e3fa7defb0c64f83526f8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0021afa0230588c2ff7164da639d3116be759c92")]
 [assembly: System.Reflection.AssemblyProductAttribute("VaaradhiPay")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VaaradhiPay")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

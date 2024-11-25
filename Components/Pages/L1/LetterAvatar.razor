@@ -1,0 +1,51 @@
+﻿@inherits ComponentBase
+
+<div class="avatar-circle" style="width:@SizePx; height:@SizePx; background-color:@BackgroundColor; font-size:@FontSize; color:@TextColor;">
+    <span>@Initials</span>
+</div>
+
+@code {
+    [Parameter] public string Name { get; set; } = "Anonymous"; // User name for initials
+    [Parameter] public int Size { get; set; } = 60;            // Avatar size in pixels
+    [Parameter] public string BackgroundColor { get; set; } = "#ffffff"; // Default background color
+    [Parameter] public string TextColor { get; set; } = "#000000";       // Default text color
+
+    private string Initials { get; set; } = "";
+    private string SizePx => $"{Size}px"; // CSS size in pixels
+    private string FontSize => $"{Size / 2.5}px"; // Dynamically adjust font size
+
+    protected override void OnParametersSet()
+    {
+        // Extract initials from the name
+        Initials = GetInitials(Name);
+    }
+
+    private string GetInitials(string name)
+    {
+        var nameSplit = name.Trim().Split(' ');
+        return nameSplit.Length == 1
+            ? nameSplit[0][0].ToString().ToUpper()
+            : $"{nameSplit[0][0]}{nameSplit[1][0]}".ToUpper();
+    }
+}
+
+<style>
+    .avatar-circle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%; /* Make the div circular */
+        color: #fff; /* Text color */
+        font-size: 1.5rem; /* Adjust font size */
+        font-weight: bold; /* Make the text bold */
+        text-transform: uppercase; /* Force uppercase letters */
+        overflow: hidden; /* Ensure text doesn't overflow */
+    }
+
+</style>
+
+@* ----------------------Example Set------------------------------
+<LetterAvatar Name="John Doe" Size="80" BackgroundColor="#17a2b8" />
+<LetterAvatar Name="Jane Smith" Size="100" BackgroundColor="#f8d7da" TextColor="#721c24" />
+<LetterAvatar Name="Alice" Size="60" BackgroundColor="#28a745" />
+<LetterAvatar Name="Robert Downey" Size="120" BackgroundColor="#ffc107" /> *@

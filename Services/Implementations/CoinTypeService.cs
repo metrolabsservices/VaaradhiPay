@@ -30,6 +30,14 @@ namespace VaaradhiPay.Services.Implementations
             return await Task.FromResult(paginatedQuery.ToList());
         }
 
+        public async Task<List<CoinType>> GetActiveCoinsAsync()
+        {
+            return await _context.CoinTypes
+                .Where(c => c.IsActive && !c.IsDeleted)
+                .ToListAsync();
+        }
+
+
         public async Task<CoinType> GetCoinTypeByIdAsync(int id)
         {
             return await _context.CoinTypes.FindAsync(id);

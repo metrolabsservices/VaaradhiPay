@@ -12,11 +12,16 @@ namespace VaaradhiPay.Data
 
         public string Symbol { get; set; } // Short symbol (e.g., USDT, BTC)
 
+        public decimal? ExchangeRateToBaseCurrency { get; set; } // Base rate: 1 USD = X units of this currency
+
         public bool IsActive { get; set; } = true; // Determines if the coin can be used in transactions
 
         public bool IsDeleted { get; set; } = false; // Flag for soft deletion of coin type
 
         public ICollection<Transaction> Transactions { get; set; } // Related transactions
+
+        public DateTime StampTime { get; set; } = DateTime.UtcNow;
+
 
     }
 }

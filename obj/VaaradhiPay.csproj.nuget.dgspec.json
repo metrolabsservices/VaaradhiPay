@@ -54,6 +54,10 @@
               "target": "Package",
               "version": "[3.1.1, )"
             },
+            "Blazor.Extensions.Canvas": {
+              "target": "Package",
+              "version": "[1.1.1, )"
+            },
             "Hangfire.PostgreSql": {
               "target": "Package",
               "version": "[1.20.9, )"
@@ -79,6 +83,14 @@
               "suppressParent": "All",
               "target": "Package",
               "version": "[8.0.4, )"
+            },
+            "Microsoft.Extensions.Logging": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Minio": {
+              "target": "Package",
+              "version": "[6.0.3, )"
             },
             "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",

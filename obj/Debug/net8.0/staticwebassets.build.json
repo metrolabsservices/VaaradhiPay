@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "IqKbVJLK4HIlllT0nEDeF90PqnzKpgfQRf9keNnTWgQ=",
+  "Hash": "wGOjPKcQz9AMmEsDxs8kdtHB7ciJI9sozxzJ9ZU657E=",
   "Source": "VaaradhiPay",
   "BasePath": "_content/VaaradhiPay",
   "Mode": "Default",
@@ -207,6 +207,25 @@
       "OriginalItemSpec": "C:\\Users\\teaml\\.nuget\\packages\\blazor.bootstrap\\3.1.1\\staticwebassets\\pdfjs-4.0.379.worker.min.js"
     },
     {
+      "Identity": "C:\\Users\\teaml\\.nuget\\packages\\blazor.extensions.canvas\\1.1.1\\staticwebassets\\blazor.extensions.canvas.js",
+      "SourceId": "Blazor.Extensions.Canvas",
+      "SourceType": "Package",
+      "ContentRoot": "C:\\Users\\teaml\\.nuget\\packages\\blazor.extensions.canvas\\1.1.1\\staticwebassets\\",
+      "BasePath": "_content/Blazor.Extensions.Canvas",
+      "RelativePath": "blazor.extensions.canvas.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "C:\\Users\\teaml\\.nuget\\packages\\blazor.extensions.canvas\\1.1.1\\staticwebassets\\blazor.extensions.canvas.js"
+    },
+    {
       "Identity": "C:\\Users\\teaml\\source\\repos\\VaaradhiPay\\VaaradhiPay\\obj\\Debug\\net8.0\\scopedcss\\bundle\\VaaradhiPay.styles.css",
       "SourceId": "VaaradhiPay",
       "SourceType": "Computed",
@@ -357,6 +376,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\MediaFiles\\Logos\\VaaradhiPay_Logo.png"
+    },
+    {
+      "Identity": "C:\\Users\\teaml\\source\\repos\\VaaradhiPay\\VaaradhiPay\\wwwroot\\MediaFiles\\Logos\\VaaradhiPay_WhiteLogo.png",
+      "SourceId": "VaaradhiPay",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\teaml\\source\\repos\\VaaradhiPay\\VaaradhiPay\\wwwroot\\",
+      "BasePath": "_content/VaaradhiPay",
+      "RelativePath": "MediaFiles/Logos/VaaradhiPay_WhiteLogo.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\MediaFiles\\Logos\\VaaradhiPay_WhiteLogo.png"
     }
   ]
 }

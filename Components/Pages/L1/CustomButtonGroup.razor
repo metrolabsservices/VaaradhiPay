@@ -1,0 +1,89 @@
+﻿@using VaaradhiPay.DTOs;
+
+@typeparam T;
+
+
+<div class="custom-button-group-container">
+    @foreach (var button in ButtonItems)
+    {
+        <button class="custom-button @GetActiveButtonClass(button)" @onclick="(() => OnButtonClick(button))">
+            @button.DisplayText
+            <div class="custom-button-underline"></div>
+        </button>
+    }
+</div>
+
+@code {
+    [Parameter] public List<CustomButtonModel> ButtonItems { get; set; } = new();
+    [Parameter] public EventCallback<CustomButtonModel> OnButtonSelected { get; set; }
+
+    private CustomButtonModel? ActiveButton;
+
+    private void OnButtonClick(CustomButtonModel button)
+    {
+        ActiveButton = button;
+        if (OnButtonSelected.HasDelegate)
+        {
+            OnButtonSelected.InvokeAsync(button);
+        }
+    }
+
+    private string GetActiveButtonClass(CustomButtonModel button)
+    {
+        return ActiveButton == button ? "custom-active-button" : "";
+    }
+}
+
+<style>
+    /* Container for the button group */
+    .custom-button-group-container {
+        display: flex;
+        gap: 30px; /* Gap between buttons */
+        background-color: #DF0A0A; /* Background color for the container */
+        padding: 15px; /* Spacing inside the container */
+    }
+
+    /* Button styling */
+    .custom-button {
+        position: relative;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 0.8rem;
+        font-weight: 400;
+        font-family: Arial, sans-serif;
+        cursor: pointer;
+        padding: 8px 0;
+        outline: none;
+        transition: color 0.3s ease-in-out;
+    }
+
+        .custom-button:hover {
+            color: #f5f5f5; /* Slightly lighter text color on hover */
+        }
+
+    /* Underline effect for buttons */
+    .custom-button-underline {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 1px;
+        width: 0;
+        background-color: white; /* Underline color */
+        transition: width 0.3s ease-in-out;
+    }
+
+    .custom-button:hover .custom-button-underline {
+        width: 100%; /* Full underline on hover */
+    }
+
+    /* Active button styling */
+    .custom-active-button .custom-button-underline {
+        width: 100%; /* Keep the underline active */
+    }
+
+    .custom-active-button {
+        color: #ffffff; /* Active button text color */
+    }
+
+</style>

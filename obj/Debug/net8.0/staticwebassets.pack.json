@@ -13,6 +13,10 @@
       "PackagePath": "staticwebassets\\MediaFiles\\Logos\\VaaradhiPay_Logo.png"
     },
     {
+      "Id": "C:\\Users\\teaml\\source\\repos\\VaaradhiPay\\VaaradhiPay\\wwwroot\\MediaFiles\\Logos\\VaaradhiPay_WhiteLogo.png",
+      "PackagePath": "staticwebassets\\MediaFiles\\Logos\\VaaradhiPay_WhiteLogo.png"
+    },
+    {
       "Id": "C:\\Users\\teaml\\source\\repos\\VaaradhiPay\\VaaradhiPay\\wwwroot\\app.css",
       "PackagePath": "staticwebassets\\app.css"
     },

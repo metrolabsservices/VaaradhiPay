@@ -2,6 +2,7 @@ using BlazorBootstrap;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Minio;
 using VaaradhiPay.Components;
 using VaaradhiPay.Components.Account;
 using VaaradhiPay.Data;
@@ -29,6 +30,8 @@ builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuth
 
 
 // -------- added Custom Services ----------- 
+
+builder.Services.AddHttpClient();
 builder.Services.AddScoped<ToastService>();
 builder.Services.AddBlazorBootstrap();
 builder.Services.AddScoped(typeof(IPaginationService<>), typeof(PaginationService<>));
@@ -42,6 +45,18 @@ builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddScoped<ICoinTypeService, CoinTypeService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
+
+builder.Services.AddSingleton<IMinioClient>(sp =>
+{
+    var configuration = sp.GetRequiredService<IConfiguration>();
+    return new MinioClient()
+        .WithEndpoint(configuration["Minio:Endpoint"])
+        .WithCredentials(configuration["Minio:AccessKey"], configuration["Minio:SecretKey"])
+        .Build();
+});
+builder.Services.AddScoped<IBucketManager, BucketManager>();
+builder.Services.AddScoped<IFileStorageService, FileStorageService>();
+
 // -------------------------
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

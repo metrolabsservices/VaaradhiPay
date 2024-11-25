@@ -1,627 +1,780 @@
 ﻿[
   {
     "Name": "Afghan Afghani",
-    "Symbol": "AFN"
+    "Symbol": "AFN",
+    "ExchangeRateToBaseCurrency": 86.50
   },
   {
     "Name": "Albanian Lek",
-    "Symbol": "ALL"
+    "Symbol": "ALL",
+    "ExchangeRateToBaseCurrency": 100.25
   },
   {
     "Name": "Algerian Dinar",
-    "Symbol": "DZD"
+    "Symbol": "DZD",
+    "ExchangeRateToBaseCurrency": 135.70
   },
   {
     "Name": "Angolan Kwanza",
-    "Symbol": "AOA"
+    "Symbol": "AOA",
+    "ExchangeRateToBaseCurrency": 830.50
   },
   {
     "Name": "Argentine Peso",
-    "Symbol": "ARS"
+    "Symbol": "ARS",
+    "ExchangeRateToBaseCurrency": 350.00
   },
   {
     "Name": "Armenian Dram",
-    "Symbol": "AMD"
+    "Symbol": "AMD",
+    "ExchangeRateToBaseCurrency": 389.00
   },
   {
     "Name": "Australian Dollar",
-    "Symbol": "AUD"
+    "Symbol": "AUD",
+    "ExchangeRateToBaseCurrency": 1.50
   },
   {
     "Name": "Azerbaijani Manat",
-    "Symbol": "AZN"
+    "Symbol": "AZN",
+    "ExchangeRateToBaseCurrency": 1.70
   },
   {
     "Name": "Bahamian Dollar",
-    "Symbol": "BSD"
+    "Symbol": "BSD",
+    "ExchangeRateToBaseCurrency": 1.00
   },
   {
     "Name": "Bahraini Dinar",
-    "Symbol": "BHD"
+    "Symbol": "BHD",
+    "ExchangeRateToBaseCurrency": 0.38
   },
   {
     "Name": "Bangladeshi Taka",
-    "Symbol": "BDT"
+    "Symbol": "BDT",
+    "ExchangeRateToBaseCurrency": 108.00
   },
   {
     "Name": "Barbadian Dollar",
-    "Symbol": "BBD"
+    "Symbol": "BBD",
+    "ExchangeRateToBaseCurrency": 2.00
   },
   {
     "Name": "Belarusian Ruble",
-    "Symbol": "BYN"
+    "Symbol": "BYN",
+    "ExchangeRateToBaseCurrency": 3.12
   },
   {
     "Name": "Belize Dollar",
-    "Symbol": "BZD"
+    "Symbol": "BZD",
+    "ExchangeRateToBaseCurrency": 2.00
   },
   {
     "Name": "Bermudian Dollar",
-    "Symbol": "BMD"
+    "Symbol": "BMD",
+    "ExchangeRateToBaseCurrency": 1.00
   },
   {
     "Name": "Bhutanese Ngultrum",
-    "Symbol": "BTN"
+    "Symbol": "BTN",
+    "ExchangeRateToBaseCurrency": 83.50
   },
   {
     "Name": "Bolivian Boliviano",
-    "Symbol": "BOB"
+    "Symbol": "BOB",
+    "ExchangeRateToBaseCurrency": 6.87
   },
   {
     "Name": "Bosnia-Herzegovina Convertible Mark",
-    "Symbol": "BAM"
+    "Symbol": "BAM",
+    "ExchangeRateToBaseCurrency": 1.85
   },
   {
     "Name": "Botswana Pula",
-    "Symbol": "BWP"
+    "Symbol": "BWP",
+    "ExchangeRateToBaseCurrency": 13.45
   },
   {
     "Name": "Brazilian Real",
-    "Symbol": "BRL"
+    "Symbol": "BRL",
+    "ExchangeRateToBaseCurrency": 5.00
   },
   {
     "Name": "Brunei Dollar",
-    "Symbol": "BND"
+    "Symbol": "BND",
+    "ExchangeRateToBaseCurrency": 1.50
   },
   {
     "Name": "Bulgarian Lev",
-    "Symbol": "BGN"
+    "Symbol": "BGN",
+    "ExchangeRateToBaseCurrency": 1.85
   },
   {
     "Name": "Burundian Franc",
-    "Symbol": "BIF"
+    "Symbol": "BIF",
+    "ExchangeRateToBaseCurrency": 2836.00
   },
-  {
-    "Name": "Cabo Verdean Escudo",
-    "Symbol": "CVE"
-  },
-  {
-    "Name": "Cambodian Riel",
-    "Symbol": "KHR"
-  },
-  {
-    "Name": "Canadian Dollar",
-    "Symbol": "CAD"
-  },
-  {
-    "Name": "Cayman Islands Dollar",
-    "Symbol": "KYD"
-  },
-  {
-    "Name": "Central African CFA Franc",
-    "Symbol": "XAF"
-  },
-  {
-    "Name": "Chilean Peso",
-    "Symbol": "CLP"
-  },
-  {
-    "Name": "Chinese Yuan Renminbi",
-    "Symbol": "CNY"
-  },
-  {
-    "Name": "Colombian Peso",
-    "Symbol": "COP"
-  },
-  {
-    "Name": "Comorian Franc",
-    "Symbol": "KMF"
-  },
-  {
-    "Name": "Congolese Franc",
-    "Symbol": "CDF"
-  },
-  {
-    "Name": "Costa Rican Colón",
-    "Symbol": "CRC"
-  },
-  {
-    "Name": "Croatian Kuna",
-    "Symbol": "HRK"
-  },
-  {
-    "Name": "Cuban Peso",
-    "Symbol": "CUP"
-  },
-  {
-    "Name": "Czech Koruna",
-    "Symbol": "CZK"
-  },
+  
+    {
+      "Name": "Cabo Verdean Escudo",
+      "Symbol": "CVE",
+      "ExchangeRateToBaseCurrency": 100.00
+    },
+    {
+      "Name": "Cambodian Riel",
+      "Symbol": "KHR",
+      "ExchangeRateToBaseCurrency": 4100.00
+    },
+    {
+      "Name": "Canadian Dollar",
+      "Symbol": "CAD",
+      "ExchangeRateToBaseCurrency": 1.36
+    },
+    {
+      "Name": "Cayman Islands Dollar",
+      "Symbol": "KYD",
+      "ExchangeRateToBaseCurrency": 0.83
+    },
+    {
+      "Name": "Central African CFA Franc",
+      "Symbol": "XAF",
+      "ExchangeRateToBaseCurrency": 608.00
+    },
+    {
+      "Name": "Chilean Peso",
+      "Symbol": "CLP",
+      "ExchangeRateToBaseCurrency": 888.00
+    },
+    {
+      "Name": "Chinese Yuan Renminbi",
+      "Symbol": "CNY",
+      "ExchangeRateToBaseCurrency": 7.30
+    },
+    {
+      "Name": "Colombian Peso",
+      "Symbol": "COP",
+      "ExchangeRateToBaseCurrency": 4182.00
+    },
+    {
+      "Name": "Comorian Franc",
+      "Symbol": "KMF",
+      "ExchangeRateToBaseCurrency": 459.00
+    },
+    {
+      "Name": "Congolese Franc",
+      "Symbol": "CDF",
+      "ExchangeRateToBaseCurrency": 2500.00
+    },
+    {
+      "Name": "Costa Rican Colón",
+      "Symbol": "CRC",
+      "ExchangeRateToBaseCurrency": 543.00
+    },
+    {
+      "Name": "Croatian Kuna",
+      "Symbol": "HRK",
+      "ExchangeRateToBaseCurrency": 7.55
+    },
+    {
+      "Name": "Cuban Peso",
+      "Symbol": "CUP",
+      "ExchangeRateToBaseCurrency": 24.00
+    },
+    {
+      "Name": "Czech Koruna",
+      "Symbol": "CZK",
+      "ExchangeRateToBaseCurrency": 22.50
+    },
     {
       "Name": "Danish Krone",
-      "Symbol": "DKK"
+      "Symbol": "DKK",
+      "ExchangeRateToBaseCurrency": 6.85
     },
     {
       "Name": "Djiboutian Franc",
-      "Symbol": "DJF"
+      "Symbol": "DJF",
+      "ExchangeRateToBaseCurrency": 177.00
     },
     {
       "Name": "Dominican Peso",
-      "Symbol": "DOP"
+      "Symbol": "DOP",
+      "ExchangeRateToBaseCurrency": 56.50
     },
-    {
-      "Name": "East Caribbean Dollar",
-      "Symbol": "XCD"
-    },
+  {
+    "Name": "East Caribbean Dollar",
+    "Symbol": "XCD",
+    "ExchangeRateToBaseCurrency": 2.70
+  },
     {
       "Name": "Egyptian Pound",
-      "Symbol": "EGP"
+      "Symbol": "EGP",
+      "ExchangeRateToBaseCurrency": 30.80
     },
     {
       "Name": "Eritrean Nakfa",
-      "Symbol": "ERN"
+      "Symbol": "ERN",
+      "ExchangeRateToBaseCurrency": 15.00
     },
     {
       "Name": "Eswatini Lilangeni",
-      "Symbol": "SZL"
+      "Symbol": "SZL",
+      "ExchangeRateToBaseCurrency": 18.40
     },
     {
       "Name": "Ethiopian Birr",
-      "Symbol": "ETB"
+      "Symbol": "ETB",
+      "ExchangeRateToBaseCurrency": 54.50
     },
     {
       "Name": "Euro",
-      "Symbol": "EUR"
+      "Symbol": "EUR",
+      "ExchangeRateToBaseCurrency": 0.95
     },
     {
       "Name": "Falkland Islands Pound",
-      "Symbol": "FKP"
+      "Symbol": "FKP",
+      "ExchangeRateToBaseCurrency": 0.83
     },
-  {
-    "Name": "Fijian Dollar",
-    "Symbol": "FJD"
-  },
+    {
+      "Name": "Fijian Dollar",
+      "Symbol": "FJD",
+      "ExchangeRateToBaseCurrency": 2.20
+    },
     {
       "Name": "Gambian Dalasi",
-      "Symbol": "GMD"
+      "Symbol": "GMD",
+      "ExchangeRateToBaseCurrency": 61.00
     },
     {
       "Name": "Georgian Lari",
-      "Symbol": "GEL"
+      "Symbol": "GEL",
+      "ExchangeRateToBaseCurrency": 2.60
     },
     {
       "Name": "Ghanaian Cedi",
-      "Symbol": "GHS"
+      "Symbol": "GHS",
+      "ExchangeRateToBaseCurrency": 11.00
     },
     {
       "Name": "Gibraltar Pound",
-      "Symbol": "GIP"
+      "Symbol": "GIP",
+      "ExchangeRateToBaseCurrency": 0.83
     },
     {
       "Name": "Guatemalan Quetzal",
-      "Symbol": "GTQ"
+      "Symbol": "GTQ",
+      "ExchangeRateToBaseCurrency": 7.75
     },
     {
       "Name": "Guinean Franc",
-      "Symbol": "GNF"
+      "Symbol": "GNF",
+      "ExchangeRateToBaseCurrency": 8650.00
     },
-    {
-      "Name": "Guyanese Dollar",
-      "Symbol": "GYD"
-    },
+  {
+    "Name": "Guyanese Dollar",
+    "Symbol": "GYD",
+    "ExchangeRateToBaseCurrency": 209.00
+  },
     {
       "Name": "Haitian Gourde",
-      "Symbol": "HTG"
+      "Symbol": "HTG",
+      "ExchangeRateToBaseCurrency": 125.00
     },
     {
       "Name": "Honduran Lempira",
-      "Symbol": "HNL"
+      "Symbol": "HNL",
+      "ExchangeRateToBaseCurrency": 24.60
     },
     {
       "Name": "Hong Kong Dollar",
-      "Symbol": "HKD"
+      "Symbol": "HKD",
+      "ExchangeRateToBaseCurrency": 7.85
     },
     {
       "Name": "Hungarian Forint",
-      "Symbol": "HUF"
+      "Symbol": "HUF",
+      "ExchangeRateToBaseCurrency": 370.00
     },
     {
       "Name": "Icelandic Króna",
-      "Symbol": "ISK"
+      "Symbol": "ISK",
+      "ExchangeRateToBaseCurrency": 140.00
     },
     {
       "Name": "Indian Rupee",
-      "Symbol": "INR"
+      "Symbol": "INR",
+      "ExchangeRateToBaseCurrency": 82.50
     },
     {
       "Name": "Indonesian Rupiah",
-      "Symbol": "IDR"
+      "Symbol": "IDR",
+      "ExchangeRateToBaseCurrency": 15400.00
     },
     {
       "Name": "Iranian Rial",
-      "Symbol": "IRR"
+      "Symbol": "IRR",
+      "ExchangeRateToBaseCurrency": 42000.00
     },
     {
       "Name": "Iraqi Dinar",
-      "Symbol": "IQD"
+      "Symbol": "IQD",
+      "ExchangeRateToBaseCurrency": 1460.00
     },
     {
       "Name": "Israeli New Shekel",
-      "Symbol": "ILS"
+      "Symbol": "ILS",
+      "ExchangeRateToBaseCurrency": 3.80
     },
     {
       "Name": "Jamaican Dollar",
-      "Symbol": "JMD"
+      "Symbol": "JMD",
+      "ExchangeRateToBaseCurrency": 155.00
     },
     {
       "Name": "Japanese Yen",
-      "Symbol": "JPY"
+      "Symbol": "JPY",
+      "ExchangeRateToBaseCurrency": 146.00
     },
     {
       "Name": "Jordanian Dinar",
-      "Symbol": "JOD"
+      "Symbol": "JOD",
+      "ExchangeRateToBaseCurrency": 0.71
     },
     {
       "Name": "Kazakhstani Tenge",
-      "Symbol": "KZT"
+      "Symbol": "KZT",
+      "ExchangeRateToBaseCurrency": 475.00
     },
     {
       "Name": "Kenyan Shilling",
-      "Symbol": "KES"
+      "Symbol": "KES",
+      "ExchangeRateToBaseCurrency": 130.00
     },
     {
       "Name": "Kiribati Dollar",
-      "Symbol": "KID"
+      "Symbol": "KID",
+      "ExchangeRateToBaseCurrency": 1.50
     },
     {
       "Name": "Kuwaiti Dinar",
-      "Symbol": "KWD"
+      "Symbol": "KWD",
+      "ExchangeRateToBaseCurrency": 0.31
     },
-    {
-      "Name": "Kyrgyzstani Som",
-      "Symbol": "KGS"
-    },
+  {
+    "Name": "Kyrgyzstani Som",
+    "Symbol": "KGS",
+    "ExchangeRateToBaseCurrency": 87.00
+  },
     {
       "Name": "Lao Kip",
-      "Symbol": "LAK"
+      "Symbol": "LAK",
+      "ExchangeRateToBaseCurrency": 19250.00
     },
     {
       "Name": "Latvian Lats (discontinued)",
-      "Symbol": "LVL"
+      "Symbol": "LVL",
+      "ExchangeRateToBaseCurrency": 0.70
     },
     {
       "Name": "Lebanese Pound",
-      "Symbol": "LBP"
+      "Symbol": "LBP",
+      "ExchangeRateToBaseCurrency": 15200.00
     },
     {
       "Name": "Lesotho Loti",
-      "Symbol": "LSL"
+      "Symbol": "LSL",
+      "ExchangeRateToBaseCurrency": 18.40
     },
     {
       "Name": "Liberian Dollar",
-      "Symbol": "LRD"
+      "Symbol": "LRD",
+      "ExchangeRateToBaseCurrency": 170.00
     },
     {
       "Name": "Libyan Dinar",
-      "Symbol": "LYD"
+      "Symbol": "LYD",
+      "ExchangeRateToBaseCurrency": 4.80
     },
     {
       "Name": "Lithuanian Litas (discontinued)",
-      "Symbol": "LTL"
+      "Symbol": "LTL",
+      "ExchangeRateToBaseCurrency": 3.45
     },
     {
       "Name": "Macanese Pataca",
-      "Symbol": "MOP"
+      "Symbol": "MOP",
+      "ExchangeRateToBaseCurrency": 8.10
     },
     {
       "Name": "Macedonian Denar",
-      "Symbol": "MKD"
+      "Symbol": "MKD",
+      "ExchangeRateToBaseCurrency": 60.00
     },
     {
       "Name": "Malagasy Ariary",
-      "Symbol": "MGA"
+      "Symbol": "MGA",
+      "ExchangeRateToBaseCurrency": 4500.00
     },
     {
       "Name": "Malawian Kwacha",
-      "Symbol": "MWK"
+      "Symbol": "MWK",
+      "ExchangeRateToBaseCurrency": 1100.00
     },
     {
       "Name": "Malaysian Ringgit",
-      "Symbol": "MYR"
+      "Symbol": "MYR",
+      "ExchangeRateToBaseCurrency": 4.70
     },
     {
       "Name": "Maldivian Rufiyaa",
-      "Symbol": "MVR"
+      "Symbol": "MVR",
+      "ExchangeRateToBaseCurrency": 15.40
     },
     {
       "Name": "Mauritanian Ouguiya",
-      "Symbol": "MRU"
+      "Symbol": "MRU",
+      "ExchangeRateToBaseCurrency": 36.00
     },
     {
       "Name": "Mauritian Rupee",
-      "Symbol": "MUR"
+      "Symbol": "MUR",
+      "ExchangeRateToBaseCurrency": 45.00
     },
     {
       "Name": "Mexican Peso",
-      "Symbol": "MXN"
+      "Symbol": "MXN",
+      "ExchangeRateToBaseCurrency": 17.00
     },
     {
       "Name": "Moldovan Leu",
-      "Symbol": "MDL"
+      "Symbol": "MDL",
+      "ExchangeRateToBaseCurrency": 18.50
     },
     {
       "Name": "Mongolian Tögrög",
-      "Symbol": "MNT"
+      "Symbol": "MNT",
+      "ExchangeRateToBaseCurrency": 3420.00
     },
     {
       "Name": "Moroccan Dirham",
-      "Symbol": "MAD"
+      "Symbol": "MAD",
+      "ExchangeRateToBaseCurrency": 10.40
     },
-    {
-      "Name": "Mozambican Metical",
-      "Symbol": "MZN"
-    },
+  {
+    "Name": "Mozambican Metical",
+    "Symbol": "MZN",
+    "ExchangeRateToBaseCurrency": 63.00
+  },
     {
       "Name": "Myanmar Kyat",
-      "Symbol": "MMK"
+      "Symbol": "MMK",
+      "ExchangeRateToBaseCurrency": 2100.00
     },
     {
       "Name": "Namibian Dollar",
-      "Symbol": "NAD"
+      "Symbol": "NAD",
+      "ExchangeRateToBaseCurrency": 18.40
     },
     {
       "Name": "Nepalese Rupee",
-      "Symbol": "NPR"
+      "Symbol": "NPR",
+      "ExchangeRateToBaseCurrency": 133.00
     },
     {
       "Name": "Netherlands Antillean Guilder",
-      "Symbol": "ANG"
+      "Symbol": "ANG",
+      "ExchangeRateToBaseCurrency": 1.80
     },
     {
       "Name": "New Zealand Dollar",
-      "Symbol": "NZD"
+      "Symbol": "NZD",
+      "ExchangeRateToBaseCurrency": 1.60
     },
     {
       "Name": "Nicaraguan Córdoba",
-      "Symbol": "NIO"
+      "Symbol": "NIO",
+      "ExchangeRateToBaseCurrency": 36.40
     },
     {
       "Name": "Nigerian Naira",
-      "Symbol": "NGN"
+      "Symbol": "NGN",
+      "ExchangeRateToBaseCurrency": 775.00
     },
     {
       "Name": "North Korean Won",
-      "Symbol": "KPW"
+      "Symbol": "KPW",
+      "ExchangeRateToBaseCurrency": 900.00
     },
     {
       "Name": "Norwegian Krone",
-      "Symbol": "NOK"
+      "Symbol": "NOK",
+      "ExchangeRateToBaseCurrency": 10.50
     },
     {
       "Name": "Omani Rial",
-      "Symbol": "OMR"
+      "Symbol": "OMR",
+      "ExchangeRateToBaseCurrency": 0.38
     },
     {
       "Name": "Pakistani Rupee",
-      "Symbol": "PKR"
+      "Symbol": "PKR",
+      "ExchangeRateToBaseCurrency": 305.00
     },
     {
       "Name": "Panamanian Balboa",
-      "Symbol": "PAB"
+      "Symbol": "PAB",
+      "ExchangeRateToBaseCurrency": 1.00
     },
     {
       "Name": "Papua New Guinean Kina",
-      "Symbol": "PGK"
+      "Symbol": "PGK",
+      "ExchangeRateToBaseCurrency": 3.60
     },
     {
       "Name": "Paraguayan Guaraní",
-      "Symbol": "PYG"
+      "Symbol": "PYG",
+      "ExchangeRateToBaseCurrency": 7200.00
     },
     {
       "Name": "Peruvian Sol",
-      "Symbol": "PEN"
+      "Symbol": "PEN",
+      "ExchangeRateToBaseCurrency": 3.80
     },
     {
       "Name": "Philippine Peso",
-      "Symbol": "PHP"
+      "Symbol": "PHP",
+      "ExchangeRateToBaseCurrency": 56.50
     },
     {
       "Name": "Polish Złoty",
-      "Symbol": "PLN"
+      "Symbol": "PLN",
+      "ExchangeRateToBaseCurrency": 4.20
     },
     {
       "Name": "Qatari Riyal",
-      "Symbol": "QAR"
+      "Symbol": "QAR",
+      "ExchangeRateToBaseCurrency": 3.65
     },
     {
       "Name": "Romanian Leu",
-      "Symbol": "RON"
+      "Symbol": "RON",
+      "ExchangeRateToBaseCurrency": 4.75
     },
-    {
-      "Name": "Russian Ruble",
-      "Symbol": "RUB"
-    },
+  {
+    "Name": "Russian Ruble",
+    "Symbol": "RUB",
+    "ExchangeRateToBaseCurrency": 96.00
+  },
     {
       "Name": "Rwandan Franc",
-      "Symbol": "RWF"
+      "Symbol": "RWF",
+      "ExchangeRateToBaseCurrency": 1200.00
     },
     {
       "Name": "Saint Helena Pound",
-      "Symbol": "SHP"
+      "Symbol": "SHP",
+      "ExchangeRateToBaseCurrency": 0.80
     },
     {
       "Name": "Samoan Tālā",
-      "Symbol": "WST"
+      "Symbol": "WST",
+      "ExchangeRateToBaseCurrency": 2.60
     },
     {
       "Name": "São Tomé and Príncipe Dobra",
-      "Symbol": "STN"
+      "Symbol": "STN",
+      "ExchangeRateToBaseCurrency": 22.00
     },
     {
       "Name": "Saudi Riyal",
-      "Symbol": "SAR"
+      "Symbol": "SAR",
+      "ExchangeRateToBaseCurrency": 3.75
     },
     {
       "Name": "Serbian Dinar",
-      "Symbol": "RSD"
+      "Symbol": "RSD",
+      "ExchangeRateToBaseCurrency": 105.00
     },
     {
       "Name": "Seychellois Rupee",
-      "Symbol": "SCR"
+      "Symbol": "SCR",
+      "ExchangeRateToBaseCurrency": 13.00
     },
     {
       "Name": "Sierra Leonean Leone",
-      "Symbol": "SLE"
+      "Symbol": "SLE",
+      "ExchangeRateToBaseCurrency": 18000.00
     },
     {
       "Name": "Singapore Dollar",
-      "Symbol": "SGD"
+      "Symbol": "SGD",
+      "ExchangeRateToBaseCurrency": 1.35
     },
     {
       "Name": "Solomon Islands Dollar",
-      "Symbol": "SBD"
+      "Symbol": "SBD",
+      "ExchangeRateToBaseCurrency": 8.20
     },
     {
       "Name": "Somali Shilling",
-      "Symbol": "SOS"
+      "Symbol": "SOS",
+      "ExchangeRateToBaseCurrency": 570.00
     },
     {
       "Name": "South African Rand",
-      "Symbol": "ZAR"
+      "Symbol": "ZAR",
+      "ExchangeRateToBaseCurrency": 18.00
     },
     {
       "Name": "South Korean Won",
-      "Symbol": "KRW"
+      "Symbol": "KRW",
+      "ExchangeRateToBaseCurrency": 1300.00
     },
     {
       "Name": "South Sudanese Pound",
-      "Symbol": "SSP"
+      "Symbol": "SSP",
+      "ExchangeRateToBaseCurrency": 650.00
     },
     {
       "Name": "Sri Lankan Rupee",
-      "Symbol": "LKR"
+      "Symbol": "LKR",
+      "ExchangeRateToBaseCurrency": 320.00
     },
     {
       "Name": "Sudanese Pound",
-      "Symbol": "SDG"
+      "Symbol": "SDG",
+      "ExchangeRateToBaseCurrency": 550.00
     },
     {
       "Name": "Surinamese Dollar",
-      "Symbol": "SRD"
+      "Symbol": "SRD",
+      "ExchangeRateToBaseCurrency": 38.00
     },
     {
       "Name": "Swazi Lilangeni",
-      "Symbol": "SZL"
+      "Symbol": "SZL",
+      "ExchangeRateToBaseCurrency": 18.40
     },
     {
       "Name": "Swedish Krona",
-      "Symbol": "SEK"
+      "Symbol": "SEK",
+      "ExchangeRateToBaseCurrency": 10.90
     },
     {
       "Name": "Swiss Franc",
-      "Symbol": "CHF"
+      "Symbol": "CHF",
+      "ExchangeRateToBaseCurrency": 0.91
     },
     {
       "Name": "Syrian Pound",
-      "Symbol": "SYP"
+      "Symbol": "SYP",
+      "ExchangeRateToBaseCurrency": 5000.00
     },
     {
       "Name": "Tajikistani Somoni",
-      "Symbol": "TJS"
+      "Symbol": "TJS",
+      "ExchangeRateToBaseCurrency": 10.30
     },
     {
       "Name": "Tanzanian Shilling",
-      "Symbol": "TZS"
+      "Symbol": "TZS",
+      "ExchangeRateToBaseCurrency": 2400.00
     },
     {
       "Name": "Thai Baht",
-      "Symbol": "THB"
+      "Symbol": "THB",
+      "ExchangeRateToBaseCurrency": 36.00
     },
     {
       "Name": "Tongan Paʻanga",
-      "Symbol": "TOP"
+      "Symbol": "TOP",
+      "ExchangeRateToBaseCurrency": 2.30
     },
     {
       "Name": "Trinidad and Tobago Dollar",
-      "Symbol": "TTD"
+      "Symbol": "TTD",
+      "ExchangeRateToBaseCurrency": 6.80
     },
     {
       "Name": "Tunisian Dinar",
-      "Symbol": "TND"
+      "Symbol": "TND",
+      "ExchangeRateToBaseCurrency": 3.10
     },
     {
       "Name": "Turkish Lira",
-      "Symbol": "TRY"
+      "Symbol": "TRY",
+      "ExchangeRateToBaseCurrency": 25.00
     },
     {
       "Name": "Turkmenistani Manat",
-      "Symbol": "TMT"
+      "Symbol": "TMT",
+      "ExchangeRateToBaseCurrency": 3.50
     },
     {
       "Name": "Tuvaluan Dollar",
-      "Symbol": "TVD"
+      "Symbol": "TVD",
+      "ExchangeRateToBaseCurrency": 1.50
     },
     {
       "Name": "Ugandan Shilling",
-      "Symbol": "UGX"
+      "Symbol": "UGX",
+      "ExchangeRateToBaseCurrency": 3700.00
     },
     {
       "Name": "Ukrainian Hryvnia",
-      "Symbol": "UAH"
+      "Symbol": "UAH",
+      "ExchangeRateToBaseCurrency": 36.90
     },
     {
       "Name": "United Arab Emirates Dirham",
-      "Symbol": "AED"
+      "Symbol": "AED",
+      "ExchangeRateToBaseCurrency": 3.67
     },
     {
       "Name": "United States Dollar",
-      "Symbol": "USD"
+      "Symbol": "USD",
+      "ExchangeRateToBaseCurrency": 1.00
     },
     {
       "Name": "Uruguayan Peso",
-      "Symbol": "UYU"
+      "Symbol": "UYU",
+      "ExchangeRateToBaseCurrency": 40.00
     },
     {
       "Name": "Uzbekistani Soʻm",
-      "Symbol": "UZS"
+      "Symbol": "UZS",
+      "ExchangeRateToBaseCurrency": 12000.00
     },
     {
       "Name": "Vanuatu Vatu",
-      "Symbol": "VUV"
+      "Symbol": "VUV",
+      "ExchangeRateToBaseCurrency": 118.00
     },
     {
       "Name": "Venezuelan Bolívar Soberano",
-      "Symbol": "VES"
+      "Symbol": "VES",
+      "ExchangeRateToBaseCurrency": 25.00
     },
     {
       "Name": "Vietnamese Đồng",
-      "Symbol": "VND"
+      "Symbol": "VND",
+      "ExchangeRateToBaseCurrency": 24000.00
     },
     {
       "Name": "Yemeni Rial",
-      "Symbol": "YER"
+      "Symbol": "YER",
+      "ExchangeRateToBaseCurrency": 250.00
     },
     {
       "Name": "Zambian Kwacha",
-      "Symbol": "ZMW"
+      "Symbol": "ZMW",
+      "ExchangeRateToBaseCurrency": 20.00
     },
     {
       "Name": "Zimbabwean Dollar",
-      "Symbol": "ZWL"
+      "Symbol": "ZWL",
+      "ExchangeRateToBaseCurrency": 600.00
     }
   ]
-
-
-
 
 

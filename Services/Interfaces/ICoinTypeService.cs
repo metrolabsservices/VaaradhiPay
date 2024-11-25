@@ -8,6 +8,7 @@ namespace VaaradhiPay.Services.Interfaces
     {
         Task<List<CoinType>> GetPaginatedCoinTypesAsync(string searchTerm, int page, int pageSize);
         Task<CoinType> GetCoinTypeByIdAsync(int id);
+        Task<List<CoinType>> GetActiveCoinsAsync();
         Task AddCoinTypeAsync(CoinType coinType);
         Task UpdateCoinTypeAsync(CoinType coinType);
         Task DeleteCoinTypeAsync(int id);
