@@ -1,7 +1,80 @@
-﻿
+﻿@page "/exc"
+
+@using VaaradhiPay.Components.Layout
+@using VaaradhiPay.Components.Pages.L1
+
+@rendermode InteractiveServer
+
+@layout EmptyLayout
+
+@inject ToastService Toast
+@inject PreloadService Load
 
 <h3>ExchangeCard</h3>
 
-@code {
+<div class="d-flex justify-content-center align-items-start vw-100 vh-100">
+    <div class="exchange-card-container">
+        
+        @* Tabs Buy and Sell *@
+        <div class="exchange-tabs-container">
+            <BuySellButtons OnTabChanged="HandleTabChange" />
+        </div>
+        
+        @* Exchange Form Body *@
+        <div class="exchange-card-body p-3">
 
+            @* exchange rate display *@
+            <div class="text-dark">
+                1 USDT is Roughly <span class="text-dark fw-bold fs-4">@INRprice</span><span class="fw-bold fst-italic fs-6">INR</span>
+            </div>
+
+            @* exchange Form *@
+            <ExchangeForm />
+
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notifications -->
+<Toasts class="p-3" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopRight" />
+
+<!-- Loader -->
+<Preload LoadingText="Loading..." />
+
+@code {
+    private string INRprice = "90.80";
+
+    private void HandleTabChange(bool isBuy)
+    {
+        Console.WriteLine(isBuy ? "Buy tab is active" : "Sell tab is active");
+        Toast.Notify(new ToastMessage
+            {
+                Type = ToastType.Info,
+                Message = isBuy ? "Switched to Buy tab" : "Switched to Sell tab"
+            });
+    }
 }
+
+<style>
+    .exchange-card-container {
+        width: 400px;
+        height: 390px;
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.25);
+    }
+
+    .exchange-tabs-container {
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
+        border-bottom: 1px solid #D4D9E2;
+    }
+
+    .exchange-card-body{
+        height: 100%;
+    }
+
+    
+
+</style>

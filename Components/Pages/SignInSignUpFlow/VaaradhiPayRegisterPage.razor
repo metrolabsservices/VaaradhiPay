@@ -9,6 +9,7 @@
 
 @rendermode InteractiveServer
 
+@inject IHttpContextAccessor HttpContextAccessor
 @inject RoleManager<IdentityRole> RoleManager
 @inject UserManager<ApplicationUser> UserManager
 @inject IUserStore<ApplicationUser> UserStore
@@ -130,14 +131,14 @@
                 ToastService.Notify(new ToastMessage { Type = ToastType.Warning, Message = "Default role 'user' does not exist. Please create it." });
             }
 
-            // Generate email confirmation link
-            var userId = await UserManager.GetUserIdAsync(user);
-            var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
-            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-            var callbackUrl = $"{NavigationManager.BaseUri}Account/ConfirmEmail?userId={userId}&code={code}";
+            // ------ Generate email confirmation link ------
+                // var userId = await UserManager.GetUserIdAsync(user);
+                // var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+                // code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                // var callbackUrl = $"{NavigationManager.BaseUri}Account/ConfirmEmail?userId={userId}&code={code}";
 
-            await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
-            ToastService.Notify(new ToastMessage { Type = ToastType.Success, Message = "Account created successfully. Please confirm your email" });
+                // await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
+                // ToastService.Notify(new ToastMessage { Type = ToastType.Success, Message = "Account created successfully. Please confirm your email" });
 
             // if (UserManager.Options.SignIn.RequireConfirmedAccount)
             // {
@@ -148,10 +149,11 @@
             await SignInManager.SignInAsync(user, isPersistent: false);
             ToastService.Notify(new ToastMessage { Type = ToastType.Success, Message = "Successfully signed in!" });
 
-            NavigationManager.NavigateTo("/");
+            // NavigationManager.NavigateTo("/");
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "An unexpected error occurred during user registration.");
             ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = $"An unexpected error occurred: {ex.Message}" });
         }
     }

@@ -9,6 +9,8 @@ using VaaradhiPay.Data;
 using VaaradhiPay.Services;
 using VaaradhiPay.Services.Implementations;
 using VaaradhiPay.Services.Interfaces;
+using Hangfire;
+using Hangfire.PostgreSql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,6 +58,13 @@ builder.Services.AddSingleton<IMinioClient>(sp =>
 });
 builder.Services.AddScoped<IBucketManager, BucketManager>();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
+builder.Services.AddHttpClient<ExchangeRateService>();
+builder.Services.AddScoped<ExchangeRateService>();
+
+builder.Services.AddHangfire(config => config.UsePostgreSqlStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddHangfireServer();
+builder.Services.AddHttpContextAccessor();
+
 
 // -------------------------
 
@@ -95,9 +104,21 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+//------ Hangfire --------- 
+app.UseHangfireDashboard();
+RecurringJob.AddOrUpdate<ExchangeRateService>(
+    "FetchAndProcessInvestmentReceipts",
+    service => service.FetchAndStoreExchangeRatesAsync(),
+      //"*/1 * * * *", // Cron expression for every 1 minute
+      "0 */3 * * *", // Cron expression for every 3 hours
+    TimeZoneInfo.FindSystemTimeZoneById("India Standard Time")
+);
+
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseHangfireDashboard();
     app.UseMigrationsEndPoint();
 }
 else

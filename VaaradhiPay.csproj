@@ -10,7 +10,10 @@
   <ItemGroup>
     <PackageReference Include="Blazor.Bootstrap" Version="3.1.1" />
     <PackageReference Include="Blazor.Extensions.Canvas" Version="1.1.1" />
+    <PackageReference Include="Hangfire" Version="1.8.17" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.17" />
     <PackageReference Include="Hangfire.PostgreSql" Version="1.20.9" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.71" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.4" />
@@ -28,7 +31,7 @@
     <Folder Include="Components\Pages\L4\" />
     <Folder Include="Components\Pages\AdminView\" />
     <Folder Include="Components\Pages\UserView\" />
-    <Folder Include="wwwroot\MediaFiles\Icons\" />
+    <Folder Include="Utilities\" />
     <Folder Include="wwwroot\MediaFiles\Images\" />
   </ItemGroup>
 

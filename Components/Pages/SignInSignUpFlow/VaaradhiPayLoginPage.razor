@@ -84,7 +84,7 @@
             {
                 Logger.LogInformation("User logged in successfully.");
                 ToastService.Notify(new ToastMessage { Type = ToastType.Success, Message = "Login successful!" });
-                NavigationManager.NavigateTo("/");
+                // NavigationManager.NavigateTo("/");
             }
             else if (result.IsLockedOut)
             {

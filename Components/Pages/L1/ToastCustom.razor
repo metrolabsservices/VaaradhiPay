@@ -1,0 +1,36 @@
+﻿@page "/test"
+
+@rendermode InteractiveServer
+
+@inject VaaradhiPay.Services.Implementations.ExchangeRateService ExchangeRateService
+
+<h3>Exchange Rates Fetcher</h3>
+
+<div>
+    <button class="btn btn-primary" @onclick="FetchExchangeRates">Fetch Exchange Rates</button>
+</div>
+
+<div>
+    @if (!string.IsNullOrEmpty(Message))
+    {
+        <p>@Message</p>
+    }
+</div>
+
+@code {
+    private string Message = "";
+
+    private async Task FetchExchangeRates()
+    {
+        try
+        {
+            // Call the service method to fetch and log exchange rates
+            await ExchangeRateService.FetchAndStoreExchangeRatesAsync();
+            Message = "Exchange rates fetched successfully! Check console logs for output.";
+        }
+        catch (Exception ex)
+        {
+            Message = $"An error occurred: {ex.Message}";
+        }
+    }
+}
