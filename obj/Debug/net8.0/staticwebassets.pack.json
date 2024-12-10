@@ -9,6 +9,22 @@
       "PackagePath": "staticwebassets\\CurrencieCodes.json"
     },
     {
+      "Id": "C:\\Users\\teaml\\source\\repos\\VaaradhiPay\\VaaradhiPay\\wwwroot\\MediaFiles\\Icons\\buyimg.png",
+      "PackagePath": "staticwebassets\\MediaFiles\\Icons\\buyimg.png"
+    },
+    {
+      "Id": "C:\\Users\\teaml\\source\\repos\\VaaradhiPay\\VaaradhiPay\\wwwroot\\MediaFiles\\Icons\\sellimg.png",
+      "PackagePath": "staticwebassets\\MediaFiles\\Icons\\sellimg.png"
+    },
+    {
+      "Id": "C:\\Users\\teaml\\source\\repos\\VaaradhiPay\\VaaradhiPay\\wwwroot\\MediaFiles\\Images\\vaaradhipay-bg.png",
+      "PackagePath": "staticwebassets\\MediaFiles\\Images\\vaaradhipay-bg.png"
+    },
+    {
+      "Id": "C:\\Users\\teaml\\source\\repos\\VaaradhiPay\\VaaradhiPay\\wwwroot\\MediaFiles\\Images\\vaaradhipay-bg1.png",
+      "PackagePath": "staticwebassets\\MediaFiles\\Images\\vaaradhipay-bg1.png"
+    },
+    {
       "Id": "C:\\Users\\teaml\\source\\repos\\VaaradhiPay\\VaaradhiPay\\wwwroot\\MediaFiles\\Logos\\VaaradhiPay_Logo.png",
       "PackagePath": "staticwebassets\\MediaFiles\\Logos\\VaaradhiPay_Logo.png"
     },

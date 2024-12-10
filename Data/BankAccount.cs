@@ -33,6 +33,7 @@ namespace VaaradhiPay.Data
 
         [ForeignKey(nameof(UserId))]
         public ApplicationUser User { get; set; } // Navigation property
+
         public DateTime TimeStamp { get; set; } = DateTime.UtcNow;
 
     }

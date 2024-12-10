@@ -8,6 +8,7 @@ namespace VaaradhiPay.Data
 
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public string? UserRefId { get; set; }
         public string? ProfilePicturePath { get; set; }
         public DateTime TimeStamp { get; set; } = DateTime.UtcNow;
 

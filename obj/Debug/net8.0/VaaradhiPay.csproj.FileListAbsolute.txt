@@ -11,11 +11,17 @@ C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\Azure.Ident
 C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\BlazorBootstrap.dll
 C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\Blazor.Extensions.Canvas.JS.dll
 C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\Blazor.Extensions.Canvas.dll
+C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\BouncyCastle.Cryptography.dll
 C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\CommunityToolkit.HighPerformance.dll
 C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\Dapper.dll
+C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\Hangfire.AspNetCore.dll
 C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\Hangfire.Core.dll
+C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\Hangfire.NetCore.dll
 C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\Hangfire.PostgreSql.dll
+C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\Hangfire.SqlServer.dll
+C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\HtmlAgilityPack.dll
 C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\Humanizer.dll
+C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\MailKit.dll
 C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\Microsoft.AspNetCore.Authorization.dll
 C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\Microsoft.AspNetCore.Components.dll
 C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\Microsoft.AspNetCore.Components.Forms.dll
@@ -56,6 +62,7 @@ C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\Microsoft.I
 C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\Microsoft.JSInterop.dll
 C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\Microsoft.SqlServer.Server.dll
 C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\Microsoft.Win32.SystemEvents.dll
+C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\MimeKit.dll
 C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\Minio.dll
 C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\Mono.TextTemplating.dll
 C:\Users\teaml\source\repos\VaaradhiPay\VaaradhiPay\bin\Debug\net8.0\Newtonsoft.Json.dll

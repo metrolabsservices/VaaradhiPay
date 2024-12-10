@@ -1,12 +1,13 @@
-﻿@page "/nav"
-
+﻿
 @using VaaradhiPay.Components.Layout
 @using VaaradhiPay.Components.Pages.L1
 @using VaaradhiPay.DTOs
 
 @rendermode InteractiveServer
 
-@layout EmptyLayout
+@layout EndUserLayout
+@inherits ComponentBase
+
 
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager NavigationManager
@@ -18,25 +19,16 @@
         <CustomButtonGroup T="CustomButtonModel" ButtonItems="@buttons" OnButtonSelected="HandleButtonClick" />
         <div>
             <Dropdown Color="DropdownColor.None" Direction="DropdownDirection.DropdownCentered" Split="true">
-                <DropdownActionButton Class="shadow-none border-0 bg-transparent">
+                <DropdownActionButton Class="shadow-none border-0 bg-transparent pe-0 ">
                     <LetterAvatar Name="Robert Downey" Size="30"  />
                 </DropdownActionButton>
                 <DropdownToggleButton Class="shadow-none border-0 bg-transparent text-white" />
                 <DropdownMenu Class="p-0">
-                    <DropdownItem To="#" Type="DropdownItemType.Link" Class="ps-3 pe-0 px-2">
+                    <DropdownItem To="" Type="DropdownItemType.Link" Class="ps-3 pe-0 px-2">
                         <TextWithIcon IconName="bi bi-person" IconText="User Profile" />
                     </DropdownItem>
                     <DropdownDivider Class="m-0">Dropdown header</DropdownDivider>
-                    @* <DropdownItem Type="DropdownItemType.Button" Class="ps-3 pe-0 px-2">
-                    <form action="Account/Logout" method="post" class="d-inline">
-                    <AntiforgeryToken />
-                    <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                    <button type="submit" class="btn btn-link p-0 m-0 text-start">
-                    <TextWithIcon IconName="bi bi-power" IconText="Logout" />
-                    </button>
-                    </form>
-                    </DropdownItem> *@
-                    <DropdownItem Type="DropdownItemType.Button" Class="ps-3 pe-0 px-2" @onclick="HandleLogout">
+                    <DropdownItem To="" Type="DropdownItemType.Button" Class="ps-3 pe-0 px-2" @onclick="HandleLogout">
                         <TextWithIcon IconName="bi bi-power" IconText="Logout" />
                     </DropdownItem>
                 </DropdownMenu>

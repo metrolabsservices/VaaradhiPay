@@ -11,6 +11,8 @@ using VaaradhiPay.Services.Implementations;
 using VaaradhiPay.Services.Interfaces;
 using Hangfire;
 using Hangfire.PostgreSql;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using VaaradhiPay.DTOs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,8 +65,10 @@ builder.Services.AddScoped<ExchangeRateService>();
 
 builder.Services.AddHangfire(config => config.UsePostgreSqlStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddHangfireServer();
-builder.Services.AddHttpContextAccessor();
-
+builder.Services.AddHttpContextAccessor(); // For accessing the current HTTP context
+builder.Services.AddScoped<ILoggedInUserService, LoggedInUserService>(); // Register the service
+builder.Services.Configure<EmailSenderDTO>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddScoped<IEmailSenderService, EmailSenderService>();
 
 // -------------------------
 
@@ -136,7 +140,10 @@ app.UseAntiforgery();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
+
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
+
+
 
 app.Run();

@@ -1,0 +1,28 @@
+﻿@page "/testingemail"
+
+@rendermode InteractiveServer
+
+@using VaaradhiPay.Services.Interfaces
+
+@inject IEmailSenderService EmailSender
+@inject IEmailSenderService EmailSenderTemplate
+
+<h3>Testing Page</h3>
+
+<div>
+    <button class="btn btn-primary" @onclick="SendMails">Send Email</button>
+</div>
+
+@code {
+    private async Task SendMails()
+    {
+        await EmailSender.EmailSendAsync("teamlead.1.metrolabsservices@gmail.com", "Email Confirtmation", await EmailSenderTemplate.EmailConfirmationLetter());
+        await EmailSender.EmailSendAsync("teamlead.1.metrolabsservices@gmail.com", "Successfull Sign up", await EmailSenderTemplate.SignUp());
+        await EmailSender.EmailSendAsync("teamlead.1.metrolabsservices@gmail.com", "KYC Pending", await EmailSenderTemplate.KycPending());
+        await EmailSender.EmailSendAsync("teamlead.1.metrolabsservices@gmail.com", "KYC Success", await EmailSenderTemplate.KycSuccess());
+        await EmailSender.EmailSendAsync("teamlead.1.metrolabsservices@gmail.com", "Wallet Added Successfully", await EmailSenderTemplate.WalletAdd());
+        await EmailSender.EmailSendAsync("teamlead.1.metrolabsservices@gmail.com", "Bank Added Successfully", await EmailSenderTemplate.BankAdd());
+        await EmailSender.EmailSendAsync("teamlead.1.metrolabsservices@gmail.com", "UPI Added Successfully", await EmailSenderTemplate.UpiAdd());
+        await EmailSender.EmailSendAsync("teamlead.1.metrolabsservices@gmail.com", "Reset Password", await EmailSenderTemplate.ChangePassword());
+    }
+}
