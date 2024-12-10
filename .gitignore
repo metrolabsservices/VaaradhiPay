@@ -12,8 +12,8 @@
 *.vs/
 
 # Ignore build output directories
-/bin
-/obj
+/bin/
+/obj/
 TestResults/
 out/
 
