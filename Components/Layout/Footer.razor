@@ -1,0 +1,71 @@
+﻿@page "/footer"
+@inherits ComponentBase
+
+ 
+@code {
+    // No need to define parameters here since the content is static
+}
+
+<!-- Footer Component Definition -->
+<footer class="footer">
+    <div class="footer-left">
+        <p>© 2024 Vaaradhi Pay, All Rights Reserved</p>
+    </div>
+    <div class="footer-right">
+        <p><a href="#">Terms of Use</a> | <a href="#">Privacy Policy</a></p>
+    </div>
+</footer>
+
+<style>
+    /* Footer styles */
+    .footer {
+        width: 100%;
+        height: 35px;
+        position: absolute;
+        bottom: 0; /* Ensures the footer stays at the bottom */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 100px; /* Adjust padding to move content more towards the center */
+        background-color: #000; /* Black background */
+        color: white; /* White text color */
+    }
+
+    /* Left section */
+    .footer-left p {
+        font-family: Poppins, sans-serif;
+        font-size: 11px;
+        font-weight: 400;
+        line-height: 21px;
+        text-align: left;
+        text-underline-position: from-font;
+        text-decoration-skip-ink: none;
+        margin: 0;
+        width: auto;
+        height: 21px;
+    }
+
+    /* Right section */
+    .footer-right p {
+        font-family: Poppins, sans-serif;
+        font-size: 11px;
+        font-weight: 400;
+        line-height: 21px;
+        text-align: right;
+        text-underline-position: from-font;
+        text-decoration-skip-ink: none;
+        margin: 0;
+        width: auto;
+        height: 21px;
+    }
+
+    /* Link styles for Terms of Use and Privacy Policy */
+    .footer-right a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+        .footer-right a:hover {
+            text-decoration: underline;
+        }
+</style>

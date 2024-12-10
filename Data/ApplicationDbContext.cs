@@ -15,6 +15,10 @@ namespace VaaradhiPay.Data
         public DbSet<UPIAddress> UPIAddresses { get; set; }
         public DbSet<TetherWallet> TetherWallets { get; set; }
         public DbSet<KYCDetails> KYCDetails { get; set; }
+        public DbSet<Currency> Currencies { get; set; } 
+        public DbSet<CurrencyExtractionAudit> CurrencyExtractionAudits { get; set; }
+        public DbSet<AdminBankAccount> AdminBankAccounts { get; set; }
+
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)

@@ -1,0 +1,97 @@
+# Ignore Visual Studio temporary files, build results, and
+# common output directories
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.pdb
+*.ipch
+*.obj
+*.log
+*.vs/
+
+# Ignore build output directories
+/bin/
+/obj/
+TestResults/
+out/
+
+# Ignore package and dependency management directories
+node_modules/
+*.vsix
+packages/
+.vscode/
+
+# Ignore coverage tools
+coverage/
+*.coverage
+*.coveragexml
+
+# Ignore temporary files
+*.tmp
+*.temp
+*.log
+
+# Ignore IDE specific files
+.idea/
+*.ide.workspace
+*.ide.*
+workspace/
+project/
+.cproject
+.settings/
+.classpath
+
+# Ignore operating system-specific files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Ignore personal preferences
+*.local.settings.json
+*.swp
+
+# Ignore Azure-specific files (if applicable)
+azure*
+*.publishsettings
+*.azureactivitylog
+
+# Ignore sensitive files
+.env
+.env.local
+.env.*.local
+
+# Ignore compiled binary files
+*.dll
+*.exe
+*.app
+*.dmg
+*.apk
+*.jar
+*.so
+*.dylib
+*.lib
+
+# Additions for specific frameworks
+# ASP.NET or ASP.NET Core-specific files
+appsettings.Development.json
+appsettings.Local.json
+appsettings.Production.json
+
+# Python
+*.pyc
+__pycache__/
+
+# Java
+*.class
+
+# Logs
+*.log
+
+# Additional global files
+*.bak
+*.old
+*.swp
+*.swo
+

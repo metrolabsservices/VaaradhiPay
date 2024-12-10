@@ -1,0 +1,43 @@
+﻿@page "/testing"
+
+@rendermode InteractiveServer
+
+@using VaaradhiPay.Services.Interfaces
+
+@inject ILoggedInUserService LoggedInUserService
+
+<h3>Testing Page</h3>
+
+<div>
+    <button class="btn btn-primary" @onclick="GetLoggedInUserDetails">Get Logged-in User Details</button>
+</div>
+
+@code {
+    private async Task GetLoggedInUserDetails()
+    {
+        try
+        {
+            // Call the service asynchronously
+            var userDetails = await LoggedInUserService.GetLoggedInUserAsync();
+
+            if (userDetails == null)
+            {
+                Console.WriteLine("No user is currently logged in.");
+                return;
+            }
+
+            // Log user details to the console
+            Console.WriteLine("Logged-in User Details:");
+            Console.WriteLine($"User Id: {userDetails.Id}");
+            Console.WriteLine($"First Name: {userDetails.FirstName}");
+            Console.WriteLine($"Last Name: {userDetails.LastName}");
+            Console.WriteLine($"User Ref ID: {userDetails.UserRefId}");
+            Console.WriteLine($"Email: {userDetails.Email}");
+            Console.WriteLine($"Phone Number: {userDetails.PhoneNumber}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching logged-in user details: {ex.Message}");
+        }
+    }
+}

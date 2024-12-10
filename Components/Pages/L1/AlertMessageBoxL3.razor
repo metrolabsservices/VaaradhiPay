@@ -1,0 +1,44 @@
+﻿<div class="notification-box">
+    <h3 class="notification-title">@Title</h3>
+    <p class="notification-message">@Message</p>
+    <p class="notification-highlight">@Highlight</p>
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = "Notification Title";
+    [Parameter] public string Message { get; set; } = "Notification message content goes here.";
+    [Parameter] public string Highlight { get; set; } = "Highlight message.";
+}
+
+<style>
+    .notification-box {
+        width: 100%;
+        background-color: #FCE2E0;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+    }
+
+    .notification-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #000000;
+        margin-bottom: 10px;
+    }
+
+    .notification-message {
+        color: #000000;
+        font-size: 1rem;
+        margin-bottom: 10px;
+    }
+
+    .notification-highlight {
+        color: #000000; 
+        font-weight: bold;
+        font-size: 1rem;
+    }
+
+</style>

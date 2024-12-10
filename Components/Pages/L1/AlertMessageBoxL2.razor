@@ -1,0 +1,47 @@
+﻿@inherits ComponentBase
+
+@using static VaaradhiPay.Components.Pages.L1.ThemedButtonGroup
+
+<div class="verify-prompt-container">
+    <div class="verify-prompt-content">
+        <h3 class="verify-prompt-title">@Title</h3>
+        <p>@Description</p>
+    </div>
+    <div class="verify-prompt-actions">
+       <ThemedButtonGroup Text="@PrimaryButtonLabel" Type="ButtonTypeCust.Primary" OnClick="OnPrimaryButtonClick" />
+       <ThemedButtonGroup Text="@SecondaryButtonLabel" Type="ButtonTypeCust.Secondary" OnClick="OnSecondaryButtonClick" />
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = "Please verify your account";
+    [Parameter] public string Description { get; set; } = "In order to execute transactions we need to verify your identity. The procedure is simple and will take less than 5 minutes.";
+    [Parameter] public string PrimaryButtonLabel { get; set; } = "Verify Account";
+    [Parameter] public string SecondaryButtonLabel { get; set; } = "Verify Later";
+    [Parameter] public EventCallback OnPrimaryButtonClick { get; set; }
+    [Parameter] public EventCallback OnSecondaryButtonClick { get; set; }
+}
+
+<style>
+    .verify-prompt-container{
+        width: 100%;
+        background-color: #FCE2E0;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        padding: 20px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+    }
+
+    .verify-prompt-title{
+        color: #000000;
+    }
+
+    .verify-prompt-actions {
+        flex-grow: 1;
+    }
+
+  
+
+</style>

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using VaaradhiPay.Data;
@@ -11,9 +12,11 @@ using VaaradhiPay.Data;
 namespace VaaradhiPay.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241209061711_RefIdAddedUsers")]
+    partial class RefIdAddedUsers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -178,58 +181,6 @@ namespace VaaradhiPay.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("VaaradhiPay.Data.AdminBankAccount", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AccountHolder")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("AccountNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("AccountType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("BankAvailability")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("BankName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("BranchCode")
-                        .HasColumnType("text");
-
-                    b.Property<string>("CurrencyType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("IfscCode")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<decimal>("TotalCreditedAmount")
-                        .HasColumnType("numeric");
-
-                    b.Property<DateTime>("UpdatedDateTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AdminBankAccounts");
                 });
 
             modelBuilder.Entity("VaaradhiPay.Data.ApplicationUser", b =>

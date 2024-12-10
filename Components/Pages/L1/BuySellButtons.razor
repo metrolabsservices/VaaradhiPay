@@ -1,0 +1,90 @@
+﻿@inherits ComponentBase
+
+
+<button class="exchange-tab @((IsBuy ? "active" : ""))" @onclick="() => SetActiveTab(true)">
+    <div class="d-flex align-items-center">
+        <div class="flex-shrink-0">
+            <img src="MediaFiles/Icons/@(IsBuy ? "buyimg.png" : "sellimg.png")"
+                 class="exchange-tab-icon @(IsBuy ? "" : "reverse-image")"
+                 alt="Exchange Icon" />
+        </div>
+        <div class="flex-grow-1 ms-3">
+            <div class="d-flex flex-column justify-content-between">
+                <span class="exchange-tab-label d-block" style="color: @((IsBuy ? "red" : "#ccc"));">Buy</span>
+                <span class="exchange-tab-subtext d-block" style="color: @((IsBuy ? "black" : "#ccc"));">USDT</span>
+            </div>
+        </div>
+    </div>
+
+
+</button>
+<button class="exchange-tab @((!IsBuy ? "active" : ""))" @onclick="() => SetActiveTab(false)">
+    <div class="d-flex align-items-center">
+        <div class="flex-shrink-0">
+            <img src="MediaFiles/Icons/@(!IsBuy ? "buyimg.png" : "sellimg.png" )"
+                 class="exchange-tab-icon @(!IsBuy ? "reverse-image" : "")"
+                 alt="Exchange Icon" />
+        </div>
+        <div class="flex-grow-1 ms-3">
+            <div class="d-flex flex-column justify-content-between">
+                <span class="exchange-tab-label" style="color: @((!IsBuy ? "red" : "#ccc"));">Sell</span>
+                <span class="exchange-tab-subtext" style="color: @((!IsBuy ? "black" : "#ccc"));">USDT</span>
+            </div>
+        </div>
+    </div>
+
+</button>
+
+@code {
+
+    [Parameter] public EventCallback<bool> OnTabChanged { get; set; }
+
+    private bool IsBuy = true;
+
+    private async Task SetActiveTab(bool isBuy)
+    {
+        IsBuy = isBuy;
+        if (OnTabChanged.HasDelegate)
+        {
+            await OnTabChanged.InvokeAsync(IsBuy);
+        }
+    }
+}
+
+<style>
+    .exchange-tab {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 10px;
+        position: relative;
+        width: 100%;
+    }
+
+    .exchange-tab-icon {
+        width: 25px;
+        height: 25px;
+        margin-bottom: 5px;
+    }
+
+    .exchange-tab-label {
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .exchange-tab-subtext {
+        font-size: 12px;
+        margin-top: 2px;
+    }
+
+    .exchange-tab.active {
+        border-bottom: 1px solid red;
+    }
+
+    .reverse-image {
+        transform: rotate(180deg);
+    }
+</style>

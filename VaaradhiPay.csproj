@@ -10,7 +10,11 @@
   <ItemGroup>
     <PackageReference Include="Blazor.Bootstrap" Version="3.1.1" />
     <PackageReference Include="Blazor.Extensions.Canvas" Version="1.1.1" />
+    <PackageReference Include="Hangfire" Version="1.8.17" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.17" />
     <PackageReference Include="Hangfire.PostgreSql" Version="1.20.9" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.71" />
+    <PackageReference Include="MailKit" Version="4.8.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.4" />
@@ -20,16 +24,16 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.0" />
+    <PackageReference Include="MimeKit" Version="4.8.0" />
     <PackageReference Include="Minio" Version="6.0.3" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Components\Pages\L3\" />
     <Folder Include="Components\Pages\L4\" />
     <Folder Include="Components\Pages\AdminView\" />
-    <Folder Include="Components\Pages\UserView\" />
-    <Folder Include="wwwroot\MediaFiles\Icons\" />
-    <Folder Include="wwwroot\MediaFiles\Images\" />
+    <Folder Include="Utilities\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,53 @@
+﻿@inherits ComponentBase
+
+<div class="dashbord-content-notification-container">
+    <p class="dashbord-content-notification-text">@Content</p>
+    @if (!string.IsNullOrEmpty(ButtonName))  // Check if ButtonName is not null or empty 
+    {
+        <button class="dashbord-content-notification-btn" @onclick="OnClick">@ButtonName</button>
+    }
+</div>
+
+@code {
+    [Parameter] public string Content { get; set; } = "-"; // Text content
+    [Parameter] public string? ButtonName { get; set; } // Button label, null by default
+    [Parameter] public EventCallback OnClickCallback { get; set; } // Event for parent method
+
+    private async Task OnClick()
+    {
+        if (OnClickCallback.HasDelegate)
+        {
+            await OnClickCallback.InvokeAsync(); // Invoke parent method
+        }
+    }
+}
+
+
+<style>
+    .dashbord-content-notification-container {
+        width: 100%;
+        background-color: #FCE2E0;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+    }
+
+    .dashbord-content-notification-text{
+        flex-grow: 1;
+        margin: 0px;
+        padding: 0px;
+        color: black;
+    }
+
+    .dashbord-content-notification-btn{
+        border-radius: 24px;
+        background-color: #DF0A0A;
+        width: 100%;
+        padding: 10px 5px;
+        font-weight: bolder;
+        color: white;
+        border: none;
+    }
+</style>

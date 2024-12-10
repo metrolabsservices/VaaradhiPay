@@ -1,0 +1,64 @@
+﻿
+<button class="@GetButtonClasses()" @onclick="OnClick">
+    @Text
+</button>
+
+@code {
+
+    public enum ButtonTypeCust
+    {
+        Primary,
+        Secondary
+    }
+
+    [Parameter] public string Text { get; set; } = string.Empty; // Button text
+    [Parameter] public ButtonTypeCust Type { get; set; } = ButtonTypeCust.Primary;  // Default button type
+    [Parameter] public EventCallback OnClick { get; set; } // Event for click handler
+   
+    private string GetButtonClasses()
+    {
+        return Type switch
+        {
+            ButtonTypeCust.Primary => "btn-cstm btn-primary-custom",
+            ButtonTypeCust.Secondary => "btn-cstm btn-secondary-custom",
+            _ => "btn-primary-custom"
+        };
+    }
+}
+
+<style>
+    /* Base button styling */
+    .btn-cstm {
+        border-radius: 24px;
+        padding: 10px 5px;
+        font-weight: bolder;
+        width: 100%;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background-color 0.3s ease, color 0.3s ease;
+        margin: 2px;
+    }
+
+    /* Primary button */
+    .btn-primary-custom {
+        background-color: #DF0A0A;
+        color: white;
+    }
+
+        .btn-primary-custom:hover {
+            background-color: #C1272D; /* Slightly darker red for hover effect */
+        }
+
+    /* Secondary button */
+    .btn-secondary-custom {
+        background-color: #FCE2E0;
+        color: #DF0A0A; /* Red text for contrast */
+    }
+
+        .btn-secondary-custom:hover {
+            background-color: #F9D2CE; /* Slightly darker pink for hover effect */
+        }
+
+</style>
+

@@ -1,0 +1,54 @@
+﻿@page "/dashboard"
+@using VaaradhiPay.Components.Pages.L1
+@using VaaradhiPay.Components.Pages.L2
+
+
+<h1 class="h3 mb-5 text-center text-white">Welcome, Renold Dim</h1>
+
+<div class="row justify-content-center align-items-start">
+    <div class="col-6 col-lg-4" >
+        <ExchangeCard />
+    </div>
+    <div class="col-6 col-lg-7 dashbord-content-container">
+        <AlertMessageBoxL1 Content="There are no transactions at the moment. Make your first exchange!" />
+        <AlertMessageBoxL2 />
+        <AlertMessageBoxL3 
+            Title="Important Notification - Change Bank & UPI Details"
+            Message="We have updated new bank account and UPI ID details for your buy transactions. We kindly request that you ensure all future fund transfers are made to these updated account details when conducting transactions. You will be able to locate the new bank and UPI details conveniently on the checkout screen during your transactions."
+            Highlight="Kindly note that the previous bank account and UPI ID are now obsolete and no longer operational." 
+        />
+        
+       @*  <div class="dashbord-content-notification-container">
+        </div> *@
+      
+    </div>
+</div>
+
+@code{
+
+}
+
+<style>
+    .userdashbord-container{
+
+    }
+
+    .dashbord-content-container{
+        height: 500px;
+        /* border: 1px solid black; */
+        overflow-y: scroll; 
+        scrollbar-width: none;
+       
+    }
+
+    .dashbord-content-notification-container{
+        width: 100%;
+        background-color: #FCE2E0;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+    }
+
+</style>

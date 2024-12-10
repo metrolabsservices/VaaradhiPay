@@ -1,5 +1,53 @@
-﻿<h3>EndUserLayout</h3>
+﻿@page "/enduser"
+
+@inherits LayoutComponentBase
+
+@layout EmptyLayout
+
+
+<div class="layout-container">
+    <!-- Header -->
+    <header class="layout-header sticky-top">
+       <NavBarTop />
+    </header>
+
+    <!-- Main Body -->
+    <main class="layout-body">
+        @Body
+    </main>
+
+    <!-- Footer -->
+    <footer class="layout-footer">
+        <Footer />
+    </footer>
+</div>
+
+
 
 @code {
 
 }
+
+<style>
+    .layout-container {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    .layout-header {
+
+    }
+
+    .layout-body {
+        flex-grow: 1;
+        padding: 1rem;
+        background-image: url("MediaFiles/Images/vaaradhipay-bg1.png");
+        background-size: cover;
+        background-repeat: no-repeat;
+    }
+
+    .layout-footer {
+      
+    }
+</style>
