@@ -69,6 +69,9 @@ builder.Services.AddHttpContextAccessor(); // For accessing the current HTTP con
 builder.Services.AddScoped<ILoggedInUserService, LoggedInUserService>(); // Register the service
 builder.Services.Configure<EmailSenderDTO>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<IEmailSenderService, EmailSenderService>();
+builder.Services.AddScoped<IBankAccountService, BankAccountService>();
+builder.Services.AddSingleton<ExchangeTransactionService>();
+
 
 // -------------------------
 

@@ -1,0 +1,104 @@
+﻿@page "/homeTesting"
+@using static VaaradhiPay.Components.Pages.TestingByChandu.TabsSwitch
+@using Microsoft.AspNetCore.Authorization
+@using VaaradhiPay.Components.Pages.TestingByChandu
+@using VaaradhiPay.Components.Pages.TransactionsPages
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "User,Admin,SuperAdmin")]
+
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<style>
+    .header {
+        background-color: #DF0A0A;
+        text-align: center;
+        padding-bottom: 200px;
+    }
+
+    .container {
+        display: flex;
+        justify-content: center;
+        margin-top:-80px;
+    }
+
+    .card {
+        background: #ffff;
+        width: 750px;
+        height: 412px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-header {
+        background-color: #fff;
+        border-bottom:none;
+    }
+</style>
+<div class="header">
+    <img src="wwwroot\\MediaFiles\\Logos\\VaaradhiPay_WhiteLogo.png" />
+</div>
+@if (isUser)
+{
+    <div class="container">
+        <div class="card">
+            <div class="card-header" style="overflow-y:auto;scrollbar-width:none;">
+                <TabsSwitch Tabs="tabs" activeTab="1" />
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <p>u are not an user</p>
+}
+
+
+@code{
+
+    private List<TabItem> tabs;
+    private bool isUser = false;
+    protected override async void OnInitialized()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user.Identity.IsAuthenticated)
+        {
+            isUser = user.IsInRole("User"); // Check if the user is in the SuperAdmin role
+        }
+        // Initialize the tabs with dynamic names and content
+        tabs = new List<TabItem>
+        {
+            new TabItem
+            {
+                TabId = 1,
+                Name = "KYC",
+                Content = @<KYCpage/>
+            },
+            new TabItem
+            {
+                TabId = 2,
+                Name = "Profile",
+                Content = @<ProfilePage />
+            },
+            new TabItem
+            {
+                TabId = 3,
+                Name = "Settings",
+                Content = @<SettingPage />
+            },
+            new TabItem
+            {
+                TabId = 4,
+                Name = "Change Password",
+                Content = @<ChangePasswordPage />
+            },
+            new TabItem
+            {
+                TabId = 5,
+                Name = "EDD",
+                Content = @<p>EDD</p>
+            }
+        };
+    }
+}

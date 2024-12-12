@@ -11,8 +11,9 @@
         public decimal TotalCreditedAmount { get; set; } = 0;
         public string BankAvailability { get; set; } = "Active"; // In-Active - Active
         public string CurrencyType { get; set; }  // USD - INR - AED 
-        public string AccountType { get; set; }  // Savings, Business, Checking.
-        public DateTime UpdatedDateTime { get; set; } = DateTime.UtcNow;
+        public string AccountType { get; set; }  // Savings - Business - Checking.
+        public DateTime UpdatedDateTime { get; set; } 
+        public DateTime CreatedDateTime { get; set; } = DateTime.UtcNow;
         public bool IsDeleted { get; set; } = false;
     }
 }

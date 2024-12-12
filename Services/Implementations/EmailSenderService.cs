@@ -75,7 +75,7 @@ namespace VaaradhiPay.Services.Implementations
             // Return the HTML using the image URL
 
         }
-        public async Task<string> EmailConfirmationLetter()
+        public async Task<string> EmailConfirmationLetter(ApplicationUser user, string link)
         {
 
             return $@"
@@ -157,11 +157,11 @@ namespace VaaradhiPay.Services.Implementations
                     <h1>Email Verification</h1>
                 </div>
                 <div class=""card-body"">
-                    <h4>Dear [User's First Name],</h4>
+                    <h4>Dear {user.FirstName},</h4>
                     <p>Thank you for registering with us! <br>Please confirm your email address by clicking the button below:</p>
 
                         <br>
-                    <a href=""#"" class=""btn-custom"">Click to Verify</a>
+                    <a href=""{link}"" class=""btn-custom"">Click to Verify</a>
                 </div>
                 <div class=""card-footer"">
                     <a href=""https://www.metrolabsservices.com"">Sriram Plaza, H.no. 1-90/2/46/1, 4th FLOOR, Vittal Rao Nagar,<br>

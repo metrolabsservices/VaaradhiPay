@@ -1,0 +1,98 @@
+﻿@page "/paytest"
+
+@using VaaradhiPay.Components.Pages.L1.ErrorTemplates
+@using VaaradhiPay.DTOs
+@using VaaradhiPay.Data
+@using VaaradhiPay.Services.Interfaces
+
+@inject ILoggedInUserService LoggedInUserService
+@inject IBankAccountService BankAccountService
+@inject PreloadService Loader
+
+<div class="container">
+    @if (error.IsError)
+    {
+        <AlertMessageBoxL1 Content="@error.Message" />
+    }
+    else if (!userAccounts.Any())
+    {
+        <ExchangeReceiveBankNotFound Content="@((MarkupString)$"No bank accounts are linked to your profile. Please add a bank account to proceed.")" />
+    }
+    else if (!userAccounts1.Any())
+    {
+        <ExchangeReceiveBankNotFound Content="@((MarkupString)$"It seems like you don’t have a bank account for receiving currency <strong>{TransactionData?.ReceiveCurrency ?? "N/A"}</strong>. Please add a bank account to proceed with the exchange.")" />
+    }
+    else if (!userAccounts1.Any(account => account.IsVerified))
+    {
+        <ExchangeReceiveBankNotFound Content="@((MarkupString)$"Well you don’t have any verified bank account for receiving currency <strong>{TransactionData?.ReceiveCurrency ?? "N/A"}</strong>. Please verify at least one bank account to proceed with the exchange.")" />
+    }
+    else
+    {
+        <PaymentVerificationRootIndex AccountsData="userAccounts1" />
+    }
+</div>
+
+@code {
+    [Parameter] public ExchangeTransactionDTO? TransactionData { get; set; }
+    [Parameter] public EventCallback<bool> OnValidationStateChanged { get; set; }
+
+    private List<BankAccount> userAccounts = new();
+    private List<BankAccount> userAccounts1 = new();
+    private ErrorHandleDTO error = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Loader.Show();
+        try
+        {
+            var userId = LoggedInUserService.GetLoggedInUserId();
+            if (string.IsNullOrEmpty(userId))
+            {
+                error = new ErrorHandleDTO
+                    {
+                        IsError = true,
+                        Message = "You are not logged in. Please log in to view your bank accounts."
+                    };
+                await EmitValidationState(false);
+                return;
+            }
+
+            userAccounts = await BankAccountService.GetBankAccountsByUserIdAsync(userId);
+            if (userAccounts.Any())
+            {
+                userAccounts1 = await BankAccountService.GetActiveBankAccountsByCurrencyUserIdAsync(TransactionData?.ReceiveCurrency, userId);
+                if (!userAccounts1.Any() || !userAccounts1.Any(account => account.IsVerified))
+                {
+                    await EmitValidationState(false);
+                    return;
+                }
+            }
+            else
+            {
+                await EmitValidationState(false);
+                return;
+            }
+
+            await EmitValidationState(true);
+        }
+        catch (Exception ex)
+        {
+            error = new ErrorHandleDTO
+                {
+                    IsError = true,
+                    Message = "An error occurred while loading bank account data.",
+                    TechnicalMessage = ex.Message
+                };
+            await EmitValidationState(false);
+        }
+        finally
+        {
+            Loader.Hide();
+        }
+    }
+
+    private async Task EmitValidationState(bool isValid)
+    {
+        await OnValidationStateChanged.InvokeAsync(isValid);
+    }
+}

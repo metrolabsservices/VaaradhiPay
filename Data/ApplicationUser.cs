@@ -10,6 +10,7 @@ namespace VaaradhiPay.Data
         public string LastName { get; set; }
         public string? UserRefId { get; set; }
         public string? ProfilePicturePath { get; set; }
+        public string KYCstatus { get; set; }  // Completed - Pending - Rejected 
         public DateTime TimeStamp { get; set; } = DateTime.UtcNow;
 
         public ICollection<BankAccount> BankAccounts { get; set; }

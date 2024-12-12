@@ -25,10 +25,10 @@ namespace VaaradhiPay.Services.Implementations
             // Load default bucket based on the environment
             //var environment = configuration["ASPNETCORE_ENVIRONMENT"];
             //_defaultBucket = environment == "Development"
-            //    ? configuration["Minio:Environment:DeveloperBucket"]
-            //    : configuration["Minio:Environment:ProductionBucket"];
+            //    ? configuration["Minio:Buckets:DeveloperBucket"]
+            //    : configuration["Minio:Buckets:ProductionBucket"];
 
-            _defaultBucket = configuration["Minio:Environment:DeveloperBucket"];
+            _defaultBucket = configuration["Minio:Buckets:DeveloperBucket"];
         }
 
         public async Task UploadFileAsync(string bucketName, string objectName, Stream data, string contentType)

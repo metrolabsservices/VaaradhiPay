@@ -20,12 +20,16 @@ namespace VaaradhiPay.Data
 
         public bool IsVerified { get; set; } = false; // Indicates if the KYC is verified
 
+        public DateTime CreatedDateTime { get; set; } = DateTime.UtcNow;
+
+        public bool IsDeleted { get; set; } = false;
+
         [Required]
         public string UserId { get; set; } // Foreign key to ApplicationUser
 
         [ForeignKey(nameof(UserId))]
         public ApplicationUser User { get; set; } // Navigation property
 
-        public DateTime TimeStamp { get; set; } = DateTime.UtcNow;
+
     }
 }

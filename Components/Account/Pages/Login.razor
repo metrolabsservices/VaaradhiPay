@@ -1,4 +1,5 @@
 ﻿@page "/Account/Login"
+@page "/Account/Login/{email}/{pwd}"
 
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Authentication
@@ -67,6 +68,12 @@
 @code {
     private string? errorMessage;
 
+    [Parameter]
+    public string email { get; set; }
+
+    [Parameter]
+    public string pwd { get; set; }
+
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
 
@@ -85,6 +92,16 @@
         }
     }
 
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(pwd))
+        {
+            Input.Email = email;
+            Input.Password = pwd;
+            await LoginUser();
+        }
+    }
+
     public async Task LoginUser()
     {
         // This doesn't count login failures towards account lockout
@@ -93,7 +110,7 @@
         if (result.Succeeded)
         {
             Logger.LogInformation("User logged in.");
-            RedirectManager.RedirectTo(ReturnUrl);
+            RedirectManager.RedirectTo("/home");
         }
         else if (result.RequiresTwoFactor)
         {

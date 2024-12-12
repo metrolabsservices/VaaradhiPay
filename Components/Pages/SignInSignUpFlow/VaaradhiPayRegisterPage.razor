@@ -6,21 +6,27 @@
 @using VaaradhiPay.Components.Account
 @using VaaradhiPay.Components.Account.Pages
 @using VaaradhiPay.Data
+@using System.Text.RegularExpressions;
+@using VaaradhiPay.Services.Interfaces
+
+@inject PreloadService Load
 
 @rendermode InteractiveServer
 
+
+@inject IEmailSenderService EmailSenderService
 @inject IHttpContextAccessor HttpContextAccessor
 @inject RoleManager<IdentityRole> RoleManager
 @inject UserManager<ApplicationUser> UserManager
 @inject IUserStore<ApplicationUser> UserStore
 @inject SignInManager<ApplicationUser> SignInManager
-@inject IEmailSender<ApplicationUser> EmailSender
 @inject NavigationManager NavigationManager
 @inject ILogger<Register> Logger
 @inject IdentityRedirectManager RedirectManager
 @inject ToastService ToastService
 
 
+<Preload LoadingText="..." />
 <div class="register-card-container">
     <div class="register-card">
 
@@ -86,6 +92,12 @@
 
     private async Task RegisterUser()
     {
+        if (!Regex.IsMatch(Input.FirstName, @"^[A-Za-z\s]+$") || !Regex.IsMatch(Input.LastName, @"^[A-Za-z\s]+$"))
+        {
+            ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = $"name must contain only letters" });
+            return;
+        }
+
         if (Input.Password != Input.ConfirmPassword)
         {
             ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = $"Passwords do not match. Please try again" });
@@ -94,7 +106,7 @@
         }
 
         var user = CreateUser();
-
+        Load.Show();
         try
         {
             await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
@@ -132,29 +144,26 @@
             }
 
             // ------ Generate email confirmation link ------
-                // var userId = await UserManager.GetUserIdAsync(user);
-                // var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
-                // code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                // var callbackUrl = $"{NavigationManager.BaseUri}Account/ConfirmEmail?userId={userId}&code={code}";
+                var userId = await UserManager.GetUserIdAsync(user);
+                var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                var callbackUrl = $"{NavigationManager.BaseUri}Account/ConfirmEmail?userId={userId}&code={code}";
 
-                // await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
-                // ToastService.Notify(new ToastMessage { Type = ToastType.Success, Message = "Account created successfully. Please confirm your email" });
-
-            // if (UserManager.Options.SignIn.RequireConfirmedAccount)
-            // {
-            //     NavigationManager.NavigateTo($"/Account/RegisterConfirmation?email={Input.Email}");
-            //     return;
-            // }
-
-            await SignInManager.SignInAsync(user, isPersistent: false);
+            await EmailSenderService.EmailSendAsync(user.Email, "confirmation Email", await EmailSenderService.EmailConfirmationLetter(user, HtmlEncoder.Default.Encode(callbackUrl)));
+               
+            ToastService.Notify(new ToastMessage { Type = ToastType.Success, Message = "Account created successfully. Please confirm your email" });
+            await Task.Delay(1000);
             ToastService.Notify(new ToastMessage { Type = ToastType.Success, Message = "Successfully signed in!" });
 
-            // NavigationManager.NavigateTo("/");
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "An unexpected error occurred during user registration.");
             ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = $"An unexpected error occurred: {ex.Message}" });
+        }
+        finally
+        {
+            Load.Hide();
         }
     }
 

@@ -1,0 +1,468 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using VaaradhiPay.Data
+@using VaaradhiPay.Services
+@using VaaradhiPay.Services.Interfaces
+@using static VaaradhiPay.Components.Pages.TestingByChandu.KYCUploadingFiles
+@inject ILoggedInUserService LoggedInUserService
+@inject IFileStorageService fileStorage
+@inject IUserService userService
+@inject ApplicationDbContext DbContext
+@inject UserManager<ApplicationUser> _userManager
+
+<style>
+
+    .card {
+        background: #ffff;
+        width: 750px;
+        height: 412px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .top-container {
+        display: flex;
+        justify-content: center;
+        gap: 45px;
+    }
+
+        .top-container h1 {
+            margin: 0;
+            color: #9ba2ad;
+            font-size: 18px;
+            font-weight: 600;
+            font-family: "Poppins";
+            text-transform: capitalize;
+            padding: 15px;
+        }
+
+            .top-container h1:nth-of-type(1) {
+                margin: 0;
+                padding: 15px;
+                color: #df0a0a;
+                font-size: 18px;
+                font-weight: 600;
+                font-family: "Poppins";
+                text-transform: uppercase;
+            }
+
+            .top-container h1:nth-of-type(5) {
+                margin: 0;
+                padding: 15px;
+                color: #9ba2ad;
+                font-size: 18px;
+                font-weight: 600;
+                font-family: "Poppins";
+                text-transform: uppercase;
+            }
+
+    hr {
+        border: solid;
+        border-color: #9ba2ad;
+        border-width: 1px;
+        margin: 0;
+    }
+
+    .bottom-container h1 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #000000;
+        font-family: "Poppins";
+        margin: 0;
+        padding: 25px 0 0 35px;
+    }
+
+    .number-container {
+        font-size: 11px;
+        font-weight: 400;
+        color: #9ba2ad;
+        font-family: "Poppins";
+        margin: 0;
+        padding: 10px 0 0 35px;
+    }
+
+    .bottom-container p {
+        font-size: 11px;
+        font-weight: 400;
+        color: #9ba2ad;
+        font-family: "Poppins";
+        margin: 0;
+        padding: 10px 0 0 35px;
+    }
+
+    .idproof-cards {
+        display: flex;
+        gap: 25px;
+        cursor:pointer;
+    }
+
+    .driving-license {
+        width: 210px;
+        height: 50px;
+        border-radius: 4px;
+        border: solid;
+        border-color: #d4dae2;
+        border-width: 1px;
+        margin: 15px 0 0 35px;
+        padding: 0;
+        display: flex;
+        gap: 20px;
+    }
+
+    .passport {
+        width: 210px;
+        height: 50px;
+        border-radius: 4px;
+        border: solid;
+        border-color: #d4dae2;
+        border-width: 1px;
+        display: flex;
+        gap: 20px;
+        margin: 15px 0 0 0;
+    }
+
+    .aadhar-card {
+        width: 210px;
+        height: 50px;
+        border-radius: 4px;
+        border: solid;
+        border-color: #d4dae2;
+        border-width: 1px;
+        margin: 15px 20px 0 0;
+        display: flex;
+        gap: 20px;
+    }
+
+    .driving-header h1 {
+        margin: 0;
+        padding: 0;
+        font-size: 13px;
+        font-family: "Poppins";
+        font-weight: 600;
+        text-transform: capitalize;
+        padding: 14px 0 0 0;
+    }
+
+    .driving-icon {
+        color: #9ba2ad;
+        font-size: 30px;
+        margin: 8px 0 0 25px;
+    }
+
+    .phone-container {
+        display: flex;
+        align-items: center;
+        width: 330px;
+        height: 51px;
+        border-radius: 4px;
+        border: solid;
+        border-width: 1px;
+        border-color: #D4D9E2;
+        margin: 0 0 0 2px;
+    }
+
+    .country-code {
+        display: flex;
+        align-items: center;
+        background-color: #ffffff;
+        padding: 0 8px;
+        background: none;
+        width: 43px;
+        height: 20px;
+        border: solid;
+        margin: 0 0 0 20px;
+        border-color: #D4D9E2;
+        border-width: 1px;
+        position: relative;
+        border-radius: 4px;
+    }
+
+        .country-code select {
+            border: none;
+            background: none;
+            outline: none;
+            width: 100%;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            appearance: none;
+            padding: 1px 0 0 0;
+        }
+
+        .country-code option {
+            border: none;
+            background: none;
+            outline: none;
+            width: 100%;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            appearance: none;
+        }
+
+        .country-code .bi-caret-down-fill {
+            font-size: 20px;
+            color: #000000;
+            position: absolute;
+            right: 3px;
+            padding: 3px 0 0 0;
+            pointer-events: none;
+        }
+
+    .phone-input {
+        flex: 1;
+        border: none;
+        outline: none;
+        padding: 8px;
+        font-size: 14px;
+    }
+
+    .phone-container:focus-within {
+        border-color: #020d18;
+    }
+
+    .number-container button {
+        width: 71px;
+        height: 26px;
+        color: #df0a0a;
+        margin: 0;
+        border-radius: 24px;
+        border: 1px solid;
+        border-color: #df0a0a;
+        background-color: #ffff;
+        font-size: 11px;
+        font-family: "Poppins";
+        font-weight: 400;
+        text-transform: capitalize;
+    }
+
+    .card-button button {
+        width: 150px;
+        height: 41px;
+        color: #ffff;
+        border-radius: 24px;
+        border: none;
+        background-color: #df0a0a;
+        letter-spacing: 2px;
+        font-size: 14px;
+        font-family: "Poppins";
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .card-button {
+        display: flex;
+        justify-content: right;
+        margin: 90px 30px 0 0;
+    }
+
+    .number-button {
+        display: flex;
+        position: absolute;
+        justify-content: right;
+        margin: 13px 10px 0 0;
+    }
+</style>
+
+
+<div class="bottom-container">
+    <h1> Upload ID Proof</h1>
+    <p> Please upload the document from the list below</p>
+</div>
+
+<div class="idproof-cards">
+    <div class="driving-license" @onclick="!isExist ? (() => OpenFileUpload(DrivingLicense)) : null">
+        <div class="driving-icon">
+            <i class="bi bi-person-vcard"></i>
+        </div>
+        <div class="driving-header">
+            <h1>driving license</h1>
+        </div>
+    </div>
+    <div class="passport" @onclick="!isExist ? (() => OpenFileUpload(Passport)) : null">
+        <div class="driving-icon">
+            <i class="bi bi-passport"></i>
+        </div>
+        <div class="driving-header">
+            <h1>passport</h1>
+        </div>
+    </div>
+    <div class="aadhar-card" @onclick="!isExist ? (() => OpenFileUpload(Aadhaar)) : null">
+        <div class="driving-icon">
+            <i class="bi bi-person-video"></i>
+        </div>
+        <div class="driving-header">
+            <h1>aadhar card</h1>
+        </div>
+    </div>
+</div>
+
+@if (isShowUploadFiles)
+{
+    <div>
+        <KYCUploadingFiles nameType="@nameType" onUploadCheck="UploadedFiles" />
+    </div>
+}
+
+<div class="number-container">
+    <p> phone number</p>
+    <div class="number-button">
+        <div class="phone-container">
+            <div class="country-code">
+                <select>
+                    <option value="+1"><span><i class="bi bi-0-circle"></i></span>IND</option>
+                    <option value="+1">USA</option>
+                    <option value="+44">UK</option>
+                    <option value="+61">AUS</option>
+                </select>
+                <i class="bi bi-caret-down-fill"></i>
+            </div>
+            <input type="tel" class="phone-input" @bind-value="phoneNumber" disabled="@(!string.IsNullOrEmpty(phoneNumber))" />
+        </div>
+        <div class="number-button">
+            <button>send otp</button>
+        </div>
+    </div>
+</div>
+
+<div class="card-button">
+    <button @onclick="SaveFiles"> send details</button>
+</div>
+
+@code {
+    private bool isShowUploadFiles = false;
+    private string nameType;
+    private string DrivingLicense = "DRIVING LICENSE";
+    private string Passport = "PASSPORT";
+    private string Aadhaar = "AADHAR CARD";
+    private Dictionary<string, Dictionary<string, FilePreview>> filePreviews = new();
+    private List<KYCDetails> kYCDetail;
+    private bool isExist = false;
+    private string phoneNumber = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var userDetails = await LoggedInUserService.GetLoggedInUserAsync();
+            kYCDetail = await DbContext.KYCDetails.Where(e => e.UserId == userDetails.Id && e.DocumentType != "PHONE NUMBER" && !e.IsDeleted).ToListAsync();
+            if (kYCDetail != null && kYCDetail.Any())
+            {
+                isExist = true;
+            }
+            if(userDetails != null)
+            {
+                phoneNumber=userDetails.PhoneNumber;
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    public void OpenFileUpload(string documentType)
+    {
+        nameType = documentType;
+        isShowUploadFiles = true;
+    }
+
+    private async Task UploadedFiles((bool isDrivingLicense, bool isPassport, bool isAadhar, Dictionary<string, Dictionary<string, FilePreview>> filePreviews) uploadInfo)
+    {
+        filePreviews = uploadInfo.filePreviews;
+
+        // Print the boolean values for driving license, passport, and Aadhar
+        Console.WriteLine($"isDrivingLicense: {uploadInfo.isDrivingLicense}");
+        Console.WriteLine($"isPassport: {uploadInfo.isPassport}");
+        Console.WriteLine($"isAadhar: {uploadInfo.isAadhar}");
+
+        // Iterate over the outer dictionary (document types)
+        foreach (var documentType in filePreviews)
+        {
+            Console.WriteLine($"Document Type: {documentType.Key}"); // e.g., "DRIVING LICENSE", "PASSPORT", etc.
+
+            // Iterate over the inner dictionary (front/back)
+            foreach (var side in documentType.Value)
+            {
+                Console.WriteLine($"  Side: {side.Key}"); // "front" or "back"
+                Console.WriteLine($"    File Name: {side.Value.FileName}");
+                Console.WriteLine($"    Content Type: {side.Value.ContentType}");
+                //Console.WriteLine($"    Preview URL: {side.Value.PreviewUrl}");
+            }
+        }
+    }
+
+    //Save Files
+    private async Task SaveFiles()
+    {
+        var userDetails = await LoggedInUserService.GetLoggedInUserAsync();
+        string user = userDetails.Email.Split('@')[0];
+
+        if(filePreviews != null && filePreviews.Count() > 0)
+        {
+            foreach (var fileCategory in filePreviews)
+            {
+                var fileType = fileCategory.Key;
+                foreach (var file in fileCategory.Value)
+                {
+                    try
+                    {
+                        var KYCDetails = await DbContext.KYCDetails.Where(e => e.UserId == userDetails.Id && e.DocumentNumber == file.Key).ToListAsync();
+                        DateOnly date = DateOnly.FromDateTime(DateTime.UtcNow);
+                        string fileName = $"{user}_{fileType}_{file.Key}_{KYCDetails.Count() + 1}";
+                        var objName = $"{user}/{fileType}/{file.Key}/{fileName}";
+
+                        var buffer = Convert.FromBase64String(file.Value.PreviewUrl.Split(',')[1]);
+                        using var stream = new MemoryStream(buffer);
+
+                        await fileStorage.UploadFileAsync(null, objName, stream, file.Value.ContentType);
+
+                        var KYC = new KYCDetails()
+                            {
+                                DocumentType = fileType,
+                                DocumentNumber = file.Key,
+                                DocumentFilePath = objName,
+                                UserId = userDetails.Id
+                            };
+
+                        DbContext.KYCDetails.Add(KYC);
+                        await DbContext.SaveChangesAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+            }
+        }
+        if (!string.IsNullOrEmpty(phoneNumber))
+        {
+            try
+            {
+                var KYC = new KYCDetails()
+                    {
+                        DocumentType = "PHONE NUMBER",
+                        DocumentNumber = "null",
+                        DocumentFilePath = null,
+                        UserId = userDetails.Id
+                    };
+                var applicationUser = await _userManager.FindByIdAsync(userDetails.Id);
+                if (applicationUser != null)
+                {
+                    applicationUser.PhoneNumber = phoneNumber;
+                    await userService.UpdateUserAsync(applicationUser);
+                }
+
+                DbContext.KYCDetails.Add(KYC);
+                await DbContext.SaveChangesAsync();
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+    }
+}
+

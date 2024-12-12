@@ -1,0 +1,134 @@
+﻿@rendermode InteractiveServer
+
+<style>
+    .custom-tabs {
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        padding-left: 0;
+        margin-bottom: 0;
+        list-style: none;
+    }
+
+        .custom-tabs .nav-item {
+            margin-bottom: -1px;
+            margin-right: 30px;
+        }
+
+        .custom-tabs .nav-link {
+            border: none;
+            padding: 10px 15px;
+            color: #6c757d;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: color 0.3s ease;
+            margin-right: 20px;
+            width: 120%;
+        }
+
+            .custom-tabs .nav-link.active {
+                width:120%;
+                color: #DF0A0A;
+                font-weight: bold;
+                border-bottom: 2px solid #DF0A0A;
+                background-color: transparent;
+            }
+
+            /* .custom-tabs .nav-link:hover {
+                color: #000;
+            } */
+
+</style>
+
+<div class="position-relative mt-4">
+    <ul class="nav nav-tabs custom-tabs" id="myTab" role="tablist">
+        @foreach (var tab in Tabs)
+        {
+            <li class="nav-item" role="presentation">
+                <button class="nav-link @GetTabClass(tab.TabId)"
+                        @onclick="() => ShowTab(tab.TabId)"
+                        type="button"
+                        role="tab"
+                        aria-selected="@(activeTab == tab.TabId)">
+                    @tab.Name
+                </button>
+            </li>
+        }
+    </ul>
+</div>
+
+<div class="tab-content mt-4">
+    @foreach (var tab in Tabs)
+    {
+        if (activeTab == tab.TabId)
+        {
+            <div class="tab-pane fade show active">
+                @tab.Content
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public List<TabItem> Tabs { get; set; } = new();
+
+    [Parameter]
+    public int activeTab { get; set; } = 1;
+
+    [Parameter]
+    public EventCallback<int> OnShowTab { get; set; }
+
+    private async Task ShowTab(int tabId)
+    {
+        activeTab = tabId;
+        await OnShowTab.InvokeAsync(tabId); // Notify parent component
+        StateHasChanged();
+    }
+
+    private string GetTabClass(int tabId)
+    {
+        return activeTab == tabId ? "nav-link active" : "nav-link";
+    }
+
+    public class TabItem
+    {
+        public int TabId { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public RenderFragment Content { get; set; }
+    }
+}
+
+
+@*
+<TabsSwitching Tabs="tabs" activeTab="1"/>
+
+    private List<TabItem> tabs;
+
+    protected override void OnInitialized()
+    {
+        // Initialize the tabs with dynamic names and content
+        tabs = new List<TabItem>
+        {
+            new TabItem
+            {
+                TabId = 1,
+                Name = "Payslips List",
+                Content = @<PaySlipView />
+            },
+            new TabItem
+            {
+                TabId = 2,
+                Name = "Other Information",
+                Content = @<p>Content for Other Information</p>
+            },
+            new TabItem
+            {
+                TabId = 3,
+                Name = "Settings",
+                Content = @<p>Content for Settings</p>
+            }
+        };
+    }
+
+*@

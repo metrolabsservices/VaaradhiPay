@@ -8,6 +8,12 @@
 @rendermode InteractiveServer
 
 
+@inject SignInManager<ApplicationUser> SignInManager
+@inject ILogger<Login> Logger
+@inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
+@inject ToastService ToastService
+
 <div class="login-card-container">
     <div class="login-card">
         <!-- Google Login Button -->
@@ -23,7 +29,7 @@
         </div>
 
         <!-- Login Form -->
-        <form @onsubmit="HandleLogin">
+        <form @onsubmit="LoginUser">
             <!-- Email Field -->
             <div class="login-field">
                 <label class="login-label">Username</label>
@@ -62,14 +68,11 @@
     private LoginInputModel Input { get; set; } = new();
     private bool IsSubmitting { get; set; }
 
-    [Inject]
-    private SignInManager<ApplicationUser> SignInManager { get; set; } = default!;
-    [Inject]
-    private ILogger<VaaradhiPayLoginPage> Logger { get; set; } = default!;
-    [Inject]
-    private ToastService ToastService { get; set; } = default!;
-    [Inject]
-    private NavigationManager NavigationManager { get; set; } = default!;
+    private async Task LoginUser()
+    {
+        NavigationManager.NavigateTo($"/Account/Login/{Input.Email}/{Input.Password}");
+    }
+   
 
     private async Task HandleLogin()
     {

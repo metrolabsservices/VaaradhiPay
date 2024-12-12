@@ -1,0 +1,41 @@
+﻿@page "/home"
+@using Microsoft.AspNetCore.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@* @attribute [Authorize(Roles = "User,Admin,SuperAdmin")] *@
+@inject NavigationManager nav
+
+
+@if (isUser)
+{
+    <VaaradhiPay.Components.Pages.UserView.UserDashbord />
+}
+else if (isAdmin)
+{
+    <p>Welcome you are an Admin....</p>
+}
+else if (isSuperAdmin)
+{
+    <p>Welcome you are an SuperAdmin....</p>
+}
+
+@code {
+    private bool isUser = false;
+    private bool isAdmin = false;
+    private bool isSuperAdmin = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user.Identity.IsAuthenticated)
+        {
+            isUser = user.IsInRole("User"); // Check if the user is in the User role
+            isAdmin = user.IsInRole("Admin"); // Check if the user is in the Admin role
+            isSuperAdmin = user.IsInRole("SuperAdmin"); // Check if the user is in the SuperAdmin role
+        }
+        else
+        {
+            nav.NavigateTo("/public");
+        }
+    }
+}

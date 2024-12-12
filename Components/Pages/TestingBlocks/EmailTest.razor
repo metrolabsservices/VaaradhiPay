@@ -16,7 +16,8 @@
 @code {
     private async Task SendMails()
     {
-        await EmailSender.EmailSendAsync("teamlead.1.metrolabsservices@gmail.com", "Email Confirtmation", await EmailSenderTemplate.EmailConfirmationLetter());
+        // Apllication user needed for the mail serve so commmented 
+        // await EmailSender.EmailSendAsync("teamlead.1.metrolabsservices@gmail.com", "Email Confirtmation", await EmailSenderTemplate.EmailConfirmationLetter());
         await EmailSender.EmailSendAsync("teamlead.1.metrolabsservices@gmail.com", "Successfull Sign up", await EmailSenderTemplate.SignUp());
         await EmailSender.EmailSendAsync("teamlead.1.metrolabsservices@gmail.com", "KYC Pending", await EmailSenderTemplate.KycPending());
         await EmailSender.EmailSendAsync("teamlead.1.metrolabsservices@gmail.com", "KYC Success", await EmailSenderTemplate.KycSuccess());

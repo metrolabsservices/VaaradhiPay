@@ -1,9 +1,11 @@
-﻿namespace VaaradhiPay.Services.Interfaces
+﻿using VaaradhiPay.Data;
+
+namespace VaaradhiPay.Services.Interfaces
 {
     public interface IEmailSenderService
     {
         Task EmailSendAsync(string email, string subject, string htmlMessage);
-        Task<string> EmailConfirmationLetter();
+        Task<string> EmailConfirmationLetter(ApplicationUser user, string link);
         Task<string> SignUp();
         Task<string> KycPending();
         Task<string> KycSuccess();

@@ -1,0 +1,179 @@
+﻿<style>
+    .container-1 {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .name-container {
+        display: flex;
+        gap: 13px;
+    }
+
+    .top-header input {
+        width: 275px;
+        height: 50px;
+        border-radius: 4px;
+        border: solid;
+        border-width: 1px;
+        border-color: #D4D9E2;
+        margin: 0 0 0 37px;
+    }
+
+    .top-header p{
+        font-size: 11px;
+        font-family: "Poppins";
+        color: #67757C;
+        font-weight: 400;
+        padding: 10px 0 0 37px;
+    }
+
+    .phn-container p {
+        font-size: 11px;
+        font-family: "Poppins";
+        color: #67757C;
+        font-weight: 400;
+        padding: 10px 0 0 37px;
+    }
+
+    .phone-container {
+        display: flex;
+        align-items: center;
+        width: 279px;
+        height: 51px;
+        border-radius: 4px;
+        border: solid;
+        border-width: 1px;
+        border-color: #D4D9E2;
+        margin: 0 0 0 37px;
+    }
+
+    .country-code {
+        display: flex;
+        align-items: center;
+        background-color: #ffffff;
+        padding: 0 8px;
+        background: none;
+        width: 43px;
+        height: 20px;
+        border: solid;
+        margin: 0 0 0 20px;
+        border-color: #D4D9E2;
+        border-width: 1px;
+        position: relative;
+        border-radius: 4px;
+    }
+
+        .country-code select option:hover {
+            background-color: #9a9b9c; /* Blue color on hover */
+            color: rgb(167, 28, 28); /* White text when hovering */
+        }
+
+        .country-code select {
+            border: none;
+            background: none;
+            outline: none;
+            width: 100%;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            appearance: none;
+            padding: 1px 0 0 0;
+        }
+
+        .country-code option {
+            border: none;
+            background: none;
+            outline: none;
+            width: 100%;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            appearance: none;
+        }
+
+        .country-code .bi-caret-down-fill {
+            font-size: 20px;
+            color: #000000;
+            position: absolute;
+            right: 3px;
+            top: 1px;
+            pointer-events: none;
+        }
+
+    .phone-input {
+        flex: 1;
+        border: none;
+        outline: none;
+        padding: 8px;
+        font-size: 14px;
+    }
+
+    .phone-container:focus-within {
+        border-color: #020d18;
+    }
+
+    .save-button {
+        display: flex;
+        justify-content: center;
+        margin: 45px 0 0 0;
+    }
+
+    .save-button button {
+        width: 180px;
+        height: 41px;
+        font-size: 14px;
+        font-weight: 600;
+        background-color: #DF0A0A;
+        border: none;
+        border-radius: 24px;
+        color: #ffffff;
+        letter-spacing: 1px;
+        padding: 10px;
+        text-transform: uppercase;
+    }
+    .kyc-span {
+        border-bottom: 1px;
+    }
+</style>
+
+<div class="container-1">
+    <div class="name-container">
+        <div class="top-header">
+            <p> First Name</p>
+            <input type="text">
+        </div>
+        <div class="top-header">
+            <p> Last Name</p>
+            <input type="text">
+        </div>
+    </div>
+    <div class="name-container">
+        <div class="top-header">
+            <p> Email</p>
+            <input type="email">
+        </div>
+        <div class="phn-container">
+            <p> Phone No</p>
+            <div class="phone-container">
+                <div class="country-code">
+                    <select>
+                        <option value="+1">IND</option>
+                        <option value="+1">USA</option>
+                        <option value="+44">UK</option>
+                        <option value="+61">AUS</option>
+                    </select>
+                    <i class="bi bi-caret-down-fill"></i>
+                </div>
+                <input type="tel"
+                       class="phone-input" />
+            </div>
+        </div>
+    </div>
+    <div class="save-button">
+        <button> save details</button>
+    </div>
+</div>
+
+@code {
+
+}

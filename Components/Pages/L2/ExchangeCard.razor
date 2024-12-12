@@ -2,6 +2,11 @@
 
 @using VaaradhiPay.Components.Layout
 @using VaaradhiPay.Components.Pages.L1
+@using VaaradhiPay.DTOs
+@using VaaradhiPay.Services.Implementations
+
+@inject NavigationManager NavigationManager
+@inject ExchangeTransactionService ExchangeTransactionService
 
 @rendermode InteractiveServer
 
@@ -28,7 +33,7 @@
             </div>
 
             @* exchange Form *@
-            <ExchangeForm />
+            <ExchangeForm OnTransactionCompleted="HandleTransactionCompleted"/>
 
         </div>
     </div>
@@ -41,15 +46,24 @@
 
 @code {
     private string INRprice = "90.80";
+    private bool IsBuyTab = true;
 
     private void HandleTabChange(bool isBuy)
     {
+        IsBuyTab = isBuy;
         Console.WriteLine(isBuy ? "Buy tab is active" : "Sell tab is active");
-        Toast.Notify(new ToastMessage
-            {
-                Type = ToastType.Info,
-                Message = isBuy ? "Switched to Buy tab" : "Switched to Sell tab"
-            });
+    }
+
+    private void HandleTransactionCompleted(ExchangeTransactionDTO transaction)
+    {
+
+        transaction.IsBuy = IsBuyTab;
+
+        // Store transaction in the shared service
+        ExchangeTransactionService.CurrentTransaction = transaction;
+
+        // Add logic to navigate to the billing page
+        NavigationManager.NavigateTo($"/bill");
     }
 }
 

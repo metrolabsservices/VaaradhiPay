@@ -1,6 +1,7 @@
 ﻿@page "/excform"
 
 @using VaaradhiPay.Components.Pages.L1
+@using VaaradhiPay.Components.Pages.L1.ErrorTemplates
 @using VaaradhiPay.DTOs
 @using VaaradhiPay.Data
 @using VaaradhiPay.Services.Interfaces
@@ -53,6 +54,8 @@
 
 
 @code {
+    [Parameter] public EventCallback<ExchangeTransactionDTO> OnTransactionCompleted { get; set; }
+
     private Modal UserLogRequired = default!;
     private List<CoinType> AvailableCoins = new();
     private string selectedCurrencyPay = "AUD"; 
@@ -210,15 +213,26 @@
                 await UserLogRequired.HideAsync();
                 return;
             }
-           
+            // Toast.Notify(new ToastMessage
+            //     {
+            //         Type = ToastType.Success,
+            //         Message = "Exchange transaction completed successfully!"
+            //     });
 
-
-
-            Toast.Notify(new ToastMessage
+            // Create DTO and pass data to the parent
+            var transaction = new ExchangeTransactionDTO
                 {
-                    Type = ToastType.Success,
-                    Message = "Exchange transaction completed successfully!"
-                });
+                    YouPay = youPayValue,
+                    PayCurrency = selectedCurrencyPay,
+                    ReceiveCurrency = selectedCurrencyReceive,
+                    YouReceive = youReceiveValue,
+                    UserId = userDetails.Id ?? string.Empty,
+                    IsBuy = true // Defaulting; parent will set based on context
+                };
+
+            await OnTransactionCompleted.InvokeAsync(transaction);
+
+            
         }
         catch (Exception ex)
         {

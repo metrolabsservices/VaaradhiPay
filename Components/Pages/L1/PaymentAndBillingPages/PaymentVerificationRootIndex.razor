@@ -1,0 +1,52 @@
+﻿@using VaaradhiPay.Data
+
+
+<div class="container-fluid row justify-content-center">
+    <div class="col-4 border border-secondary rounded-3 p-3">
+        <h3 class="text-dark mb-0">Payment Information</h3>
+        <div class=" px-3 pt-3" style="font-size: 12px">
+            <p class="mb-3">Choose an account from the list of existing Accounts to Settle the Amount of Your currency type.</p>
+            <p class="fw-bold mb-3">Your Currency Exchange Value lies in :</p>
+            <p class="mb-3 fw-bold">BUY - USD <span class="fw-normal">with</span> INR</p>
+            <p class="text-muted fw-bold mb-0">NOTE: No Payment is Refunded Check twice before Pay.</p>
+        </div>
+    </div>
+    <div class="col py-2">
+        <div class="vr h-100 mx-3"></div>
+    </div>
+    <div class="col-7 p-0">
+        @if (AccountsData.Any())
+        {
+            <SortableList TItem="BankAccount" Data="@AccountsData" AllowSorting="false" Context="account" Class="w-100 sortable-container">
+                <ItemTemplate>
+                        <p class="mb-0 fw-bold">@account.AccountHolderName</p>
+                        <p class="mb-0 text-muted">@account.BankName</p>
+                        <p class="mb-0">@account.CurrencyType</p>
+                </ItemTemplate>
+            </SortableList>
+        }
+        else
+        {
+            <p>No Data</p>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public List<BankAccount>? AccountsData { get; set; }
+
+}
+
+<style>
+    .sortable-container {
+        max-height: 270px; 
+        overflow-y: scroll; 
+        -ms-overflow-style: none; 
+        scrollbar-width: none;
+    }
+
+        .sortable-container::-webkit-scrollbar {
+        display: none;
+    }
+
+</style>

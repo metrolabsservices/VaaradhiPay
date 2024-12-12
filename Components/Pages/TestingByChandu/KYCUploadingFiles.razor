@@ -1,0 +1,242 @@
+﻿@using VaaradhiPay.Services.Interfaces
+@inject IJSRuntime JSRuntime
+@inject IFileStorageService fileStorage
+
+<style>
+
+    .details-header-1 {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .dl-front {
+        font-size: 11px;
+        font-family: "Poppins";
+        font-weight: 400;
+        color: #9ba2ad;
+        padding: 10px 0 0 35px;
+        text-transform: capitalize;
+    }
+
+    .dl-back {
+        font-size: 11px;
+        font-family: "Poppins";
+        font-weight: 400;
+        color: #9ba2ad;
+        padding: 10px 27% 0 0;
+        text-transform: capitalize;
+    }
+
+    .details-note {
+        font-family: "Poppins";
+        font-size: 11px;
+        font-weight: 100;
+        color: #ff0000;
+        padding: 0 0 0 35px;
+    }
+
+    .drivinglicense-images {
+        display: flex;
+        gap: 13px;
+    }
+
+    .dl-front-image, .dl-back-image {
+        width: 300px;
+        height: 50px;
+        border-radius: 4px;
+        border: solid;
+        border-color: #d4dae2;
+        background-color: #FFF5F4;
+        border-width: 1px;
+        display: flex;
+        gap: 10px;
+        margin: 15px 0 0 35px;
+        padding: 0;
+    }
+
+    .drivinglicense-header p {
+        font-family: "Poppins";
+        font-weight: 100;
+        color: #9ba2ad;
+        padding: 7px 0 0 0;
+        font-size: 10px;
+    }
+
+    .drivinglicense-header span {
+        color: #df0a0a;
+    }
+</style>
+
+
+<div class="driving-license-details">
+    <div class="details-header-1">
+        <p class="dl-front">upload @nameType front</p>
+        <p class="dl-back">upload @nameType back</p>
+    </div>
+    <p class="details-note"> NOTE : Only (JPEG/PNG/PDF) files types are allowed and MAX Size : 10mb</p>
+</div>
+
+<div class="drivinglicense-images">
+    <div class="dl-front-image">
+        <div class="driving-icon">
+            <i class="bi bi-camera-fill"></i>
+        </div>
+        <div class="drivinglicense-header">
+            <InputFile OnChange="@(e => HandleFileSelected(e, nameType,"front"))" />
+            <p>Drag Document here or <span>Browse</span> to Upload</p>
+        </div>
+    </div>
+    <div class="dl-back-image">
+        <div class="driving-icon">
+            <i class="bi bi-camera-fill"></i>
+        </div>
+        <div class="drivinglicense-header">
+            <InputFile OnChange="@(e => HandleFileSelected(e, nameType,"back"))" />
+            <p>Drag Document here or <span>Browse</span> to Upload</p>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Uploaded Files (if any) -->
+<div class="uploaded-files m-4">
+    <h>Uploaded Files for @nameType:</h>
+    <div class="file-preview">
+        @if (filePreviews.ContainsKey(nameType))
+        {
+            foreach (var side in new[] { "front", "back" })
+            {
+                if (filePreviews[nameType].ContainsKey(side))
+                {
+                    var file = filePreviews[nameType][side];
+                    <div class="uploaded-file">
+                        <img src="@file.PreviewUrl" alt="@file.FileName" width="100" />
+                        <p>@file.FileName</p>
+                    </div>
+                }
+            }
+        }
+        else
+        {
+            <p style="font-size:10px;margin-left:20px;">not uploaded</p>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string nameType { get; set; }
+    private Dictionary<string, Dictionary<string, FilePreview>> filePreviews = new();
+    [Parameter]
+    public EventCallback<(bool isDrivingLicense, bool isPassport, bool isAadhar, Dictionary<string, Dictionary<string, FilePreview>> filePreviews)> onUploadCheck { get; set; }
+
+    private bool isDrivingLicense = false;
+    private bool isPassport = false;
+    private bool isAadhar = false;
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e, string documentType, string side)
+    {
+        var file = e.File;  // Only one file can be selected
+
+        var allowedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp", ".heif", ".heic"
+        };
+
+        try
+        {
+            if (file == null)
+            {
+                await JSRuntime.InvokeVoidAsync("showAlert", "No file selected!");
+                return;
+            }
+
+            var fileExtension = Path.GetExtension(file.Name).ToLowerInvariant();
+            if (!allowedExtensions.Contains(fileExtension))
+            {
+                await JSRuntime.InvokeVoidAsync("showAlert", $"File {file.Name} must be one of the following formats: jpg, jpeg, png, gif, bmp, tiff, webp, heif, heic.");
+                return;
+            }
+
+            var filePreview = new FilePreview
+                {
+                    FileName = file.Name,
+                    PreviewUrl = await GetFilePreviewUrl(file),
+                    ContentType = file.ContentType
+                };
+
+            // Ensure the documentType is initialized in the dictionary
+            if (!filePreviews.ContainsKey(documentType))
+            {
+                filePreviews[documentType] = new Dictionary<string, FilePreview>();
+            }
+
+            // Set the file preview for the appropriate side (front/back)
+            filePreviews[documentType][side] = filePreview;
+
+            // Check if both the front and back images are uploaded for this nameType
+            bool isUploaded = filePreviews[documentType].ContainsKey("front") && filePreviews[documentType].ContainsKey("back");
+
+            // Update the respective boolean flag based on the document type
+            if (isUploaded)
+            {
+                switch (documentType)
+                {
+                    case "DRIVING LICENSE":
+                        isDrivingLicense = true;
+                        break;
+                    case "PASSPORT":
+                        isPassport = true;
+                        break;
+                    case "AADHAR CARD":
+                        isAadhar = true;
+                        break;
+                }
+
+                // Create a tuple with the required data to pass to the parent
+                var uploadInfo = (isDrivingLicense, isPassport, isAadhar, filePreviews);
+
+                // Call UploadCheck and pass the tuple
+                await UploadCheck(uploadInfo);
+            }
+
+            StateHasChanged(); // Trigger UI update
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("showAlert", $"Error processing file {file.Name}: {ex.Message}");
+        }
+    }
+
+    // Generate a preview URL from the uploaded file
+    private async Task<string> GetFilePreviewUrl(IBrowserFile file)
+    {
+        try
+        {
+            using var stream = new MemoryStream();
+            await file.OpenReadStream().CopyToAsync(stream);
+            var buffer = stream.ToArray();
+            var base64String = Convert.ToBase64String(buffer);
+            return $"data:{file.ContentType};base64,{base64String}";
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            throw;
+        }
+    }
+
+
+    private async Task UploadCheck((bool isDrivingLicense, bool isPassport, bool isAadhar, Dictionary<string, Dictionary<string, FilePreview>> filePreviews) uploadInfo)
+    {
+        await onUploadCheck.InvokeAsync(uploadInfo);
+        StateHasChanged();
+    }
+
+    public class FilePreview
+    {
+        public string FileName { get; set; }
+        public string PreviewUrl { get; set; }
+        public string ContentType { get; set; }
+    }
+}
+

@@ -1,0 +1,22 @@
+﻿
+@inject NavigationManager Nav
+
+<Callout HideHeading="true" Class="callout-warning">
+    <h4>No Bank Account Found</h4>
+    <p>
+        @Content 
+    </p>
+    <button class="btn btn-primary mt-2" @onclick="NavigateToAddBankAccount">
+        Add Bank Account
+    </button>
+</Callout>
+
+@code {
+    [Parameter] public MarkupString Content { get; set; }
+
+    private void NavigateToAddBankAccount()
+    {
+        // Navigate to the Add Bank Account page
+        Nav.NavigateTo("/add-bank-account");
+    }
+}

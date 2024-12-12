@@ -6,35 +6,40 @@ namespace VaaradhiPay.Data
     public class BankAccount
     {
         [Key]
-        public int BankAccountId { get; set; } // Unique identifier
+        public int BankAccountId { get; set; } 
+
+        public string BankName { get; set; } 
+
+        public string AccountHolderName { get; set; } 
+
+        public string AccountNumber { get; set; }
+
+        public string? BranchCode { get; set; }
+
+        public string? IFSCCode { get; set; } 
+
+        public string ProofFilePath { get; set; } 
+
+        public string CurrencyType { get; set; }  // USD - INR - AED 
+
+        public string AccountType { get; set; }  // Savings - Business - Checking.
+
+        public bool IsActive { get; set; } = true;
+
+        public bool IsVerified { get; set; } = false;
+
+        public DateTime UpdatedDateTime { get; set; }
+
+        public DateTime CreatedDateTime { get; set; } = DateTime.UtcNow;
+
+        public bool IsDeleted { get; set; } = false;
 
         [Required]
-        [MaxLength(100)]
-        public string BankName { get; set; } // Name of the bank
-
-        [Required]
-        [MaxLength(100)]
-        public string AccountHolderName { get; set; } // Account holder's name
-
-        [Required]
-        [MaxLength(20)]
-        public string AccountNumber { get; set; } // Bank account number
-
-        [Required]
-        [MaxLength(11)]
-        public string IFSCCode { get; set; } // IFSC code of the bank
-
-        public string? ProofFilePath { get; set; } // File path for bank proof (uploaded document)
-
-        public bool IsActive { get; set; } = true; // Indicates if the account is active
-
-        [Required]
-        public string UserId { get; set; } // Foreign key to ApplicationUser
+        public string UserId { get; set; } 
 
         [ForeignKey(nameof(UserId))]
-        public ApplicationUser User { get; set; } // Navigation property
+        public ApplicationUser User { get; set; } 
 
-        public DateTime TimeStamp { get; set; } = DateTime.UtcNow;
 
     }
 }

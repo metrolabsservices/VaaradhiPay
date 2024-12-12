@@ -67,6 +67,23 @@ namespace VaaradhiPay.Services.Implementations
             return httpContext.User.Identity?.Name;
         }
 
+        public string? GetLoggedInUserId()
+        {
+            // Ensure the HttpContext is available
+            var httpContext = _httpContextAccessor?.HttpContext;
+            if (httpContext?.User?.Identity?.IsAuthenticated != true)
+            {
+                return null; // User is not logged in
+            }
+
+            // Retrieve the user ID claim
+            var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // Return user ID if found, otherwise null
+            return string.IsNullOrEmpty(userId) ? null : userId;
+        }
+
+
         public string? GetUserClaim(string claimType)
         {
             var httpContext = _httpContextAccessor.HttpContext;

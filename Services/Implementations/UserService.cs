@@ -99,11 +99,7 @@ namespace VaaradhiPay.Services
             var existingUser = await _userManager.FindByIdAsync(user.Id);
             if (existingUser == null) return false;
 
-            existingUser.FirstName = user.FirstName;
-            existingUser.LastName = user.LastName;
-            existingUser.Email = user.Email;
-
-            var result = await _userManager.UpdateAsync(existingUser);
+            var result = await _userManager.UpdateAsync(user);
             return result.Succeeded;
         }
 

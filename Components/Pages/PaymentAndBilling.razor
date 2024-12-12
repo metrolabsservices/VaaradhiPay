@@ -1,0 +1,134 @@
+﻿@page "/bill"
+
+@rendermode InteractiveServer
+
+@using VaaradhiPay.Components.Pages.L1
+@using VaaradhiPay.Components.Pages.L1.PaymentAndBillingPages
+@using VaaradhiPay.Services.Implementations
+
+@inject ExchangeTransactionService ExchangeTransactionService
+@inject PreloadService Load
+@inject ToastService Toast
+
+
+
+<h3 class="text-center text-white mb-4">Payment & Bill</h3>
+
+<Preload LoadingText="..Loading"/>
+<Toasts class="p-3" AutoHide="true" Delay="4000" Placement="ToastsPlacement.MiddleRight" />
+
+
+
+<div class="d-flex justify-content-center w-100">
+    <div class="rounded-3 w-75 bg-white p-5">
+            <StepperTransaction CurrentStep="currentStep" />
+            <div class="d-flex justify-content-center align-items-center my-3">
+            @if (currentStep == 1)
+            {
+                <PaymentVerification TransactionData="ExchangeTransactionService.CurrentTransaction" OnValidationStateChanged="HandleValidationStateChanged" />
+            }
+            else if (currentStep == 2)
+            {
+
+            }
+            else if (currentStep == 3)
+            {
+
+            }
+            else
+            {
+
+            }
+            </div>
+       
+        <div class="w-100 d-flex justify-content-between">
+
+            @if (!IsPreviousDisabled)
+            {
+                <button class="btn btn-sm btn-danger"
+                        @onclick="HandlePreBtn">
+                    Previous
+                </button>
+            }
+            else
+            {
+                <span></span>
+            }
+
+            @if (!IsNextDisabled)
+            {
+                <button class="btn btn-sm btn-danger"
+                        @onclick="HandleNexBtn">
+                    Next
+                </button>
+            }
+            else
+            {
+                <span></span>
+            }
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+@code {
+    private int currentStep = 1;
+    private bool canProceed = true; // Tracks if the user can proceed
+    private bool IsPreviousDisabled => currentStep == 1 || currentStep == 3; // Dynamically determine if "Previous" is disabled
+    private bool IsNextDisabled => currentStep == 3;     // Dynamically determine if "Next" is disabled
+
+    private void HandlePreBtn()
+    {
+        if (currentStep > 1)
+        {
+            currentStep--;
+            StateHasChanged(); 
+        }
+    }
+
+    private void HandleNexBtn()
+    {
+        if (!canProceed)
+        {
+            Toast.Notify(new ToastMessage { Type = ToastType.Danger, Message = $"Please resolve the issues on this step before proceeding." });
+
+            return;
+        }
+        if (currentStep < 3)
+        {
+            currentStep++;
+            StateHasChanged(); 
+        }
+    }
+    private void HandleValidationStateChanged(bool isValid)
+    {
+        canProceed = isValid;
+        if (!canProceed)
+        {
+            Toast.Notify(new ToastMessage { Type = ToastType.Danger, Message = $"Validation failed. Please check the current step and resolve the issues." });
+        }
+    }
+}
+
+
+@* @if (ExchangeTransactionService.CurrentTransaction != null)
+{
+    <div>
+        <p>You Pay: @ExchangeTransactionService.CurrentTransaction.YouPay</p>
+        <p>Pay Currency: @ExchangeTransactionService.CurrentTransaction.PayCurrency</p>
+        <p>Receive Currency: @ExchangeTransactionService.CurrentTransaction.ReceiveCurrency</p>
+        <p>You Receive: @ExchangeTransactionService.CurrentTransaction.YouReceive</p>
+        <p>User ID: @ExchangeTransactionService.CurrentTransaction.UserId</p>
+        <p>Is Buy: @ExchangeTransactionService.CurrentTransaction.IsBuy</p>
+    </div>
+}
+else
+{
+    <p>No transaction data available.</p>
+} *@
