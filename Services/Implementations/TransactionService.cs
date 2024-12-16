@@ -16,108 +16,77 @@ namespace VaaradhiPay.Services
             _context = context;
         }
 
-        public async Task<List<Transaction>> GetPaginatedTransactionsAsync(
-                                                 string searchTerm,
-                                                 int page,
-                                                 int pageSize,
-                                                 DateTime? startDate = null,
-                                                 DateTime? endDate = null,
-                                                 string transactionType = "All")
+        // Get paginated transactions with filtering options
+        public async Task<List<FinancialTransaction>> GetPaginatedTransactionsAsync(
+            string searchTerm,
+            int page,
+            int pageSize,
+            DateTime? startDate = null,
+            DateTime? endDate = null,
+            TransactionStatus? status = null)
         {
-            // Validate pagination parameters
-            if (page < 1 || pageSize < 1)
+            var query = _context.FinancialTransactions
+                .Include(t => t.User)
+                .Include(t => t.AdminBankAccount)
+                .Include(t => t.UserBankAccount)
+                .Where(t => t.Status != TransactionStatus.Cancelled);
+
+            // Apply filters
+            if (!string.IsNullOrEmpty(searchTerm))
             {
-                throw new ArgumentException("Page and pageSize must be greater than zero.");
+                query = query.Where(t =>
+                    t.UserTransactionId.Contains(searchTerm) ||
+                    t.AdminTransactionRefId.Contains(searchTerm));
             }
 
-            // Validate date range
-            if (startDate.HasValue && endDate.HasValue && startDate > endDate)
+            if (startDate.HasValue)
             {
-                throw new ArgumentException("Start date cannot be later than end date.");
+                query = query.Where(t => t.TransactionDateTime >= startDate.Value);
             }
 
-            // Validate transaction type
-            if (!string.IsNullOrEmpty(transactionType) &&
-                transactionType != "All" &&
-                !transactionType.Equals("Buy", StringComparison.OrdinalIgnoreCase) &&
-                !transactionType.Equals("Sell", StringComparison.OrdinalIgnoreCase))
+            if (endDate.HasValue)
             {
-                throw new ArgumentException("Transaction type must be 'All', 'Buy', or 'Sell'.");
+                query = query.Where(t => t.TransactionDateTime <= endDate.Value);
             }
 
-            try
+            if (status.HasValue)
             {
-                // Build the base query
-                var query = _context.Transactions
-                    .Include(t => t.CoinType) // Include CoinType for navigation properties
-                    .Where(t => !t.IsDeleted); // Exclude soft-deleted transactions
-
-                // Apply search term filter
-                if (!string.IsNullOrEmpty(searchTerm))
-                {
-                    query = query.Where(t => t.ReferenceNumber != null &&
-                                             t.ReferenceNumber.ToLower().Contains(searchTerm.ToLower()));
-                }
-
-                // Apply date range filters
-                if (startDate.HasValue)
-                {
-                    query = query.Where(t => t.TransactionDateTime >= startDate.Value);
-                }
-                if (endDate.HasValue)
-                {
-                    query = query.Where(t => t.TransactionDateTime <= endDate.Value);
-                }
-
-                // Apply transaction type filter
-                if (!string.IsNullOrEmpty(transactionType) && transactionType != "All")
-                {
-                    query = query.Where(t => t.TransactionType.Equals(transactionType, StringComparison.OrdinalIgnoreCase));
-                }
-
-                // Order by transaction date
-                query = query.OrderBy(t => t.TransactionDateTime);
-
-                // Apply pagination
-                var transactions = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
-
-                return transactions;
+                query = query.Where(t => t.Status == status.Value);
             }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException("An error occurred while fetching transactions.", ex);
-            }
+
+            // Pagination
+            return await query
+                .OrderByDescending(t => t.TransactionDateTime)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
         }
 
-
-
-        public async Task<Transaction> GetTransactionByIdAsync(int id)
+        // Get transaction by ID
+        public async Task<FinancialTransaction> GetTransactionByIdAsync(int id)
         {
-            if (id <= 0)
-            {
-                throw new ArgumentException("Transaction ID must be greater than zero.");
-            }
-
-            var transaction = await _context.Transactions
-                .Include(t => t.CoinType)
-                .FirstOrDefaultAsync(t => t.TransactionId == id && !t.IsDeleted);
+            var transaction = await _context.FinancialTransactions
+                .Include(t => t.User)
+                .Include(t => t.AdminBankAccount)
+                .Include(t => t.UserBankAccount)
+                .FirstOrDefaultAsync(t => t.TransactionId == id);
 
             if (transaction == null)
             {
-                throw new InvalidOperationException($"Transaction with ID {id} not found or has been deleted.");
+                throw new InvalidOperationException($"Transaction with ID {id} not found.");
             }
 
             return transaction;
         }
 
-        public async Task AddTransactionAsync(Transaction transaction)
+        // Add a new transaction
+        public async Task AddTransactionAsync(FinancialTransaction transaction)
         {
-            // Validate required fields
             ValidateTransaction(transaction);
 
             try
             {
-                _context.Transactions.Add(transaction);
+                _context.FinancialTransactions.Add(transaction);
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateException ex)
@@ -126,48 +95,33 @@ namespace VaaradhiPay.Services
             }
         }
 
-        public async Task UpdateTransactionAsync(Transaction transaction)
+        // Update an existing transaction
+        public async Task UpdateTransactionAsync(FinancialTransaction transaction)
         {
-            // Validate required fields
             ValidateTransaction(transaction);
 
-            // Validate CoinType
-            var coinType = await _context.CoinTypes.FirstOrDefaultAsync(c =>
-                c.CoinTypeId == transaction.CoinTypeId &&
-                !c.IsDeleted &&
-                c.IsActive);
+            var existingTransaction = await _context.FinancialTransactions.FindAsync(transaction.TransactionId);
 
-            if (coinType == null)
+            if (existingTransaction == null)
             {
-                throw new InvalidOperationException("The specified CoinType is either inactive or does not exist.");
+                throw new InvalidOperationException($"Transaction with ID {transaction.TransactionId} not found.");
             }
 
-            // Retrieve the existing transaction
-            var existing = await _context.Transactions
-                .Include(t => t.CoinType)
-                .FirstOrDefaultAsync(t => t.TransactionId == transaction.TransactionId && !t.IsDeleted);
-
-            if (existing == null)
-            {
-                throw new InvalidOperationException($"Transaction with ID {transaction.TransactionId} does not exist or has been deleted.");
-            }
+            existingTransaction.UserTransactionId = transaction.UserTransactionId;
+            existingTransaction.AdminTransactionRefId = transaction.AdminTransactionRefId;
+            existingTransaction.PayCurrency = transaction.PayCurrency;
+            existingTransaction.ReceiveCurrency = transaction.ReceiveCurrency;
+            existingTransaction.IsBuy = transaction.IsBuy;
+            existingTransaction.AmountPaid = transaction.AmountPaid;
+            existingTransaction.AmountReceived = transaction.AmountReceived;
+            existingTransaction.ConversionRate = transaction.ConversionRate;
+            existingTransaction.ConvenienceFee = transaction.ConvenienceFee;
+            existingTransaction.Status = transaction.Status;
+            existingTransaction.TransactionProofPath = transaction.TransactionProofPath;
 
             try
             {
-                // Update properties
-                existing.ReferenceNumber = transaction.ReferenceNumber;
-                existing.CoinTypeId = transaction.CoinTypeId;
-                existing.Volume = transaction.Volume;
-                existing.Amount = transaction.Amount;
-                existing.TransactionDateTime = transaction.TransactionDateTime;
-                existing.TransactionType = transaction.TransactionType;
-
-                // Save changes
                 await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                throw new InvalidOperationException("The transaction was modified by another user. Please try again.", ex);
             }
             catch (DbUpdateException ex)
             {
@@ -175,23 +129,41 @@ namespace VaaradhiPay.Services
             }
         }
 
-        public async Task DeleteTransactionAsync(int id)
+        // Approve or Decline a transaction
+        public async Task UpdateTransactionStatusAsync(int transactionId, TransactionStatus status)
         {
-            if (id <= 0)
-            {
-                throw new ArgumentException("Transaction ID must be greater than zero.");
-            }
-
-            var transaction = await _context.Transactions.FindAsync(id);
+            var transaction = await _context.FinancialTransactions.FindAsync(transactionId);
 
             if (transaction == null)
             {
-                throw new InvalidOperationException($"Transaction with ID {id} does not exist.");
+                throw new InvalidOperationException($"Transaction with ID {transactionId} not found.");
+            }
+
+            transaction.Status = status;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new InvalidOperationException("An error occurred while updating the transaction status.", ex);
+            }
+        }
+
+        // Delete (soft delete) a transaction
+        public async Task DeleteTransactionAsync(int id)
+        {
+            var transaction = await _context.FinancialTransactions.FindAsync(id);
+
+            if (transaction == null)
+            {
+                throw new InvalidOperationException($"Transaction with ID {id} not found.");
             }
 
             try
             {
-                transaction.IsDeleted = true; // Soft delete
+                transaction.Status = TransactionStatus.Cancelled;
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateException ex)
@@ -200,27 +172,27 @@ namespace VaaradhiPay.Services
             }
         }
 
-        private void ValidateTransaction(Transaction transaction)
+        // Validate transaction
+        private void ValidateTransaction(FinancialTransaction transaction)
         {
             if (transaction == null)
             {
                 throw new ArgumentNullException(nameof(transaction), "Transaction cannot be null.");
             }
 
-            if (string.IsNullOrEmpty(transaction.TransactionType) ||
-                (transaction.TransactionType != "Buy" && transaction.TransactionType != "Sell"))
+            if (string.IsNullOrEmpty(transaction.PayCurrency) || string.IsNullOrEmpty(transaction.ReceiveCurrency))
             {
-                throw new InvalidOperationException("TransactionType must be either 'Buy' or 'Sell'.");
+                throw new InvalidOperationException("Currency details are required.");
             }
 
-            if (transaction.Volume <= 0)
+            if (transaction.AmountPaid <= 0 || transaction.AmountReceived <= 0)
             {
-                throw new InvalidOperationException("Volume must be greater than zero.");
+                throw new InvalidOperationException("Transaction amounts must be greater than zero.");
             }
 
-            if (transaction.Amount <= 0)
+            if (transaction.ConversionRate <= 0)
             {
-                throw new InvalidOperationException("Amount must be greater than zero.");
+                throw new InvalidOperationException("Conversion rate must be greater than zero.");
             }
         }
     }

@@ -18,8 +18,6 @@ namespace VaaradhiPay.Data
 
         public bool IsDeleted { get; set; } = false; // Flag for soft deletion of coin type
 
-        public ICollection<Transaction> Transactions { get; set; } // Related transactions
-
         public DateTime StampTime { get; set; } = DateTime.UtcNow;
 
 

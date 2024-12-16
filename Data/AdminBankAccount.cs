@@ -1,7 +1,10 @@
-﻿namespace VaaradhiPay.Data
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace VaaradhiPay.Data
 {
     public class AdminBankAccount
     {
+        [Key]
         public int Id { get; set; }
         public string AccountNumber { get; set; }
         public string AccountHolder { get; set; }
@@ -15,6 +18,7 @@
         public DateTime UpdatedDateTime { get; set; } 
         public DateTime CreatedDateTime { get; set; } = DateTime.UtcNow;
         public bool IsDeleted { get; set; } = false;
+        public ICollection<FinancialTransaction> TransactionRecords { get; set; }
     }
 }
 

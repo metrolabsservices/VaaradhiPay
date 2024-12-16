@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using VaaradhiPay.Data;
+using VaaradhiPay.DTOs;
 
 namespace VaaradhiPay.Services
 {
@@ -8,6 +9,7 @@ namespace VaaradhiPay.Services
     {
         Task<(List<ApplicationUser> Users, int TotalCount)> GetUsersAsync(string searchTerm, int page, int pageSize);
         Task<List<ApplicationUser>> GetUsersWithDetailsAsync(string searchTerm, int page, int pageSize);
+        Task<LoggedInUserDTO> GetUserDetailsByEmail(string email);
 
         Task<Dictionary<string, string>> GetUserStatusesAsync(string userId);
         Task<bool> UpdateUserAsync(ApplicationUser user);

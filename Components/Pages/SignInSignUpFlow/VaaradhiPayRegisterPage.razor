@@ -115,6 +115,7 @@
 
             user.FirstName = Input.FirstName;
             user.LastName = Input.LastName;
+            user.KYCstatus = "Not Started";
 
             var result = await UserManager.CreateAsync(user, Input.Password);
 

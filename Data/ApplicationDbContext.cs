@@ -10,7 +10,7 @@ namespace VaaradhiPay.Data
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public DbSet<CoinType> CoinTypes { get; set; }
-        public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<FinancialTransaction> FinancialTransactions { get; set; }
         public DbSet<BankAccount> BankAccounts { get; set; }
         public DbSet<UPIAddress> UPIAddresses { get; set; }
         public DbSet<TetherWallet> TetherWallets { get; set; }
@@ -29,12 +29,27 @@ namespace VaaradhiPay.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Define the relationship between CoinType and Transaction
-            modelBuilder.Entity<Transaction>()
-                .HasOne(t => t.CoinType)
-                .WithMany(c => c.Transactions)
-                .HasForeignKey(t => t.CoinTypeId)
-                .OnDelete(DeleteBehavior.Restrict); // Prevent cascading deletes
+            // Define relationships for TransactionRecord
+            modelBuilder.Entity<FinancialTransaction>()
+                 .HasOne(ft => ft.User)
+                 .WithMany(u => u.TransactionRecords) // Ensure this matches the navigation property in ApplicationUser
+                 .HasForeignKey(ft => ft.UserId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<FinancialTransaction>()
+               .HasOne(ft => ft.AdminBankAccount)
+               .WithMany(ab => ab.TransactionRecords) // Ensure this matches the navigation property in AdminBankAccount
+               .HasForeignKey(ft => ft.AdminBankAccountId)
+               .OnDelete(DeleteBehavior.Restrict); // Prevent cascading deletes
+
+
+            modelBuilder.Entity<FinancialTransaction>()
+                .HasOne(ft => ft.UserBankAccount)
+                .WithMany()
+                .HasForeignKey(ft => ft.UserBankAccountId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
 
             // Define relationships between ApplicationUser and other entities
             modelBuilder.Entity<BankAccount>()

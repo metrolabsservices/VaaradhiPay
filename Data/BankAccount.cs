@@ -38,8 +38,8 @@ namespace VaaradhiPay.Data
         public string UserId { get; set; } 
 
         [ForeignKey(nameof(UserId))]
-        public ApplicationUser User { get; set; } 
-
+        public ApplicationUser User { get; set; }
+        public ICollection<FinancialTransaction> TransactionRecords { get; set; }
 
     }
 }

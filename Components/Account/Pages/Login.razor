@@ -1,15 +1,18 @@
 ﻿@page "/Account/Login"
-@page "/Account/Login/{email}/{pwd}"
 
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Identity
 @using VaaradhiPay.Data
+@using VaaradhiPay.Services
+@using VaaradhiPay.Services.Implementations
 
 @inject SignInManager<ApplicationUser> SignInManager
 @inject ILogger<Login> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
+@inject ExchangeTransactionService LocalStorage
+@inject IUserService userService
 
 <PageTitle>Log in</PageTitle>
 
@@ -68,12 +71,6 @@
 @code {
     private string? errorMessage;
 
-    [Parameter]
-    public string email { get; set; }
-
-    [Parameter]
-    public string pwd { get; set; }
-
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
 
@@ -90,17 +87,22 @@
             // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
         }
-    }
-
-    protected override async Task OnParametersSetAsync()
-    {
-        if (!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(pwd))
+        if (LocalStorage.LoginCredentials != null)
         {
-            Input.Email = email;
-            Input.Password = pwd;
-            await LoginUser();
+            Input.Email = LocalStorage.LoginCredentials.Email;
+            Input.Password = LocalStorage.LoginCredentials.Password;
+            if (!string.IsNullOrEmpty(Input.Email) && !string.IsNullOrEmpty(Input.Password))
+            {
+                await LoginUser();
+            }
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/public");
         }
     }
+
+    
 
     public async Task LoginUser()
     {
@@ -109,6 +111,16 @@
         var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
         if (result.Succeeded)
         {
+            if (LocalStorage.LoginCredentials != null)
+            {
+                var user = await userService.GetUserDetailsByEmail(Input.Email);
+                if (user != null)
+                {
+                    LocalStorage.LoggedInInfo = user;
+                }
+                LocalStorage.LoginCredentials.Email = string.Empty;
+                LocalStorage.LoginCredentials.Password = string.Empty;
+            }
             Logger.LogInformation("User logged in.");
             RedirectManager.RedirectTo("/home");
         }
@@ -126,6 +138,7 @@
         else
         {
             errorMessage = "Error: Invalid login attempt.";
+            NavigationManager.NavigateTo("/public");
         }
     }
 

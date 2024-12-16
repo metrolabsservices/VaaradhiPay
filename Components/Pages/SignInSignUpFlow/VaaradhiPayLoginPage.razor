@@ -1,9 +1,11 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using VaaradhiPay.Components.Account
 @using VaaradhiPay.Components.Account.Pages
+@using VaaradhiPay.DTOs
 @using VaaradhiPay.Data
 @using Microsoft.AspNetCore.Authentication
 @using System.ComponentModel.DataAnnotations
+@using VaaradhiPay.Services.Implementations
 
 @rendermode InteractiveServer
 
@@ -13,6 +15,8 @@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 @inject ToastService ToastService
+@inject UserManager<ApplicationUser> _userManager;
+@inject ExchangeTransactionService LocalStorage
 
 <div class="login-card-container">
     <div class="login-card">
@@ -23,7 +27,6 @@
             </button>
         </div>
 
-        <!-- Divider with "or" -->
         <div class="hr-text">
             <span>or</span>
         </div>
@@ -65,66 +68,33 @@
 <Toasts class="p-3" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopRight" />
 
 @code {
-    private LoginInputModel Input { get; set; } = new();
+    private LoginCredentialsDTO Input { get; set; } = new();
     private bool IsSubmitting { get; set; }
 
     private async Task LoginUser()
     {
-        NavigationManager.NavigateTo($"/Account/Login/{Input.Email}/{Input.Password}");
-    }
-   
-
-    private async Task HandleLogin()
-    {
-
-        IsSubmitting = false;
-
-        try
+        var user = await _userManager.FindByEmailAsync(Input.Email);
+        if (user != null)
         {
-            var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, IsSubmitting, lockoutOnFailure: false);
-
-            if (result.Succeeded)
+            bool checkpwd = await _userManager.CheckPasswordAsync(user, Input.Password);
+            if (checkpwd)
             {
-                Logger.LogInformation("User logged in successfully.");
-                ToastService.Notify(new ToastMessage { Type = ToastType.Success, Message = "Login successful!" });
-                // NavigationManager.NavigateTo("/");
-            }
-            else if (result.IsLockedOut)
-            {
-                Logger.LogWarning("User account is locked out.");
-                ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = "Your account is locked. Please contact support." });
-            }
-            else if (result.RequiresTwoFactor)
-            {
-                Logger.LogInformation("Two-factor authentication required.");
-                NavigationManager.NavigateTo("/Account/LoginWith2fa");
+                LocalStorage.LoginCredentials = Input;
+                NavigationManager.NavigateTo($"/Account/Login");
             }
             else
             {
-                Logger.LogWarning("Invalid login attempt.");
-                ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = "Invalid login attempt. Please try again." });
+                ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = "Invalid Password." });
             }
         }
-        catch (Exception ex)
+        else
         {
-            Logger.LogError(ex, "An error occurred during login.");
-            ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = "An unexpected error occurred. Please try again later." });
-        }
-        finally
-        {
-            IsSubmitting = false;
+            ToastService.Notify(new ToastMessage { Type = ToastType.Danger, Message = "Invalid Email." });
         }
     }
+   
 
-    private class LoginInputModel
-    {
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; } = string.Empty;
-
-        [Required]
-        public string Password { get; set; } = string.Empty;
-    }
+   
 }
 
 <style>

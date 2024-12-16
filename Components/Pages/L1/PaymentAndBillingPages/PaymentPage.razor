@@ -1,5 +1,372 @@
-﻿<h3>PaymentPage</h3>
+﻿@using VaaradhiPay.DTOs
+@using VaaradhiPay.Data
+@using VaaradhiPay.Services
+@using VaaradhiPay.Services.Implementations
+
+@inject ExchangeTransactionService LocalStorage
+@inject AdminBankAccountService AdminServ
+@inject ITransactionService TransacServ 
+@inject ToastService Toast
+@inject PreloadService Loader
+
+<div class="container-fluid row justify-content-center">
+    @if (error.IsError)
+    {
+        <AlertMessageBoxL1 Content="@error.Message" />
+    }
+    else
+    {
+        <div class="col-6">
+            <div>
+                <h4 class="text-dark fw-bold mb-3">Pay to the Account Below</h4>
+                <KeyValueDisplay Key="Account Number" Value="@adminBankAccount?.AccountNumber" />
+                <KeyValueDisplay Key="Account Holder" Value="@adminBankAccount?.AccountHolder" />
+                <KeyValueDisplay Key="Bank Name " Value="@adminBankAccount?.BankName" />
+                <KeyValueDisplay Key="Branch Code" Value="@adminBankAccount?.BranchCode" />
+                <KeyValueDisplay Key="IFSC Code" Value="@adminBankAccount?.IfscCode" />
+            </div>
+            <hr class="px-2 my-3" />
+            <div>
+                <h4 class="text-dark fw-bold mb-3">Recipient Bank Details</h4>
+                <KeyValueDisplay Key="Account Holder" Value="@LocalStorage.SelectedBank?.AccountHolderName" />
+                <KeyValueDisplay Key="Bank Name" Value="@LocalStorage.SelectedBank?.BankName" />
+                <KeyValueDisplay Key="Currency" Value="@LocalStorage.SelectedBank?.CurrencyType" />
+            </div>
+
+        </div>
+        <div class="col-1 py-2 text-center">
+            <div class="vr h-100 mx-2"></div>
+        </div>
+        <div class="col-5">
+            <div class="d-flex justify-content-between mainFontSize">
+                <p class="m-0">
+                    @LocalStorage.CurrentTransaction?.YouPay @LocalStorage.CurrentTransaction?.PayCurrency
+                </p>
+                <p class="m-0">
+                    1 @LocalStorage.CurrentTransaction?.PayCurrency = @BaseConvertionValue @LocalStorage.CurrentTransaction?.ReceiveCurrency
+                </p>
+            </div>
+
+            <hr class="px-2 my-3" />
+
+            <div class="d-flex justify-content-between secondaryFontSize">
+                <p class="text-muted fw-bold">To Receive:</p>
+                <p class="">@LocalStorage.CurrentTransaction?.YouReceive.ToString("F2")  @LocalStorage.CurrentTransaction?.ReceiveCurrency</p>
+            </div>
+            <div class="d-flex justify-content-between secondaryFontSize">
+                <p class="text-muted fw-bold">Convenience Fee:</p>
+                <p class="">@ChargedFee.ToString("F2") @LocalStorage.CurrentTransaction?.ReceiveCurrency</p>
+            </div>
+    
+            <hr class="px-2 my-3" />
+
+            <div class="d-flex justify-content-between mainFontSize">
+                <p class="">Total Receivable:</p>
+                <p class="">@TotalReceive.ToString("F2") @LocalStorage.CurrentTransaction?.ReceiveCurrency</p>
+            </div>
+            <div class="d-flex flex-column align-items-center">
+                <button class="btn bg-danger text-white" @onclick="OnUpload">Upload</button>
+                <p class="text-muted"><span class="fw-bold">Note:</span> Upload you trabsaction proof in a valid format( Screenshot / PDF )</p>
+            </div>
+        </div>
+    }
+    
+</div>
+
+<Modal @ref="TransactionUploadBox" UseStaticBackdrop="true" CloseOnEscape="false" IsVerticallyCentered="true" Title="Upload Proof">
+    <BodyTemplate>
+        <div class="transaction_upload-form-container">
+            <form>
+                <div class="mb-3">
+                    <label for="transactionId" class="transaction_upload-form-label">Enter Transaction ID</label>
+                    <input type="text" id="transactionId" class="transaction_upload-form-control" @bind="UserTransactionId" placeholder="Transaction ID" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="screenshotUpload" class="transaction_upload-form-label">Upload Screenshot</label>
+                    <div class="transaction_upload-file-upload-box">
+                        <label for="screenshotUpload" class="transaction_upload-file-upload-label">
+                            <i class="bi bi-camera"></i> Drag Document here or <span class="transaction_upload-browse-text">Browse</span> to Upload
+                        </label>
+                        <InputFile class="transaction_upload-file-upload-input" OnChange="HandleFileChange" />
+                    </div>
+                </div>
+
+                <button type="button" class="transaction_upload-btn-danger w-100 rounded-pill" @onclick="HandleSubmit">SUBMIT</button>
+            </form>
+        </div>
+    </BodyTemplate>
+</Modal>
+
 
 @code {
+    [Parameter] public EventCallback<bool> OnValidationStateChanged { get; set; }
+    [Parameter] public EventCallback OnFinal { get; set; }
 
+    private Modal TransactionUploadBox = default!;
+    private ErrorHandleDTO error = new();
+    private AdminBankAccount? adminBankAccount;
+
+    //   --------- Charges  -----------
+    private decimal ConvenienceFee = 1.2m;
+    // -----------------------------------
+
+    private string? BaseConvertionValue;
+    private string? ReceCurrtype;
+    private decimal ChargedFee = 0m;
+    private decimal TotalReceive = 0m;
+
+    private string UserTransactionId { get; set; } = string.Empty;
+    private IBrowserFile? UploadedFile { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await EmitValidationState(false);
+
+        ReceCurrtype = LocalStorage.CurrentTransaction?.ReceiveCurrency;
+
+        if(ReceCurrtype == null)
+        {
+            error = new ErrorHandleDTO
+                {
+                    IsError = true,
+                    Message = "Currency information is missing. Unable to proceed with the transaction."
+                };
+            return;
+        }
+        else
+        {
+            var result = await AdminServ.GetRandomAdminBankAccountAsync(ReceCurrtype);
+            if (result.Error.IsError)
+            {
+                error = new ErrorHandleDTO
+                    {
+                        IsError = result.Error.IsError,
+                        Message = result.Error.Message,
+                        TechnicalMessage = result.Error.TechnicalMessage,
+                    };
+            }
+            else
+            {
+                adminBankAccount = result.Account;
+                BaseConvertionValue = (LocalStorage.CurrentTransaction?.YouReceive / LocalStorage.CurrentTransaction?.YouPay)?.ToString("F2");
+
+                // calaculate charges 
+                ChargedFee = (ConvenienceFee / 100) * LocalStorage.CurrentTransaction.YouReceive;
+                TotalReceive = ChargedFee - LocalStorage.CurrentTransaction.YouReceive;
+                TotalReceive = TotalReceive < 0 ? TotalReceive * -1 : TotalReceive; 
+
+            }
+
+
+        }
+        
+    }
+    private async Task OnUpload()
+    {
+        await TransactionUploadBox.ShowAsync();
+    }
+
+    private async Task HandleSubmit()
+    {
+        Loader.Show();
+        try
+        {
+            // Validate Transaction ID
+            if (string.IsNullOrWhiteSpace(UserTransactionId))
+            {
+                ShowToast("Transaction ID is required.", ToastType.Danger);
+                await EmitValidationState(false);
+                return;
+            }
+
+            // Validate Uploaded File
+            if (UploadedFile == null)
+            {
+                ShowToast("Please upload a screenshot to proceed.", ToastType.Danger);
+                await EmitValidationState(false);
+                return;
+            }
+
+            // Check file size (example: max 5MB)
+            // const long maxFileSize = 5 * 1024 * 1024; // 5 MB
+            // if (UploadedFile.Size > maxFileSize)
+            // {
+            //     ShowToast("Uploaded file size exceeds 5MB. Please upload a smaller file.", ToastType.Danger);
+            //     return;
+            // }
+
+            // Create a new FinancialTransaction record
+            var transaction = new FinancialTransaction
+                {
+                    UserTransactionId = UserTransactionId,
+                    AdminTransactionRefId = Guid.NewGuid().ToString(), // Generate a unique admin reference ID
+                    PayCurrency = LocalStorage.CurrentTransaction?.PayCurrency ?? string.Empty,
+                    ReceiveCurrency = LocalStorage.CurrentTransaction?.ReceiveCurrency ?? string.Empty,
+                    IsBuy = LocalStorage.CurrentTransaction.IsBuy, 
+                    AmountPaid = LocalStorage.CurrentTransaction?.YouPay ?? 0m,
+                    AmountReceived = LocalStorage.CurrentTransaction?.YouReceive ?? 0m,
+                    ConversionRate = LocalStorage.CurrentTransaction?.YouReceive / LocalStorage.CurrentTransaction?.YouPay ?? 1m,
+                    ConvenienceFee = ChargedFee,
+                    TransactionDateTime = DateTime.UtcNow,
+                    TransactionProofPath = UploadedFile.Name, // You can set the file path after saving the file
+                    Status = TransactionStatus.Pending, // Default to pending
+                    UserId = LocalStorage.CurrentTransaction?.UserId ?? string.Empty,
+                    AdminBankAccountId = adminBankAccount?.Id ?? 0,
+                    UserBankAccountId = LocalStorage.SelectedBank?.BankAccountId ?? 0
+                };
+            await SaveTransactionToDatabase(transaction);
+
+            // Console.WriteLine($"Transaction ID: {UserTransactionId}");
+            // Console.WriteLine($"Uploaded File: {UploadedFile.Name}");
+
+            ShowToast("Transaction proof submitted successfully!", ToastType.Success);
+
+            await EmitValidationState(true);
+            await OnFinal.InvokeAsync();
+            await TransactionUploadBox.HideAsync();
+        }
+        catch (InvalidOperationException ex)
+        {
+            ShowToast(ex.Message, ToastType.Danger);
+            await EmitValidationState(false);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error during submission: {ex.Message}");
+            ShowToast("An unexpected error occurred. Please try again later.", ToastType.Danger);
+            await EmitValidationState(false);
+        }
+        finally
+        {
+            Loader.Hide();
+        }
+    }
+
+    private async Task SaveTransactionToDatabase(FinancialTransaction transaction)
+    {
+        try
+        {
+            await TransacServ.AddTransactionAsync(transaction);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to save transaction: {ex.Message}");
+            throw new InvalidOperationException("Failed to save the transaction. Please try again.");
+        }
+    }
+
+
+    // Helper method to show toast notifications
+    private void ShowToast(string message, ToastType type)
+    {
+        Toast.Notify(new ToastMessage { Type = type, Message = message });
+    }
+
+    private async Task HandleFileChange(InputFileChangeEventArgs e)
+    {
+        // Get the first file from the input
+        UploadedFile = e.File;
+        var UploadedFileName = UploadedFile.Name;
+
+        // Read the file as a byte array
+        using var stream = UploadedFile.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // 10 MB max file size
+        using var memoryStream = new MemoryStream();
+        await stream.CopyToAsync(memoryStream);
+        var FileBytes = memoryStream.ToArray();
+
+        Console.WriteLine($"File selected: {UploadedFileName}, Size: {FileBytes?.Length} bytes");
+    }
+
+
+    private async Task EmitValidationState(bool isValid)
+    {
+        await OnValidationStateChanged.InvokeAsync(isValid);
+    }
+
+   
 }
+
+
+<style>
+    .mainFontSize{
+        font-size: 15px;
+        font-weight: bold;
+    }
+    .secondaryFontSize{
+        font-size: 13px;
+    }
+    .transaction_upload-form-container{
+        padding: 15px;
+
+    }
+
+        .transaction_upload-form-label {
+        font-weight: bold;
+        font-size: 16px;
+        margin-bottom: 10px;
+        display: block; /* Ensure labels are above inputs */
+    }
+
+    .transaction_upload-form-control {
+        width: 100%;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+
+    .transaction_upload-file-upload-box {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        text-align: center;
+        padding: 20px;
+        color: #6c757d;
+        background-color: #f8f9fa;
+        position: relative;
+        font-size: 14px;
+        margin-bottom: 15px;
+    }
+
+    .transaction_upload-file-upload-label {
+        display: inline-block;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .transaction_upload-browse-text {
+        color: red;
+        text-decoration: underline;
+        font-weight: bold;
+    }
+
+    .transaction_upload-file-upload-input {
+        position: absolute;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        cursor: pointer;
+    }
+
+    .transaction_upload-btn-danger {
+        background-color: #dc3545;
+        border: none;
+        padding: 12px 0;
+        font-size: 16px;
+        border-radius: 30px;
+        font-weight: bold;
+        color: #fff;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+        .transaction_upload-btn-danger:hover {
+            background-color: #b02a37;
+        }
+
+
+
+</style>

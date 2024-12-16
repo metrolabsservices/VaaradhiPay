@@ -1,7 +1,8 @@
-﻿
-@using VaaradhiPay.Components.Layout
+﻿@using VaaradhiPay.Components.Layout
 @using VaaradhiPay.Components.Pages.L1
 @using VaaradhiPay.DTOs
+@using VaaradhiPay.Services.Implementations
+@using VaaradhiPay.Services.Interfaces
 
 @rendermode InteractiveServer
 
@@ -12,6 +13,8 @@
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager NavigationManager
 @inject ToastService ToastService
+@inject ILoggedInUserService LoggedInUserService
+@inject ExchangeTransactionService LocalStorage
 
 <div class="navbar_container">
     <Image Class="logoWhiteProp NavleftWing" Src="MediaFiles/Logos/VaaradhiPay_WhiteLogo.png" Alt="Vaaradhi Pay Logo" IsResponsive="true" />
@@ -20,7 +23,7 @@
         <div>
             <Dropdown Color="DropdownColor.None" Direction="DropdownDirection.DropdownCentered" Split="true">
                 <DropdownActionButton Class="shadow-none border-0 bg-transparent pe-0 ">
-                    <LetterAvatar Name="Robert Downey" Size="30"  />
+                    <LetterAvatar Name="@userName" Size="30" />
                 </DropdownActionButton>
                 <DropdownToggleButton Class="shadow-none border-0 bg-transparent text-white" />
                 <DropdownMenu Class="p-0">
@@ -28,37 +31,41 @@
                         <TextWithIcon IconName="bi bi-person" IconText="User Profile" />
                     </DropdownItem>
                     <DropdownDivider Class="m-0">Dropdown header</DropdownDivider>
-                    <DropdownItem To="" Type="DropdownItemType.Button" Class="ps-3 pe-0 px-2" @onclick="HandleLogout">
-                        <TextWithIcon IconName="bi bi-power" IconText="Logout" />
+                    <DropdownItem To="" Type="DropdownItemType.Button" Class="ps-3 pe-0 px-2">
+                        <form action="Account/Logout" method="post">
+                            @* Anti-forgery token *@
+                            <AntiforgeryToken />
+                            <button type="submit" style="border:none;background-color:white;">
+                                @* ReturnUrl is used to redirect the user after logout *@
+                                <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                                <TextWithIcon IconName="bi bi-power" IconText="Logout" />
+                            </button>
+                        </form>
                     </DropdownItem>
                 </DropdownMenu>
             </Dropdown>
 
         </div>
-      
+
     </div>
-    
+
 </div>
 
 @code {
-    // private string? currentUrl;
+    private string? userName = "NA";
+    private string currentUrl = "/dashboard";
 
-    // protected override void OnInitialized()
-    // {
-    //     currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-    //     NavigationManager.LocationChanged += OnLocationChanged;
-    // }
+    protected override async Task OnInitializedAsync()
+    {
+        currentUrl = "public";
 
-    // private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
-    // {
-    //     currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
-    //     StateHasChanged();
-    // }
+        if (LocalStorage.LoggedInInfo != null)
+        {
+            userName = $"{LocalStorage.LoggedInInfo.FirstName} {LocalStorage.LoggedInInfo.LastName}";
+        }
+        StateHasChanged();
+    }
 
-    // public void Dispose()
-    // {
-    //     NavigationManager.LocationChanged -= OnLocationChanged;
-    // }
     private List<CustomButtonModel> buttons = new()
     {
         new CustomButtonModel { DisplayText = "Dashboard", NavigationLink = "/dashboard" },
@@ -105,7 +112,7 @@
         catch (Exception ex)
         {
             Console.WriteLine($"--------- Log out clicked 4 ------------ {ex}");
-            
+
             // Display an error message if something goes wrong
             ToastService.Notify(new ToastMessage
                 {
@@ -129,11 +136,11 @@
             margin-left: 100px;
         }
 
-        .NavRightWing{
+        .NavRightWing {
             margin-right: 100px;
         }
     }
-  
+
     .navbar_container {
         width: 100%;
         background-color: #DF0A0A;

@@ -1,5 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
+@using VaaradhiPay.DTOs
 @using VaaradhiPay.Data
 @using VaaradhiPay.Services
 @using VaaradhiPay.Services.Interfaces
@@ -9,6 +10,249 @@
 @inject IUserService userService
 @inject ApplicationDbContext DbContext
 @inject UserManager<ApplicationUser> _userManager
+
+<div class="bottom-container">
+    <h1> Upload ID Proof</h1>
+    <p> Please upload the document from the list below</p>
+</div>
+
+<div class="idproof-cards">
+    <div class="driving-license" @onclick="!isExist ? (() => OpenFileUpload(DrivingLicense)) : null">
+        <div class="driving-icon">
+            <i class="bi bi-person-vcard"></i>
+        </div>
+        <div class="driving-header">
+            <h1>driving license</h1>
+        </div>
+    </div>
+    <div class="passport" @onclick="!isExist ? (() => OpenFileUpload(Passport)) : null">
+        <div class="driving-icon">
+            <i class="bi bi-passport"></i>
+        </div>
+        <div class="driving-header">
+            <h1>passport</h1>
+        </div>
+    </div>
+    <div class="aadhar-card" @onclick="!isExist ? (() => OpenFileUpload(Aadhaar)) : null">
+        <div class="driving-icon">
+            <i class="bi bi-person-video"></i>
+        </div>
+        <div class="driving-header">
+            <h1>aadhar card</h1>
+        </div>
+    </div>
+</div>
+
+@if (isShowUploadFiles)
+{
+    <div>
+        <KYCUploadingFiles nameType="@nameType" onUploadCheck="UploadedFiles" />
+    </div>
+}
+
+<div class="number-container">
+    <p> phone number</p>
+    <div class="number-button">
+        <div class="phone-container">
+            <div class="country-code">
+                <select>
+                    <option value="+1"><span><i class="bi bi-0-circle"></i></span>IND</option>
+                    <option value="+1">USA</option>
+                    <option value="+44">UK</option>
+                    <option value="+61">AUS</option>
+                </select>
+                <i class="bi bi-caret-down-fill"></i>
+            </div>
+            <input type="tel" class="phone-input" @bind-value="phoneNumber" disabled="@(!string.IsNullOrEmpty(phoneNumber))" />
+        </div>
+        <div class="number-button">
+            <button>send otp</button>
+        </div>
+    </div>
+</div>
+
+<div class="card-button">
+    <button @onclick="SaveFiles"> send details</button>
+</div>
+
+@code {
+    private bool isShowUploadFiles = false;
+    private string nameType;
+    private string DrivingLicense = "DRIVING LICENSE";
+    private string Passport = "PASSPORT";
+    private string Aadhaar = "AADHAR CARD";
+    private Dictionary<string, Dictionary<string, FilePreview>> filePreviews = new();
+    private List<KYCDetails> kYCDetail;
+    private bool isExist = false;
+    private string phoneNumber = null;
+    private LoggedInUserDTO userDetails;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            userDetails = await LoggedInUserService.GetLoggedInUserAsync();
+            kYCDetail = await DbContext.KYCDetails.Where(e => e.UserId == userDetails.Id && e.DocumentType != "PHONE NUMBER" && !e.IsDeleted).ToListAsync();
+            if (kYCDetail != null && kYCDetail.Any())
+            {
+                isExist = true;
+            }
+            if(userDetails != null)
+            {
+                phoneNumber=userDetails.PhoneNumber;
+            }
+            await UpdatingKycStatus();
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    public void OpenFileUpload(string documentType)
+    {
+        nameType = documentType;
+        isShowUploadFiles = true;
+    }
+
+    private async Task UploadedFiles((bool isDrivingLicense, bool isPassport, bool isAadhar, Dictionary<string, Dictionary<string, FilePreview>> filePreviews) uploadInfo)
+    {
+        filePreviews = uploadInfo.filePreviews;
+
+        // Print the boolean values for driving license, passport, and Aadhar
+        Console.WriteLine($"isDrivingLicense: {uploadInfo.isDrivingLicense}");
+        Console.WriteLine($"isPassport: {uploadInfo.isPassport}");
+        Console.WriteLine($"isAadhar: {uploadInfo.isAadhar}");
+
+        // Iterate over the outer dictionary (document types)
+        foreach (var documentType in filePreviews)
+        {
+            Console.WriteLine($"Document Type: {documentType.Key}"); // e.g., "DRIVING LICENSE", "PASSPORT", etc.
+
+            // Iterate over the inner dictionary (front/back)
+            foreach (var side in documentType.Value)
+            {
+                Console.WriteLine($"  Side: {side.Key}"); // "front" or "back"
+                Console.WriteLine($"    File Name: {side.Value.FileName}");
+                Console.WriteLine($"    Content Type: {side.Value.ContentType}");
+                //Console.WriteLine($"    Preview URL: {side.Value.PreviewUrl}");
+            }
+        }
+    }
+
+    //Save Files
+    private async Task SaveFiles()
+    {
+        var userDetails = await LoggedInUserService.GetLoggedInUserAsync();
+        string user = userDetails.Email.Split('@')[0];
+
+        if(filePreviews != null && filePreviews.Count() > 0)
+        {
+            foreach (var fileCategory in filePreviews)
+            {
+                var fileType = fileCategory.Key;
+                foreach (var file in fileCategory.Value)
+                {
+                    try
+                    {
+                        var KYCDetails = await DbContext.KYCDetails.Where(e => e.UserId == userDetails.Id && e.DocumentNumber == file.Key).ToListAsync();
+                        DateOnly date = DateOnly.FromDateTime(DateTime.UtcNow);
+                        string fileName = $"{user}_{fileType}_{file.Key}_{KYCDetails.Count() + 1}";
+                        var objName = $"{user}/{fileType}/{file.Key}/{fileName}";
+
+                        var buffer = Convert.FromBase64String(file.Value.PreviewUrl.Split(',')[1]);
+                        using var stream = new MemoryStream(buffer);
+
+                        await fileStorage.UploadFileAsync(null, objName, stream, file.Value.ContentType);
+
+                        var KYC = new KYCDetails()
+                            {
+                                DocumentType = fileType,
+                                DocumentNumber = file.Key,
+                                DocumentFilePath = objName,
+                                UserId = userDetails.Id
+                            };
+
+                        DbContext.KYCDetails.Add(KYC);
+                        await DbContext.SaveChangesAsync();
+                        await UpdatingKycStatus();
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+            }
+        }
+        if (!string.IsNullOrEmpty(phoneNumber))
+        {
+            try
+            {
+                var KYC = new KYCDetails()
+                    {
+                        DocumentType = "PHONE NUMBER",
+                        DocumentNumber = "null",
+                        DocumentFilePath = null,
+                        UserId = userDetails.Id
+                    };
+                var applicationUser = await _userManager.FindByIdAsync(userDetails.Id);
+                if (applicationUser != null)
+                {
+                    applicationUser.PhoneNumber = phoneNumber;
+                    await userService.UpdateUserAsync(applicationUser);
+                }
+
+                DbContext.KYCDetails.Add(KYC);
+                await DbContext.SaveChangesAsync();
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+    }
+
+    private async Task UpdatingKycStatus()
+    {
+        try
+        {
+            var kyc = await userService.GetUserDetailsByEmail(userDetails.Email);
+            var applicationUser = await _userManager.FindByIdAsync(userDetails.Id);
+
+            var kYCDetails = await DbContext.KYCDetails.Where(e => e.UserId == userDetails.Id && !e.IsDeleted).ToListAsync();
+
+            bool hasPhoneNumber = kYCDetails.Any(k => k.DocumentType == "PHONE NUMBER"); // Adjust the condition based on your schema
+            bool hasDocuments = kYCDetails.Any(k => (k.DocumentType == "DRIVING LICENSE" || k.DocumentType == "PASSPORT" || k.DocumentType == "AADHAR CARD"));     // Adjust the condition based on your schema
+
+            if (hasPhoneNumber && hasDocuments)
+            {
+                if (applicationUser != null && (applicationUser.KYCstatus == "Not Started" || applicationUser.KYCstatus == "Pending"))
+                {
+                    applicationUser.KYCstatus = "Progress";
+                    await userService.UpdateUserAsync(applicationUser);
+                }
+            }
+            else if (hasPhoneNumber || hasDocuments)
+            {
+                if (applicationUser != null && applicationUser.KYCstatus == "Not Started")
+                {
+                    applicationUser.KYCstatus = "Pending";
+                    await userService.UpdateUserAsync(applicationUser);
+                }
+            }
+            await DbContext.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+}
+
+
 
 <style>
 
@@ -93,7 +337,7 @@
     .idproof-cards {
         display: flex;
         gap: 25px;
-        cursor:pointer;
+        cursor: pointer;
     }
 
     .driving-license {
@@ -263,206 +507,4 @@
         margin: 13px 10px 0 0;
     }
 </style>
-
-
-<div class="bottom-container">
-    <h1> Upload ID Proof</h1>
-    <p> Please upload the document from the list below</p>
-</div>
-
-<div class="idproof-cards">
-    <div class="driving-license" @onclick="!isExist ? (() => OpenFileUpload(DrivingLicense)) : null">
-        <div class="driving-icon">
-            <i class="bi bi-person-vcard"></i>
-        </div>
-        <div class="driving-header">
-            <h1>driving license</h1>
-        </div>
-    </div>
-    <div class="passport" @onclick="!isExist ? (() => OpenFileUpload(Passport)) : null">
-        <div class="driving-icon">
-            <i class="bi bi-passport"></i>
-        </div>
-        <div class="driving-header">
-            <h1>passport</h1>
-        </div>
-    </div>
-    <div class="aadhar-card" @onclick="!isExist ? (() => OpenFileUpload(Aadhaar)) : null">
-        <div class="driving-icon">
-            <i class="bi bi-person-video"></i>
-        </div>
-        <div class="driving-header">
-            <h1>aadhar card</h1>
-        </div>
-    </div>
-</div>
-
-@if (isShowUploadFiles)
-{
-    <div>
-        <KYCUploadingFiles nameType="@nameType" onUploadCheck="UploadedFiles" />
-    </div>
-}
-
-<div class="number-container">
-    <p> phone number</p>
-    <div class="number-button">
-        <div class="phone-container">
-            <div class="country-code">
-                <select>
-                    <option value="+1"><span><i class="bi bi-0-circle"></i></span>IND</option>
-                    <option value="+1">USA</option>
-                    <option value="+44">UK</option>
-                    <option value="+61">AUS</option>
-                </select>
-                <i class="bi bi-caret-down-fill"></i>
-            </div>
-            <input type="tel" class="phone-input" @bind-value="phoneNumber" disabled="@(!string.IsNullOrEmpty(phoneNumber))" />
-        </div>
-        <div class="number-button">
-            <button>send otp</button>
-        </div>
-    </div>
-</div>
-
-<div class="card-button">
-    <button @onclick="SaveFiles"> send details</button>
-</div>
-
-@code {
-    private bool isShowUploadFiles = false;
-    private string nameType;
-    private string DrivingLicense = "DRIVING LICENSE";
-    private string Passport = "PASSPORT";
-    private string Aadhaar = "AADHAR CARD";
-    private Dictionary<string, Dictionary<string, FilePreview>> filePreviews = new();
-    private List<KYCDetails> kYCDetail;
-    private bool isExist = false;
-    private string phoneNumber = null;
-
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-            var userDetails = await LoggedInUserService.GetLoggedInUserAsync();
-            kYCDetail = await DbContext.KYCDetails.Where(e => e.UserId == userDetails.Id && e.DocumentType != "PHONE NUMBER" && !e.IsDeleted).ToListAsync();
-            if (kYCDetail != null && kYCDetail.Any())
-            {
-                isExist = true;
-            }
-            if(userDetails != null)
-            {
-                phoneNumber=userDetails.PhoneNumber;
-            }
-
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
-    }
-
-    public void OpenFileUpload(string documentType)
-    {
-        nameType = documentType;
-        isShowUploadFiles = true;
-    }
-
-    private async Task UploadedFiles((bool isDrivingLicense, bool isPassport, bool isAadhar, Dictionary<string, Dictionary<string, FilePreview>> filePreviews) uploadInfo)
-    {
-        filePreviews = uploadInfo.filePreviews;
-
-        // Print the boolean values for driving license, passport, and Aadhar
-        Console.WriteLine($"isDrivingLicense: {uploadInfo.isDrivingLicense}");
-        Console.WriteLine($"isPassport: {uploadInfo.isPassport}");
-        Console.WriteLine($"isAadhar: {uploadInfo.isAadhar}");
-
-        // Iterate over the outer dictionary (document types)
-        foreach (var documentType in filePreviews)
-        {
-            Console.WriteLine($"Document Type: {documentType.Key}"); // e.g., "DRIVING LICENSE", "PASSPORT", etc.
-
-            // Iterate over the inner dictionary (front/back)
-            foreach (var side in documentType.Value)
-            {
-                Console.WriteLine($"  Side: {side.Key}"); // "front" or "back"
-                Console.WriteLine($"    File Name: {side.Value.FileName}");
-                Console.WriteLine($"    Content Type: {side.Value.ContentType}");
-                //Console.WriteLine($"    Preview URL: {side.Value.PreviewUrl}");
-            }
-        }
-    }
-
-    //Save Files
-    private async Task SaveFiles()
-    {
-        var userDetails = await LoggedInUserService.GetLoggedInUserAsync();
-        string user = userDetails.Email.Split('@')[0];
-
-        if(filePreviews != null && filePreviews.Count() > 0)
-        {
-            foreach (var fileCategory in filePreviews)
-            {
-                var fileType = fileCategory.Key;
-                foreach (var file in fileCategory.Value)
-                {
-                    try
-                    {
-                        var KYCDetails = await DbContext.KYCDetails.Where(e => e.UserId == userDetails.Id && e.DocumentNumber == file.Key).ToListAsync();
-                        DateOnly date = DateOnly.FromDateTime(DateTime.UtcNow);
-                        string fileName = $"{user}_{fileType}_{file.Key}_{KYCDetails.Count() + 1}";
-                        var objName = $"{user}/{fileType}/{file.Key}/{fileName}";
-
-                        var buffer = Convert.FromBase64String(file.Value.PreviewUrl.Split(',')[1]);
-                        using var stream = new MemoryStream(buffer);
-
-                        await fileStorage.UploadFileAsync(null, objName, stream, file.Value.ContentType);
-
-                        var KYC = new KYCDetails()
-                            {
-                                DocumentType = fileType,
-                                DocumentNumber = file.Key,
-                                DocumentFilePath = objName,
-                                UserId = userDetails.Id
-                            };
-
-                        DbContext.KYCDetails.Add(KYC);
-                        await DbContext.SaveChangesAsync();
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.Message);
-                    }
-                }
-            }
-        }
-        if (!string.IsNullOrEmpty(phoneNumber))
-        {
-            try
-            {
-                var KYC = new KYCDetails()
-                    {
-                        DocumentType = "PHONE NUMBER",
-                        DocumentNumber = "null",
-                        DocumentFilePath = null,
-                        UserId = userDetails.Id
-                    };
-                var applicationUser = await _userManager.FindByIdAsync(userDetails.Id);
-                if (applicationUser != null)
-                {
-                    applicationUser.PhoneNumber = phoneNumber;
-                    await userService.UpdateUserAsync(applicationUser);
-                }
-
-                DbContext.KYCDetails.Add(KYC);
-                await DbContext.SaveChangesAsync();
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
-
-    }
-}
 

@@ -26,9 +26,12 @@
     {
         <ExchangeReceiveBankNotFound Content="@((MarkupString)$"Well you don’t have any verified bank account for receiving currency <strong>{TransactionData?.ReceiveCurrency ?? "N/A"}</strong>. Please verify at least one bank account to proceed with the exchange.")" />
     }
-    else
+    else if (userAccounts1.Any(account => account.IsVerified))
     {
-        <PaymentVerificationRootIndex AccountsData="userAccounts1" />
+        <PaymentVerificationRootIndex AccountsData="userAccounts1" OnValidationState="HandleValidationStateChanged" ReceiveCurrency="@TransactionData?.ReceiveCurrency" />
+    }
+    else{
+        <AlertMessageBoxL1 Content="Unexpected Failure Contact Admin" />
     }
 </div>
 
@@ -57,10 +60,22 @@
                 return;
             }
 
+            if (TransactionData?.ReceiveCurrency == null)
+            {
+                error = new ErrorHandleDTO
+                    {
+                        IsError = true,
+                        Message = "Currency information is missing. Unable to proceed with the transaction."
+                    };
+                await EmitValidationState(false);
+                return;
+            }
+
             userAccounts = await BankAccountService.GetBankAccountsByUserIdAsync(userId);
             if (userAccounts.Any())
             {
-                userAccounts1 = await BankAccountService.GetActiveBankAccountsByCurrencyUserIdAsync(TransactionData?.ReceiveCurrency, userId);
+                 userAccounts1 = await BankAccountService.GetActiveBankAccountsByCurrencyUserIdAsync(TransactionData.ReceiveCurrency, userId);
+
                 if (!userAccounts1.Any() || !userAccounts1.Any(account => account.IsVerified))
                 {
                     await EmitValidationState(false);
@@ -89,6 +104,11 @@
         {
             Loader.Hide();
         }
+    }
+
+    private async Task HandleValidationStateChanged(bool isValid)
+    {
+        await EmitValidationState(isValid);
     }
 
     private async Task EmitValidationState(bool isValid)

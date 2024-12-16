@@ -29,11 +29,11 @@
             }
             else if (currentStep == 2)
             {
-
+                <PaymentPage OnValidationStateChanged="HandleValidationStateChanged" OnFinal="FinalSucessPage" />
             }
             else if (currentStep == 3)
             {
-
+                <PaymentSuccessPage />
             }
             else
             {
@@ -94,6 +94,11 @@
 
     private void HandleNexBtn()
     {
+        if (currentStep == 1 && ExchangeTransactionService.SelectedBank == null)
+        {
+            Toast.Notify(new ToastMessage { Type = ToastType.Danger, Message = $"Please select a bank account to proceed." });
+            return;
+        }
         if (!canProceed)
         {
             Toast.Notify(new ToastMessage { Type = ToastType.Danger, Message = $"Please resolve the issues on this step before proceeding." });
@@ -114,6 +119,11 @@
             Toast.Notify(new ToastMessage { Type = ToastType.Danger, Message = $"Validation failed. Please check the current step and resolve the issues." });
         }
     }
+    private void FinalSucessPage()
+    {
+        HandleNexBtn();
+    }
+
 }
 
 

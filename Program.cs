@@ -70,6 +70,7 @@ builder.Services.AddScoped<ILoggedInUserService, LoggedInUserService>(); // Regi
 builder.Services.Configure<EmailSenderDTO>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<IEmailSenderService, EmailSenderService>();
 builder.Services.AddScoped<IBankAccountService, BankAccountService>();
+builder.Services.AddScoped<AdminBankAccountService>();
 builder.Services.AddSingleton<ExchangeTransactionService>();
 
 
@@ -97,19 +98,19 @@ app.MapGet("/", context =>
 });
 
 // Seed roles after building the app
-using (var scope = app.Services.CreateScope())
-{
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    string[] roles = { "user", "admin", "superadmin" }; // Define your roles here
+//using (var scope = app.Services.CreateScope())
+//{
+//    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+//    string[] roles = { "user", "admin", "superadmin" }; // Define your roles here
 
-    foreach (var role in roles)
-    {
-        if (!await roleManager.RoleExistsAsync(role))
-        {
-            await roleManager.CreateAsync(new IdentityRole(role));
-        }
-    }
-}
+//    foreach (var role in roles)
+//    {
+//        if (!await roleManager.RoleExistsAsync(role))
+//        {
+//            await roleManager.CreateAsync(new IdentityRole(role));
+//        }
+//    }
+//}
 
 //------ Hangfire --------- 
 app.UseHangfireDashboard();
@@ -134,7 +135,10 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-
+using (var scope = app.Services.CreateScope())
+{
+    await SeedData.Initialize(scope.ServiceProvider);
+}
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();

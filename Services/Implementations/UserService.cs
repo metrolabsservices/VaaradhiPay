@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using VaaradhiPay.Data;
+using VaaradhiPay.DTOs;
 
 namespace VaaradhiPay.Services
 {
@@ -49,6 +50,7 @@ namespace VaaradhiPay.Services
         .ToListAsync();
 }
 
+
         public async Task<List<ApplicationUser>> GetUsersWithDetailsAsync(string searchTerm, int page, int pageSize)
         {
             var query = _context.Users
@@ -70,6 +72,26 @@ namespace VaaradhiPay.Services
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
+        }
+
+
+        public async Task<LoggedInUserDTO> GetUserDetailsByEmail(string email)
+        {
+            var userId = await _context.Users
+                                        .Where(e => e.Email == email)
+                                        .FirstOrDefaultAsync();
+            if (userId != null)
+            {
+                return new LoggedInUserDTO
+                {
+                    FirstName = userId.FirstName,
+                    LastName = userId.LastName,
+                    Email = email,
+                    UserRefId = userId.UserRefId,
+                    PhoneNumber = userId.PhoneNumber,
+                };
+            }
+            return null;
         }
 
         // Fetch user-specific status information

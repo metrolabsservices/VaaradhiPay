@@ -1,0 +1,30 @@
+﻿<dl class="row key-value-list">
+    <dt class="col-sm-4 key-text m-0">@Key</dt>
+    <dd class="col-sm-8 value-text m-0">@Value</dd>
+</dl>
+
+@code {
+    [Parameter] public string Key { get; set; } = string.Empty;
+    [Parameter] public string Value { get; set; } = string.Empty;
+}
+
+<style>
+    .key-value-list {
+        margin-bottom: 0.5rem; /* Space between each key-value pair */
+        font-size: 13px;
+    }
+
+    .key-text {
+        font-weight: bold; /* Make the key stand out */
+        color: #6c757d; /* Grayish color for the key */
+        white-space: nowrap; /* Prevent text wrapping */
+    }
+
+    .value-text {
+        color: #000; /* Standard black color for the value */
+        font-weight: normal; /* Normal weight for the value */
+        word-wrap: break-word; /* Wrap long text in the value */
+    }
+
+
+</style>

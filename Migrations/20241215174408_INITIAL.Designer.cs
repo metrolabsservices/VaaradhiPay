@@ -12,8 +12,8 @@ using VaaradhiPay.Data;
 namespace VaaradhiPay.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241211184624_Kyc_AdminBank_Bank_deatilsUpdated")]
-    partial class Kyc_AdminBank_Bank_deatilsUpdated
+    [Migration("20241215174408_INITIAL")]
+    partial class INITIAL
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -261,6 +261,10 @@ namespace VaaradhiPay.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("KYCstatus")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("text");
@@ -471,6 +475,84 @@ namespace VaaradhiPay.Migrations
                     b.ToTable("CurrencyExtractionAudits");
                 });
 
+            modelBuilder.Entity("VaaradhiPay.Data.FinancialTransaction", b =>
+                {
+                    b.Property<int>("TransactionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TransactionId"));
+
+                    b.Property<int>("AdminBankAccountId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("AdminTransactionRefId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("AmountPaid")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("AmountReceived")
+                        .HasColumnType("numeric");
+
+                    b.Property<int?>("BankAccountId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("ConvenienceFee")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("ConversionRate")
+                        .HasColumnType("numeric");
+
+                    b.Property<bool>("IsBuy")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("PayCurrency")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ReceiveCurrency")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("TransactionDateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TransactionNote")
+                        .HasColumnType("text");
+
+                    b.Property<string>("TransactionProofPath")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("UserBankAccountId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserTransactionId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("TransactionId");
+
+                    b.HasIndex("AdminBankAccountId");
+
+                    b.HasIndex("BankAccountId");
+
+                    b.HasIndex("UserBankAccountId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("FinancialTransactions");
+                });
+
             modelBuilder.Entity("VaaradhiPay.Data.KYCDetails", b =>
                 {
                     b.Property<int>("KYCId")
@@ -550,44 +632,6 @@ namespace VaaradhiPay.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("TetherWallets");
-                });
-
-            modelBuilder.Entity("VaaradhiPay.Data.Transaction", b =>
-                {
-                    b.Property<int>("TransactionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TransactionId"));
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric");
-
-                    b.Property<int>("CoinTypeId")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("ReferenceNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("TransactionDateTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("TransactionType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("Volume")
-                        .HasColumnType("numeric");
-
-                    b.HasKey("TransactionId");
-
-                    b.HasIndex("CoinTypeId");
-
-                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("VaaradhiPay.Data.UPIAddress", b =>
@@ -682,6 +726,37 @@ namespace VaaradhiPay.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("VaaradhiPay.Data.FinancialTransaction", b =>
+                {
+                    b.HasOne("VaaradhiPay.Data.AdminBankAccount", "AdminBankAccount")
+                        .WithMany("TransactionRecords")
+                        .HasForeignKey("AdminBankAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VaaradhiPay.Data.BankAccount", null)
+                        .WithMany("TransactionRecords")
+                        .HasForeignKey("BankAccountId");
+
+                    b.HasOne("VaaradhiPay.Data.BankAccount", "UserBankAccount")
+                        .WithMany()
+                        .HasForeignKey("UserBankAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VaaradhiPay.Data.ApplicationUser", "User")
+                        .WithMany("TransactionRecords")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AdminBankAccount");
+
+                    b.Navigation("User");
+
+                    b.Navigation("UserBankAccount");
+                });
+
             modelBuilder.Entity("VaaradhiPay.Data.KYCDetails", b =>
                 {
                     b.HasOne("VaaradhiPay.Data.ApplicationUser", "User")
@@ -704,17 +779,6 @@ namespace VaaradhiPay.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("VaaradhiPay.Data.Transaction", b =>
-                {
-                    b.HasOne("VaaradhiPay.Data.CoinType", "CoinType")
-                        .WithMany("Transactions")
-                        .HasForeignKey("CoinTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("CoinType");
-                });
-
             modelBuilder.Entity("VaaradhiPay.Data.UPIAddress", b =>
                 {
                     b.HasOne("VaaradhiPay.Data.ApplicationUser", "User")
@@ -726,6 +790,11 @@ namespace VaaradhiPay.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("VaaradhiPay.Data.AdminBankAccount", b =>
+                {
+                    b.Navigation("TransactionRecords");
+                });
+
             modelBuilder.Entity("VaaradhiPay.Data.ApplicationUser", b =>
                 {
                     b.Navigation("BankAccounts");
@@ -734,12 +803,14 @@ namespace VaaradhiPay.Migrations
 
                     b.Navigation("TetherWallets");
 
+                    b.Navigation("TransactionRecords");
+
                     b.Navigation("UPIAddresses");
                 });
 
-            modelBuilder.Entity("VaaradhiPay.Data.CoinType", b =>
+            modelBuilder.Entity("VaaradhiPay.Data.BankAccount", b =>
                 {
-                    b.Navigation("Transactions");
+                    b.Navigation("TransactionRecords");
                 });
 #pragma warning restore 612, 618
         }

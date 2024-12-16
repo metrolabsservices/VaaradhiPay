@@ -9,11 +9,35 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace VaaradhiPay.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class INITIAL : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "AdminBankAccounts",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    AccountNumber = table.Column<string>(type: "text", nullable: false),
+                    AccountHolder = table.Column<string>(type: "text", nullable: false),
+                    BankName = table.Column<string>(type: "text", nullable: false),
+                    BranchCode = table.Column<string>(type: "text", nullable: true),
+                    IfscCode = table.Column<string>(type: "text", nullable: true),
+                    TotalCreditedAmount = table.Column<decimal>(type: "numeric", nullable: false),
+                    BankAvailability = table.Column<string>(type: "text", nullable: false),
+                    CurrencyType = table.Column<string>(type: "text", nullable: false),
+                    AccountType = table.Column<string>(type: "text", nullable: false),
+                    UpdatedDateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedDateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AdminBankAccounts", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
@@ -35,7 +59,9 @@ namespace VaaradhiPay.Migrations
                     Id = table.Column<string>(type: "text", nullable: false),
                     FirstName = table.Column<string>(type: "text", nullable: false),
                     LastName = table.Column<string>(type: "text", nullable: false),
+                    UserRefId = table.Column<string>(type: "text", nullable: true),
                     ProfilePicturePath = table.Column<string>(type: "text", nullable: true),
+                    KYCstatus = table.Column<string>(type: "text", nullable: false),
                     TimeStamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -65,12 +91,47 @@ namespace VaaradhiPay.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Symbol = table.Column<string>(type: "text", nullable: false),
+                    ExchangeRateToBaseCurrency = table.Column<decimal>(type: "numeric", nullable: true),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    StampTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CoinTypes", x => x.CoinTypeId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Currencies",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    ISOCode = table.Column<string>(type: "text", nullable: false),
+                    Rate = table.Column<decimal>(type: "numeric", nullable: false),
+                    LastUpdated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Currencies", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CurrencyExtractionAudits",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    IsExtractionSuccessful = table.Column<bool>(type: "boolean", nullable: false),
+                    ErrorMessage = table.Column<string>(type: "text", nullable: true),
+                    AddedCount = table.Column<int>(type: "integer", nullable: false),
+                    UpdatedCount = table.Column<int>(type: "integer", nullable: false),
+                    LastUpdated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CurrencyExtractionAudits", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -185,14 +246,20 @@ namespace VaaradhiPay.Migrations
                 {
                     BankAccountId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    BankName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    AccountHolderName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    AccountNumber = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    IFSCCode = table.Column<string>(type: "character varying(11)", maxLength: 11, nullable: false),
-                    ProofFilePath = table.Column<string>(type: "text", nullable: true),
+                    BankName = table.Column<string>(type: "text", nullable: false),
+                    AccountHolderName = table.Column<string>(type: "text", nullable: false),
+                    AccountNumber = table.Column<string>(type: "text", nullable: false),
+                    BranchCode = table.Column<string>(type: "text", nullable: true),
+                    IFSCCode = table.Column<string>(type: "text", nullable: true),
+                    ProofFilePath = table.Column<string>(type: "text", nullable: false),
+                    CurrencyType = table.Column<string>(type: "text", nullable: false),
+                    AccountType = table.Column<string>(type: "text", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    UserId = table.Column<string>(type: "text", nullable: false),
-                    TimeStamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    IsVerified = table.Column<bool>(type: "boolean", nullable: false),
+                    UpdatedDateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedDateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -215,8 +282,9 @@ namespace VaaradhiPay.Migrations
                     DocumentNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     DocumentFilePath = table.Column<string>(type: "text", nullable: true),
                     IsVerified = table.Column<bool>(type: "boolean", nullable: false),
-                    UserId = table.Column<string>(type: "text", nullable: false),
-                    TimeStamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    CreatedDateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -276,27 +344,54 @@ namespace VaaradhiPay.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Transactions",
+                name: "FinancialTransactions",
                 columns: table => new
                 {
                     TransactionId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ReferenceNumber = table.Column<string>(type: "text", nullable: false),
-                    CoinTypeId = table.Column<int>(type: "integer", nullable: false),
-                    TransactionType = table.Column<string>(type: "text", nullable: false),
-                    Volume = table.Column<decimal>(type: "numeric", nullable: false),
-                    Amount = table.Column<decimal>(type: "numeric", nullable: false),
+                    UserTransactionId = table.Column<string>(type: "text", nullable: false),
+                    AdminTransactionRefId = table.Column<string>(type: "text", nullable: false),
+                    PayCurrency = table.Column<string>(type: "text", nullable: false),
+                    ReceiveCurrency = table.Column<string>(type: "text", nullable: false),
+                    IsBuy = table.Column<bool>(type: "boolean", nullable: false),
+                    AmountPaid = table.Column<decimal>(type: "numeric", nullable: false),
+                    AmountReceived = table.Column<decimal>(type: "numeric", nullable: false),
+                    ConversionRate = table.Column<decimal>(type: "numeric", nullable: false),
+                    ConvenienceFee = table.Column<decimal>(type: "numeric", nullable: false),
                     TransactionDateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    TransactionProofPath = table.Column<string>(type: "text", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    TransactionNote = table.Column<string>(type: "text", nullable: true),
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    AdminBankAccountId = table.Column<int>(type: "integer", nullable: false),
+                    UserBankAccountId = table.Column<int>(type: "integer", nullable: false),
+                    BankAccountId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Transactions", x => x.TransactionId);
+                    table.PrimaryKey("PK_FinancialTransactions", x => x.TransactionId);
                     table.ForeignKey(
-                        name: "FK_Transactions_CoinTypes_CoinTypeId",
-                        column: x => x.CoinTypeId,
-                        principalTable: "CoinTypes",
-                        principalColumn: "CoinTypeId",
+                        name: "FK_FinancialTransactions_AdminBankAccounts_AdminBankAccountId",
+                        column: x => x.AdminBankAccountId,
+                        principalTable: "AdminBankAccounts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_FinancialTransactions_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_FinancialTransactions_BankAccounts_BankAccountId",
+                        column: x => x.BankAccountId,
+                        principalTable: "BankAccounts",
+                        principalColumn: "BankAccountId");
+                    table.ForeignKey(
+                        name: "FK_FinancialTransactions_BankAccounts_UserBankAccountId",
+                        column: x => x.UserBankAccountId,
+                        principalTable: "BankAccounts",
+                        principalColumn: "BankAccountId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -354,6 +449,26 @@ namespace VaaradhiPay.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_FinancialTransactions_AdminBankAccountId",
+                table: "FinancialTransactions",
+                column: "AdminBankAccountId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FinancialTransactions_BankAccountId",
+                table: "FinancialTransactions",
+                column: "BankAccountId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FinancialTransactions_UserBankAccountId",
+                table: "FinancialTransactions",
+                column: "UserBankAccountId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FinancialTransactions_UserId",
+                table: "FinancialTransactions",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_KYCDetails_UserId",
                 table: "KYCDetails",
                 column: "UserId");
@@ -362,11 +477,6 @@ namespace VaaradhiPay.Migrations
                 name: "IX_TetherWallets_UserId",
                 table: "TetherWallets",
                 column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Transactions_CoinTypeId",
-                table: "Transactions",
-                column: "CoinTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UPIAddresses_UserId",
@@ -393,7 +503,16 @@ namespace VaaradhiPay.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "BankAccounts");
+                name: "CoinTypes");
+
+            migrationBuilder.DropTable(
+                name: "Currencies");
+
+            migrationBuilder.DropTable(
+                name: "CurrencyExtractionAudits");
+
+            migrationBuilder.DropTable(
+                name: "FinancialTransactions");
 
             migrationBuilder.DropTable(
                 name: "KYCDetails");
@@ -402,16 +521,16 @@ namespace VaaradhiPay.Migrations
                 name: "TetherWallets");
 
             migrationBuilder.DropTable(
-                name: "Transactions");
-
-            migrationBuilder.DropTable(
                 name: "UPIAddresses");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "CoinTypes");
+                name: "AdminBankAccounts");
+
+            migrationBuilder.DropTable(
+                name: "BankAccounts");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
