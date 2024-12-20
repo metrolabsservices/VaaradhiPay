@@ -1,0 +1,87 @@
+﻿@page "/kyctest"
+@using VaaradhiPay.Components.Pages.TestingByChandu
+
+<div class="userprofile-kyc-container">
+    <h4 class="fw-bold" >Upload ID Proof</h4>
+    <p class="userprofile-kyc-text mb-4">Please upload the documnet from the list below</p>
+    
+    <div class="row g-4 justify-content-evenly mb-4 userprofile-kyc-cards mx-auto">
+        <div class="col-12 col-md-6 col-lg-3 userprofile-kyc-cardblock" @onclick="() => OpenFileUpload(DrivingLicense)">
+            <i class="userprofile-kyc-secondary-text-color me-3 bi bi-person-vcard" />
+            <p class="p-0 m-0 fw-bold">Driving License</p>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3 userprofile-kyc-cardblock" @onclick="() => OpenFileUpload(Passport)">
+            <i class="userprofile-kyc-secondary-text-color me-3 bi bi-passport" />
+            <p class="p-0 m-0 fw-bold">Passport</p>
+
+        </div>
+        <div class="col-12 col-md-6 col-lg-3 userprofile-kyc-cardblock" @onclick="() => OpenFileUpload(Aadhaar)">
+            <i class="userprofile-kyc-secondary-text-color me-3 bi bi-person-video" />
+            <p class="p-0 m-0 fw-bold">Aadhar Card</p>
+        </div>
+    </div>
+    
+    @if (isShowUploadFiles)
+    {
+        <div>
+            <KycUploadingBlock KycType="@nameType" />
+        </div>
+    }
+
+    <div class="">
+        <p class="userprofile-kyc-text mb-2">Phone Number</p>
+
+    </div>
+
+
+</div>
+
+
+
+@code {
+    private string DrivingLicense = "DRIVING LICENSE";
+    private string Passport = "PASSPORT";
+    private string Aadhaar = "AADHAR CARD";
+
+    private string nameType;
+
+    private bool isShowUploadFiles = false;
+
+    public void OpenFileUpload(string documentType)
+    {
+        nameType = documentType;
+        isShowUploadFiles = true;
+    }
+
+    private async Task UploadedFiles()
+    {
+        
+    }
+}
+
+<style>
+    .userprofile-kyc-container{
+
+    }
+    .userprofile-kyc-text{
+        font-size: 10px;
+        color: #9BA2AD;
+    }
+    .userprofile-kyc-cards{
+        width: 90%;
+    }
+
+    .userprofile-kyc-cardblock{
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 20px;
+        border: 1px solid #D4D9E2;
+        border-radius: 10px;
+        width: 200px;
+        cursor: pointer;
+    }
+
+    .userprofile-kyc-secondary-text-color{
+        color : #9BA2AD;
+    }
+</style>

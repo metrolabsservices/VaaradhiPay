@@ -50,6 +50,23 @@ namespace VaaradhiPay.Services
         .ToListAsync();
 }
 
+        public async Task<string> GenerateUserRefIdAsync()
+        {
+            const string prefix = "VPAY";
+            var latestUser = await _context.Users
+                .OrderByDescending(u => u.UserRefId)
+                .FirstOrDefaultAsync(u => u.UserRefId != null && u.UserRefId.StartsWith(prefix));
+
+            int nextOrderNumber = 1;
+
+            if (latestUser != null && int.TryParse(latestUser.UserRefId.Substring(prefix.Length), out int lastOrderNumber))
+            {
+                nextOrderNumber = lastOrderNumber + 1;
+            }
+
+            // Ensure a 7-character length (e.g., VPAY000001)
+            return $"{prefix}{nextOrderNumber:D6}";
+        }
 
         public async Task<List<ApplicationUser>> GetUsersWithDetailsAsync(string searchTerm, int page, int pageSize)
         {

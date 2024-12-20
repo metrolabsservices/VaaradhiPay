@@ -1,0 +1,67 @@
+﻿@using VaaradhiPay.DTOs
+
+<div class="btn-group w-100 border-bottom rounded-0 my-3" role="group" aria-label="Basic example">
+    @foreach (var tab in Tabs)
+    {
+        <button type="button" class="btn py-2 TabSwitch-btn @(activeTab == tab.TabId ? "TabSwitch_ActiveTab" : "")" @onclick="() => ShowTab(tab.TabId)">@tab.Name</button>
+    }
+</div>
+
+<div class="TabSwitch-content m-3">
+    @foreach (var tab in Tabs)
+    {
+        if (activeTab == tab.TabId)
+        {
+            <div class="TabSwitch-content-Pages">
+                @tab.Content
+            </div>
+        }
+    }
+</div>
+
+
+
+@code {
+    [Parameter]
+    public List<TabItemDTO> Tabs { get; set; } = new();
+
+    [Parameter]
+    public int activeTab { get; set; } = 1;
+
+    [Parameter]
+    public EventCallback<int> OnShowTab { get; set; }
+
+    private async Task ShowTab(int tabId)
+    {
+        activeTab = tabId;
+    }
+}
+
+<style>
+    .TabSwitch-btn{
+        background-color: white;
+        border-radius: 0px;
+    }
+
+    .TabSwitch-btn:hover{
+            color: #DF0A0A;
+            border-bottom-color: #DF0A0A;
+    }
+
+    .TabSwitch-btn:focus,
+    .TabSwitch-btn:active {
+        outline: none !important; /* Removes the blue border */
+        box-shadow: none !important; /* Removes any shadow effects */
+    }
+
+    .TabSwitch_ActiveTab{
+        color: #DF0A0A;
+        font-weight: bold;
+        border-bottom: 2px solid #DF0A0A;
+    }
+
+    .TabSwitch-content-Pages{
+        overflow-y: auto;
+    }
+
+</style>

@@ -7,6 +7,7 @@
 @using VaaradhiPay.Components.Account.Pages
 @using VaaradhiPay.Data
 @using System.Text.RegularExpressions;
+@using VaaradhiPay.Services
 @using VaaradhiPay.Services.Interfaces
 
 @inject PreloadService Load
@@ -22,6 +23,7 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject NavigationManager NavigationManager
 @inject ILogger<Register> Logger
+@inject IUserService UserSer
 @inject IdentityRedirectManager RedirectManager
 @inject ToastService ToastService
 
@@ -88,6 +90,8 @@
 <Toasts class="p-3" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopRight" />
 
 @code {
+    [Parameter] public EventCallback OnRegistrationSuccess { get; set; }
+
     private InputModel Input { get; set; } = new();
 
     private async Task RegisterUser()
@@ -116,6 +120,7 @@
             user.FirstName = Input.FirstName;
             user.LastName = Input.LastName;
             user.KYCstatus = "Not Started";
+            user.UserRefId = await UserSer.GenerateUserRefIdAsync();
 
             var result = await UserManager.CreateAsync(user, Input.Password);
 
@@ -154,7 +159,9 @@
                
             ToastService.Notify(new ToastMessage { Type = ToastType.Success, Message = "Account created successfully. Please confirm your email" });
             await Task.Delay(1000);
-            ToastService.Notify(new ToastMessage { Type = ToastType.Success, Message = "Successfully signed in!" });
+            ToastService.Notify(new ToastMessage { Type = ToastType.Success, Message = "Successfully signup!" });
+            await Task.Delay(1000);
+            await OnRegistrationSuccess.InvokeAsync();
 
         }
         catch (Exception ex)

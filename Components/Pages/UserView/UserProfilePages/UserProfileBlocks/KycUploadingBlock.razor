@@ -1,0 +1,138 @@
+﻿@using VaaradhiPay.DTOs
+@inject IJSRuntime JSRuntime
+
+
+<div class="row mb-4 kyc-upload-main-container">
+    @if (isFrontUploaded)
+    {
+
+    }
+    else
+    {
+        <div class="col-12 col-md-6 kyc-upload-container">
+            <p class="kycuploadingblock-upload-text-primary">Upload @KycType front</p>
+            <div class="w-75 kycuploadingblock-uplodcontainer" @onclick="() => UploadonClick(UploadDirectionFront)">
+                <i class="bi bi-camera-fill me-3" />
+                <p class="m-0 px-4 py-3 kycuploadingblock-upload-text"> <span class="text-danger">Browse</span> to Upload</p>
+            </div>
+        </div>
+    }
+    
+    @if (isBackUploaded)
+    {
+        
+    }
+    else
+    {
+        <div class="col-12 col-md-6 kyc-upload-container">
+            <p class="kycuploadingblock-upload-text-primary">Upload @KycType back</p>
+            <div class="w-75 kycuploadingblock-uplodcontainer" @onclick="() => UploadonClick(UploadDirectionBack)">
+                <i class="bi bi-camera-fill me-3" />
+                <p class="m-0 px-4 py-3 kycuploadingblock-upload-text"> <span class="text-danger">Browse</span> to Upload</p>
+            </div>
+        </div>
+    }
+   
+    @if (isError)
+    {
+        <p class="text-danger">NOTE : Only (JPEG/PNG/PDF) file types are allowed and MAX size : 10mb</p>
+    }
+</div>
+
+<!-- Hidden InputFile -->
+<InputFile @ref="fileInputElementKYC" style="display: none;" OnChange="HandleFileSelected" />
+
+
+
+
+
+
+@code {
+    [Parameter]
+    public string KycType { get; set; }
+    public string UploadDirection { get; set; }
+
+    private ErrorHandleDTO ErrorDetails = new();
+    private InputFile fileInputElementKYC;
+    private bool isError = false;
+    private string UploadDirectionFront = "FRONT";
+    private string UploadDirectionBack = "BACK";
+    private bool isFrontUploaded = false;
+    private bool isBackUploaded = false;
+
+    private async Task UploadonClick(string UploadDirect)
+    {
+        UploadDirection = UploadDirect;
+        await JSRuntime.InvokeVoidAsync("triggerClick", fileInputElementKYC.Element);
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;  
+
+        var allowedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp", ".heif", ".heic"
+        };
+
+        try
+        {
+            if (file == null)
+            {
+                await JSRuntime.InvokeVoidAsync("showAlert", "No file selected!");
+                ErrorDetails = new ErrorHandleDTO
+                    {
+                        IsError = true,
+                        Message = "No file selected!",
+                    };
+                return;
+            }
+        }
+        catch(Exception ex)
+        {
+            
+        }
+
+
+    }
+}
+
+
+<script>
+    function triggerClick(element) {
+        element.click();
+    }
+</script>
+
+<style>
+
+    .kyc-upload-main-container{
+        width: 95%;
+    }
+
+    .kyc-upload-container{
+        
+
+    }
+
+    .kycuploadingblock-uplodcontainer{
+        border: 2px solid #D4D9E2;
+        background-color: #F5F5F5;
+        border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    .kycuploadingblock-upload-text{
+        color: #9BA2AD;
+        font-size: 10px;
+    }
+
+    .kycuploadingblock-upload-text-primary {
+        color: #9BA2AD;
+        font-size: 12px;
+        font-weight: bold;
+    }
+</style>

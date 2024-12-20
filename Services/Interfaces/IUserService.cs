@@ -17,5 +17,6 @@ namespace VaaradhiPay.Services
         Task<bool> AssignRoleAsync(string userId, string roleName);
         Task<bool> RemoveRoleAsync(string userId, string roleName);
         Task<List<string>> GetUserRolesAsync(string userId);
+        Task<string> GenerateUserRefIdAsync();
     }
 }

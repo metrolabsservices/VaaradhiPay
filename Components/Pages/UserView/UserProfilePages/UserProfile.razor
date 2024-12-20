@@ -1,0 +1,100 @@
+﻿@page "/userprofile"
+@using VaaradhiPay.Components.Pages.L2
+@using VaaradhiPay.Components.Pages.UserView.UserProfilePages.UserProfileBlocks
+@using VaaradhiPay.DTOs
+
+@rendermode InteractiveServer
+
+@inject PreloadService Load
+@inject ToastService Toast
+
+
+
+<h3 class="text-center text-white mb-4">User Profile</h3>
+
+<!-- Loader -->
+<Preload LoadingText="Loading..." />
+
+<!-- Toaster -->
+<Toasts class="p-3" AutoHide="true" Delay="4000" Placement="ToastsPlacement.MiddleRight" />
+
+
+
+<div class="row justify-content-around">
+    <div class="col-12 col-md-4 mb-3 mb-md-0">
+        <UserProfileInfo />
+    </div>
+    <div class="col-12 col-md-8 userprofile-tab-container">
+        <TabSwitcherKeyContentBlock Tabs="UserProfileTab" activeTab="1" />
+        <div class="text-end">
+            <button class="userprofile-senddetails-btn"> Send Details</button>
+        </div>
+    </div>
+   
+</div>
+
+@code {
+    private List<TabItemDTO> UserProfileTab = new List<TabItemDTO>  {
+        new TabItemDTO
+            {
+                TabId = 1,
+                Name = "KYC",
+                Content =@<KycPage />
+            },
+            new TabItemDTO
+            {
+                TabId = 2,
+                Name = "Profile",
+                Content = @<p>ProfilePage</p>
+            },
+            new TabItemDTO
+            {
+                TabId = 3,
+                Name = "Settings",
+                Content = @<p>SettingPage</p>
+            },
+            new TabItemDTO
+            {
+                TabId = 4,
+                Name = "Change Password",
+                Content = @<p>SettingPage</p>
+            },
+            new TabItemDTO
+            {
+                TabId = 5,
+                Name = "EDD",
+                Content = @<p>EDD</p>
+            }
+    };
+
+
+
+
+
+}
+
+<style>
+    .userprofile-tab-container{
+        width: 50%;
+        height: 500px;
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.25);
+    }
+     @@media (max-width: 768px) {
+        .userprofile-tab-container {
+            width: 100%; /* Forces full width for smaller screens */
+            margin-top: 10px; /* Add some spacing between blocks */
+        }
+    }
+
+    .userprofile-senddetails-btn{
+        background-color: red;
+        color: white;
+        border-radius: 15px;
+        border: none;
+        padding: 8px 15px;
+        font-size: 15px;
+        font-weight : bold;
+    }
+</style>

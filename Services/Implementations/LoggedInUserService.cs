@@ -50,7 +50,8 @@ namespace VaaradhiPay.Services.Implementations
                 LastName = user.LastName,
                 UserRefId = user.UserRefId,
                 Email = user.Email,
-                PhoneNumber = user.PhoneNumber
+                PhoneNumber = user.PhoneNumber,
+                KYCstatus = user.KYCstatus,
             };
         }
 

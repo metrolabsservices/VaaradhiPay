@@ -11,12 +11,12 @@
 @inject ApplicationDbContext DbContext
 @inject UserManager<ApplicationUser> _userManager
 
-<div class="bottom-container">
+<div class="bottom-container position-sticky">
     <h1> Upload ID Proof</h1>
     <p> Please upload the document from the list below</p>
 </div>
 
-<div class="idproof-cards">
+<div class="idproof-cards position-sticky">
     <div class="driving-license" @onclick="!isExist ? (() => OpenFileUpload(DrivingLicense)) : null">
         <div class="driving-icon">
             <i class="bi bi-person-vcard"></i>

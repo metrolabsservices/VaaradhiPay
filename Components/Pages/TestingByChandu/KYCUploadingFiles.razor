@@ -125,9 +125,11 @@
 @code {
     [Parameter]
     public string nameType { get; set; }
-    private Dictionary<string, Dictionary<string, FilePreview>> filePreviews = new();
+   
     [Parameter]
     public EventCallback<(bool isDrivingLicense, bool isPassport, bool isAadhar, Dictionary<string, Dictionary<string, FilePreview>> filePreviews)> onUploadCheck { get; set; }
+
+    private Dictionary<string, Dictionary<string, FilePreview>> filePreviews = new();
 
     private bool isDrivingLicense = false;
     private bool isPassport = false;

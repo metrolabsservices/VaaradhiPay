@@ -1,0 +1,151 @@
+﻿
+@using VaaradhiPay.DTOs
+@using VaaradhiPay.Services.Interfaces
+
+
+@inject PreloadService Load
+@inject ToastService Toast
+@inject ILoggedInUserService LoggedInUserService
+@inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
+
+
+
+<div class="userprofileinfo-card-container text-center">
+
+    <img class="userprofileinfo-logo-prop mb-3 p-1" src="MediaFiles/Logos/VaaradhiPay_Logo.png" alt="Vaaradhi Pay Logo" />
+
+    @if (errorDetails.IsError)
+    {
+        <p class="text-danger text-center">@errorDetails.Message</p>
+    }
+    else if (UserDetails != null)
+    {
+        <h3 class="fw-bold text-center">@UserDetails.FirstName @UserDetails.LastName</h3>
+        <div class="d-flex justify-content-center align-items-center">
+            <p class="fw-lighter p-0 m-0"><span class="fw-bold">ID: </span>@UserDetails.UserRefId</p>
+            <Tooltip Title="@CopyTitle" @onclick="CopyToClipboard" role="button">
+                <i class="ms-2 @CopyIcon" title="@CopyTitle"  ></i>
+            </Tooltip>
+        </div>
+        <hr class="px-2 my-3"/>
+        <div class="hstack gap-3 userprofileinfo-text">
+            <div class="p-2 text-center w-100">
+                <p class="text-dark fw-bold">Mobile Number:</p>
+                <p class="text-danger">@(string.IsNullOrEmpty(UserDetails.PhoneNumber) ? "Not Avialable" : UserDetails.PhoneNumber)</p>
+            </div>
+            <div class="vr mx-2"></div>
+            <div class="p-2 ms-auto w-100 text-center">
+                <p class="text-dark fw-bold">KYC Status:</p>
+                <p class="text-danger">@UserDetails.KYCstatus</p>
+            </div>
+        </div>
+     }
+    else
+    {
+        <p class="text-center">Loading user information...</p>
+    }
+</div>
+
+@code {
+    private ErrorHandleDTO errorDetails = new();
+    private LoggedInUserDTO? UserDetails;
+    private string CopyIcon { get; set; } = "bi bi-file-earmark"; 
+    private string CopyTitle { get; set; } = "Copy to clipboard";
+
+    protected override async Task OnInitializedAsync()
+    {
+        Load.Show(); // Display loading spinner
+        try
+        {
+            UserDetails = await LoggedInUserService.GetLoggedInUserAsync();
+            Console.WriteLine($"UserDetails fetched: {UserDetails}");
+
+            errorDetails = new ErrorHandleDTO
+                {
+                    IsError = false,
+                };
+
+            if(UserDetails == null)
+            {
+                errorDetails = new ErrorHandleDTO
+                    {
+                        IsError = true,
+                        Message = "You are not logged in. Please log in to view your bank accounts.",
+                    };
+            }
+
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            errorDetails = new ErrorHandleDTO
+                {
+                    IsError = true,
+                    Message = "You are not logged in. Please log in to view your bank accounts.",
+                    TechnicalMessage = ex.Message
+                };
+        }
+        finally
+        {
+            Load.Hide(); // Hide loading spinner
+        }
+    }
+
+    private async Task CopyToClipboard()
+    {
+        if (!string.IsNullOrEmpty(UserDetails.UserRefId))
+        {
+            await JSRuntime.InvokeVoidAsync("copyToClipboard", UserDetails.UserRefId);
+
+            Toast.Notify(new ToastMessage
+                {
+                    Type = ToastType.Success, 
+                    Message = "User Reference ID copied to clipboard successfully!"
+                });
+            CopyIcon = "bi bi-file-earmark-check"; 
+            CopyTitle = "Copied!";
+            StateHasChanged();
+
+           
+            await Task.Delay(2000);
+            CopyIcon = "bi bi-file-earmark"; 
+            CopyTitle = "Copy to clipboard"; 
+            StateHasChanged();
+        }
+    }
+}
+
+<script>
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            console.log('Copied to clipboard successfully!');
+        }, function(err) {
+            console.error('Could not copy text: ', err);
+        });
+    }
+</script>
+
+<style>
+
+    .userprofileinfo-text{
+        font-size: 12px;
+    }
+
+    .userprofileinfo-card-container {
+        width: 320px;
+        height: auto;
+        padding: 20px 15px;
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.25);
+    }
+
+    .userprofileinfo-logo-prop{
+        width : 260px;
+        height: 120px;
+        
+    }
+
+</style>

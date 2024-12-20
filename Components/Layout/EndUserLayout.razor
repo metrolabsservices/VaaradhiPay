@@ -36,7 +36,7 @@
     }
 
     .layout-header {
-
+        z-index: 1000;
     }
 
     .layout-body {
@@ -45,9 +45,15 @@
         background-image: url("MediaFiles/Images/vaaradhipay-bg1.png");
         background-size: cover;
         background-repeat: no-repeat;
+        overflow-y: auto;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
     }
 
+        .layout-body::-webkit-scrollbar {
+        display: none;
+    }
     .layout-footer {
-      
+     
     }
 </style>
