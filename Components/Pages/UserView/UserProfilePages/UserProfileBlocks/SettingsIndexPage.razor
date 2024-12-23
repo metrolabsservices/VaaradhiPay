@@ -78,7 +78,7 @@
     private string lastName;
     private string email;
     private string phoneNumber;
-    private string selectedCountryCode = "+91";  // Default to USA's country code
+    private string selectedCountryCode = "+1";  // Default to USA's country code
     private string errorMessage;
     private string successMessage;
     private string ReturnUrl = "/profile"; // Specify the return URL after confirmation
@@ -88,18 +88,17 @@
 
     private List<Country> countryCodes = new List<Country>
     {
-        new Country { Code = "+91", Name = "India" },
         new Country { Code = "+1", Name = "USA" },
         new Country { Code = "+44", Name = "UK" },
         new Country { Code = "+61", Name = "Australia" },
+        new Country { Code = "+91", Name = "India" },
         new Country { Code = "+33", Name = "France" },
         new Country { Code = "+49", Name = "Germany" },
         new Country { Code = "+81", Name = "Japan" },
         // Add more countries as needed
     };
 
-    [Parameter]
-    public ClaimsPrincipal? CurrentUser { get; set; }
+    private ClaimsPrincipal? CurrentUser;
     private string currentUrl = "public";
 
     protected override async Task OnInitializedAsync()
@@ -183,12 +182,9 @@
     {
         applicationUser.FirstName = firstName;
         applicationUser.LastName = lastName;
-        if (applicationUser.UserName != email)
-        {
-            applicationUser.EmailConfirmed = false;
-        }
         applicationUser.Email = email;
         applicationUser.UserName = email;
+        applicationUser.EmailConfirmed = false;
         if (!string.IsNullOrEmpty(phoneNumber))
         {
             applicationUser.PhoneNumber = $"{selectedCountryCode} {phoneNumber}";
@@ -278,7 +274,7 @@
         color: #67757C;
         font-weight: 400;
         padding: 20px 0 0 37px;
-        margin-bottom: 0px;
+        margin-bottom :0px;
     }
 
     .user-profile-setting-phn-container p {
@@ -335,7 +331,7 @@
             background: none;
             outline: none;
             width: 100%;
-            font-size: 10px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             appearance: none;

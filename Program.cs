@@ -93,7 +93,16 @@ var app = builder.Build();
 
 app.MapGet("/", context =>
 {
-    context.Response.Redirect("/public");
+    if (context.User.Identity?.IsAuthenticated ?? false)
+    {
+        // Redirect to a page for logged-in users
+        context.Response.Redirect("/home");
+    }
+    else
+    {
+        // Redirect to the public page for non-logged-in users
+        context.Response.Redirect("/public");
+    }
     return Task.CompletedTask;
 });
 

@@ -4,7 +4,7 @@
 @using VaaradhiPay.Components.Pages.TestingByChandu
 @using VaaradhiPay.Components.Pages.TransactionsPages
 @rendermode InteractiveServer
-@attribute [Authorize(Roles = "User,Admin,SuperAdmin")]
+@attribute [Authorize]
 
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -19,7 +19,7 @@
     .container {
         display: flex;
         justify-content: center;
-        margin-top:-80px;
+        margin-top: -30px;
     }
 
     .card {
@@ -32,12 +32,10 @@
 
     .card-header {
         background-color: #fff;
-        border-bottom:none;
+        border-bottom: none;
     }
 </style>
-<div class="header">
-    <img src="wwwroot\\MediaFiles\\Logos\\VaaradhiPay_WhiteLogo.png" />
-</div>
+
 @if (isUser)
 {
     <div class="container">
@@ -54,7 +52,7 @@ else
 }
 
 
-@code{
+@code {
 
     private List<TabItem> tabs;
     private bool isUser = false;
@@ -73,7 +71,7 @@ else
             {
                 TabId = 1,
                 Name = "KYC",
-                Content = @<KYCpage/>
+                Content = @<KYCpage />
             },
             new TabItem
             {
@@ -85,13 +83,13 @@ else
             {
                 TabId = 3,
                 Name = "Settings",
-                Content = @<SettingPage />
+                Content = @<SettingPage CurrentUser="user" />
             },
             new TabItem
             {
                 TabId = 4,
                 Name = "Change Password",
-                Content = @<ChangePasswordPage />
+                Content = @<ChangePasswordPage CurrentUser="user" />
             },
             new TabItem
             {

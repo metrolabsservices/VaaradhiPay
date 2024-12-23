@@ -26,9 +26,6 @@
     </div>
     <div class="col-12 col-md-8 userprofile-tab-container">
         <TabSwitcherKeyContentBlock Tabs="UserProfileTab" activeTab="1" />
-        <div class="text-end">
-            <button class="userprofile-senddetails-btn"> Send Details</button>
-        </div>
     </div>
    
 </div>
@@ -51,13 +48,13 @@
             {
                 TabId = 3,
                 Name = "Settings",
-                Content = @<p>SettingPage</p>
+                Content = @<SettingsIndexPage />
             },
             new TabItemDTO
             {
                 TabId = 4,
                 Name = "Change Password",
-                Content = @<p>SettingPage</p>
+                Content = @<ChangePasswordIndexPage />
             },
             new TabItemDTO
             {

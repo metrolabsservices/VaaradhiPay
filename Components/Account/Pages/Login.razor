@@ -113,11 +113,6 @@
         {
             if (LocalStorage.LoginCredentials != null)
             {
-                var user = await userService.GetUserDetailsByEmail(Input.Email);
-                if (user != null)
-                {
-                    LocalStorage.LoggedInInfo = user;
-                }
                 LocalStorage.LoginCredentials.Email = string.Empty;
                 LocalStorage.LoginCredentials.Password = string.Empty;
             }

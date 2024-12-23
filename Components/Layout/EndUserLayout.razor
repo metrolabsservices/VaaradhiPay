@@ -1,8 +1,13 @@
 ﻿@page "/enduser"
+@using VaaradhiPay.DTOs
+@using VaaradhiPay.Services.Implementations
+@using VaaradhiPay.Services.Interfaces
 
 @inherits LayoutComponentBase
 
 @layout EmptyLayout
+@inject ILoggedInUserService loggedUser
+@inject ExchangeTransactionService LocalStorage
 
 
 <div class="layout-container">
@@ -25,7 +30,16 @@
 
 
 @code {
+    private LoggedInUserDTO userDetails;
 
+    protected override async Task OnInitializedAsync()
+    {
+        userDetails = await loggedUser.GetLoggedInUserAsync();
+        if (userDetails != null)
+        {
+            LocalStorage.LoggedInInfo = userDetails;
+        }
+    }
 }
 
 <style>
