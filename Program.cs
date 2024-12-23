@@ -72,6 +72,8 @@ builder.Services.AddScoped<IEmailSenderService, EmailSenderService>();
 builder.Services.AddScoped<IBankAccountService, BankAccountService>();
 builder.Services.AddScoped<AdminBankAccountService>();
 builder.Services.AddSingleton<ExchangeTransactionService>();
+builder.Services.AddScoped<ITetherWalletService, TetherWalletService>();
+builder.Services.AddScoped<IUPIAddressService, UPIAddressService>();
 
 
 // -------------------------

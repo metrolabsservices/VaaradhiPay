@@ -7,27 +7,17 @@ namespace VaaradhiPay.Data
     {
         [Key]
         public int WalletId { get; set; } // Unique identifier
-
-        [Required]
-        [MaxLength(50)]
         public string WalletType { get; set; } // Wallet type (e.g., BEP20, ERC20, TRC20)
-
-        [Required]
-        [MaxLength(100)]
         public string WalletName { get; set; } // Name of the wallet
-
-        [Required]
-        [MaxLength(150)]
         public string WalletAddress { get; set; } // Wallet address
-
         public bool IsActive { get; set; } = true; // Indicates if the wallet is active
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+
 
         [Required]
         public string UserId { get; set; } // Foreign key to ApplicationUser
-
+        
         [ForeignKey(nameof(UserId))]
         public ApplicationUser User { get; set; } // Navigation property
-        public DateTime TimeStamp { get; set; } = DateTime.UtcNow;
-
     }
 }

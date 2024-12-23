@@ -6,20 +6,20 @@ namespace VaaradhiPay.Data
     public class UPIAddress
     {
         [Key]
-        public int UPIAddressId { get; set; } // Unique identifier
+        public int UPIAddressId { get; set; } 
+        public string Address { get; set; } 
+        public string UpiUserName { get; set; } 
+        public bool IsActive { get; set; } = true; 
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+
 
         [Required]
-        [MaxLength(100)]
-        public string Address { get; set; } // UPI address (e.g., user@upi)
-
-        public bool IsActive { get; set; } = true; // Indicates if the UPI address is active
-
-        [Required]
-        public string UserId { get; set; } // Foreign key to ApplicationUser
+        public string UserId { get; set; } 
 
         [ForeignKey(nameof(UserId))]
-        public ApplicationUser User { get; set; } // Navigation property
-        public DateTime TimeStamp { get; set; } = DateTime.UtcNow;
+        public ApplicationUser User { get; set; } 
+
+        
 
     }
 }
