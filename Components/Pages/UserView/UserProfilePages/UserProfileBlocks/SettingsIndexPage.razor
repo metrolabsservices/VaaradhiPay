@@ -78,7 +78,7 @@
     private string lastName;
     private string email;
     private string phoneNumber;
-    private string selectedCountryCode = "+1";  // Default to USA's country code
+    private string selectedCountryCode = "+91";  // Default to USA's country code
     private string errorMessage;
     private string successMessage;
     private string ReturnUrl = "/profile"; // Specify the return URL after confirmation
@@ -90,31 +90,34 @@
     {
         new Country { Code = "+1", Name = "USA" },
         new Country { Code = "+44", Name = "UK" },
-        new Country { Code = "+61", Name = "Australia" },
-        new Country { Code = "+91", Name = "India" },
-        new Country { Code = "+33", Name = "France" },
-        new Country { Code = "+49", Name = "Germany" },
-        new Country { Code = "+81", Name = "Japan" },
+        new Country { Code = "+91", Name = "IND" },
         // Add more countries as needed
     };
 
-    private ClaimsPrincipal? CurrentUser;
     private string currentUrl = "public";
 
     protected override async Task OnInitializedAsync()
     {
-        var user = await GetAuthenticatedUserAsync();
-        if (user != null)
+        try
         {
-            // Load application user details
-            applicationUser = await _userManager.FindByNameAsync(user.Identity.Name);
-            if (applicationUser != null)
+            var user = await GetAuthenticatedUserAsync();
+            if (user != null)
             {
-                firstName = applicationUser.FirstName;
-                lastName = applicationUser.LastName;
-                email = applicationUser.Email;
-                phoneNumber = applicationUser.PhoneNumber;
+                // Load application user details
+                applicationUser = await _userManager.FindByNameAsync(user.Identity.Name);
+                if (applicationUser != null)
+                {
+                    firstName = applicationUser.FirstName;
+                    lastName = applicationUser.LastName;
+                    email = applicationUser.Email;
+                    phoneNumber = applicationUser.PhoneNumber.Substring(3);
+                    selectedCountryCode = applicationUser.PhoneNumber.Split(' ')[0]; // Extracts "+91"
+                }
             }
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.Message);
         }
     }
 

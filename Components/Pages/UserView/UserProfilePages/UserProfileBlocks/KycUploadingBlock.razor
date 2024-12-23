@@ -10,29 +10,52 @@
     else
     {
         <div class="col-12 col-md-6 kyc-upload-container">
-            <p class="kycuploadingblock-upload-text-primary">Upload @KycType front</p>
-            <div class="w-75 kycuploadingblock-uplodcontainer" @onclick="() => UploadonClick(UploadDirectionFront)">
-                <i class="bi bi-camera-fill me-3" />
-                <p class="m-0 px-4 py-3 kycuploadingblock-upload-text"> <span class="text-danger">Browse</span> to Upload</p>
-            </div>
+            @if (filePreviews.ContainsKey(KycType) && filePreviews[KycType].ContainsKey(UploadDirectionFront))
+            {
+                <p class="kycuploadingblock-upload-text-primary">Uploaded @KycType front</p>
+
+                var file = filePreviews[KycType][UploadDirectionFront];
+                <div class="uploaded-file ms-1">
+                    <img src="@file.PreviewUrl" alt="@file.FileName" width="180" height="130" />
+                </div>
+            }
+            else
+            {
+                <p class="kycuploadingblock-upload-text-primary">Upload @KycType front</p>
+                <div class="w-75 kycuploadingblock-uplodcontainer" @onclick="() => UploadonClick(UploadDirectionFront)">
+                    <i class="bi bi-camera-fill me-3" />
+                    <p class="m-0 px-4 py-3 kycuploadingblock-upload-text"> <span class="text-danger">Browse</span> to Upload</p>
+                </div>
+            }
         </div>
     }
-    
+
     @if (isBackUploaded)
     {
-        
+
     }
     else
     {
         <div class="col-12 col-md-6 kyc-upload-container">
-            <p class="kycuploadingblock-upload-text-primary">Upload @KycType back</p>
-            <div class="w-75 kycuploadingblock-uplodcontainer" @onclick="() => UploadonClick(UploadDirectionBack)">
-                <i class="bi bi-camera-fill me-3" />
-                <p class="m-0 px-4 py-3 kycuploadingblock-upload-text"> <span class="text-danger">Browse</span> to Upload</p>
-            </div>
+            @if (filePreviews.ContainsKey(KycType) && filePreviews[KycType].ContainsKey(UploadDirectionBack))
+            {
+                <p class="kycuploadingblock-upload-text-primary">Uploaded @KycType front</p>
+                var file = filePreviews[KycType][UploadDirectionBack];
+                <div class="uploaded-file ms-1">
+                    <img src="@file.PreviewUrl" alt="@file.FileName" width="180" height="130" />
+                </div>
+            }
+            else
+            {
+                <p class="kycuploadingblock-upload-text-primary">Upload @KycType back</p>
+                <div class="w-75 kycuploadingblock-uplodcontainer" @onclick="() => UploadonClick(UploadDirectionBack)">
+                    <i class="bi bi-camera-fill me-3" />
+                    <p class="m-0 px-4 py-3 kycuploadingblock-upload-text"> <span class="text-danger">Browse</span> to Upload</p>
+                </div>
+            }
         </div>
     }
-   
+
     @if (isError)
     {
         <p class="text-danger">NOTE : Only (JPEG/PNG/PDF) file types are allowed and MAX size : 10mb</p>
@@ -40,7 +63,7 @@
 </div>
 
 <!-- Hidden InputFile -->
-<InputFile @ref="fileInputElementKYC" style="display: none;" OnChange="HandleFileSelected" />
+<InputFile @ref="fileInputElementKYC" style="display: none;" OnChange="@(e => HandleFileSelected(e, KycType))" />
 
 
 
@@ -50,6 +73,10 @@
 @code {
     [Parameter]
     public string KycType { get; set; }
+    [Parameter]
+    public EventCallback<Dictionary<string, Dictionary<string, FilePreview>>> onUploadCheck { get; set; }
+
+
     public string UploadDirection { get; set; }
 
     private ErrorHandleDTO ErrorDetails = new();
@@ -60,15 +87,18 @@
     private bool isFrontUploaded = false;
     private bool isBackUploaded = false;
 
+    private Dictionary<string, Dictionary<string, FilePreview>> filePreviews = new();
+
+
     private async Task UploadonClick(string UploadDirect)
     {
         UploadDirection = UploadDirect;
         await JSRuntime.InvokeVoidAsync("triggerClick", fileInputElementKYC.Element);
     }
 
-    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    private async Task HandleFileSelected(InputFileChangeEventArgs e, string documentType)
     {
-        var file = e.File;  
+        var file = e.File;
 
         var allowedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -87,13 +117,72 @@
                     };
                 return;
             }
+
+            var fileExtension = Path.GetExtension(file.Name).ToLowerInvariant();
+            if (!allowedExtensions.Contains(fileExtension))
+            {
+                await JSRuntime.InvokeVoidAsync("showAlert", $"File {file.Name} must be one of the following formats: jpg, jpeg, png, gif, bmp, tiff, webp, heif, heic.");
+                return;
+            }
+
+            var filePreview = new FilePreview
+                {
+                    FileName = file.Name,
+                    PreviewUrl = await GetFilePreviewUrl(file),
+                    ContentType = file.ContentType
+                };
+
+            // Ensure the documentType is initialized in the dictionary
+            if (!filePreviews.ContainsKey(documentType))
+            {
+                filePreviews[documentType] = new Dictionary<string, FilePreview>();
+            }
+
+            // Set the file preview for the appropriate side (front/back)
+            filePreviews[documentType][UploadDirection] = filePreview;
+
+            bool isUploaded = filePreviews[documentType].ContainsKey(UploadDirectionFront) && filePreviews[documentType].ContainsKey(UploadDirectionBack);
+            if (isUploaded)
+            {
+                // Call UploadCheck if both sides are uploaded
+                await UploadCheck(filePreviews);
+            }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-            
+
         }
+    }
 
+    // Generate a preview URL from the uploaded file
+    private async Task<string> GetFilePreviewUrl(IBrowserFile file)
+    {
+        try
+        {
+            using var stream = new MemoryStream();
+            await file.OpenReadStream().CopyToAsync(stream);
+            var buffer = stream.ToArray();
+            var base64String = Convert.ToBase64String(buffer);
+            return $"data:{file.ContentType};base64,{base64String}";
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            throw;
+        }
+    }
 
+    private async Task UploadCheck(Dictionary<string, Dictionary<string, FilePreview>> filePreviews)
+    {
+        await onUploadCheck.InvokeAsync(filePreviews);
+        StateHasChanged();
+    }
+
+    public class FilePreview
+    {
+        public string FileName { get; set; }
+        public string PreviewUrl { get; set; }
+        public string ContentType { get; set; }
     }
 }
 
@@ -106,16 +195,14 @@
 
 <style>
 
-    .kyc-upload-main-container{
+    .kyc-upload-main-container {
         width: 95%;
     }
 
-    .kyc-upload-container{
-        
-
+    .kyc-upload-container {
     }
 
-    .kycuploadingblock-uplodcontainer{
+    .kycuploadingblock-uplodcontainer {
         border: 2px solid #D4D9E2;
         background-color: #F5F5F5;
         border-radius: 10px;
@@ -125,7 +212,7 @@
         cursor: pointer;
     }
 
-    .kycuploadingblock-upload-text{
+    .kycuploadingblock-upload-text {
         color: #9BA2AD;
         font-size: 10px;
     }

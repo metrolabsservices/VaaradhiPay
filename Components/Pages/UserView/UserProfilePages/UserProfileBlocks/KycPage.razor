@@ -1,10 +1,23 @@
 ﻿@page "/kyctest"
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
 @using VaaradhiPay.Components.Pages.TestingByChandu
+@using VaaradhiPay.DTOs
+@using VaaradhiPay.Data
+@using VaaradhiPay.Services
+@using VaaradhiPay.Services.Interfaces
+@using static VaaradhiPay.Components.Pages.UserView.UserProfilePages.UserProfileBlocks.KycUploadingBlock
+
+@inject ILoggedInUserService LoggedInUserService
+@inject ApplicationDbContext DbContext
+@inject IFileStorageService fileStorage
+@inject IUserService userService
+@inject UserManager<ApplicationUser> _userManager
 
 <div class="userprofile-kyc-container">
-    <h4 class="fw-bold" >Upload ID Proof</h4>
+    <h4 class="fw-bold">Upload ID Proof</h4>
     <p class="userprofile-kyc-text mb-4">Please upload the documnet from the list below</p>
-    
+
     <div class="row g-4 justify-content-evenly mb-4 userprofile-kyc-cards mx-auto">
         <div class="col-12 col-md-6 col-lg-3 userprofile-kyc-cardblock" @onclick="() => OpenFileUpload(DrivingLicense)">
             <i class="userprofile-kyc-secondary-text-color me-3 bi bi-person-vcard" />
@@ -20,11 +33,11 @@
             <p class="p-0 m-0 fw-bold">Aadhar Card</p>
         </div>
     </div>
-    
+
     @if (isShowUploadFiles)
     {
         <div>
-            <KycUploadingBlock KycType="@nameType" />
+            <KycUploadingBlock KycType="@nameType" onUploadCheck="UploadedFiles" />
         </div>
     }
 
@@ -33,8 +46,8 @@
 
     </div>
     <div class="text-end">
-            <button class="userprofile-senddetails-btn"> Send Details</button>
-        </div>
+        <button class="userprofile-senddetails-btn" @onclick="SaveFiles"> Send Details</button>
+    </div>
 
 </div>
 
@@ -49,31 +62,120 @@
 
     private bool isShowUploadFiles = false;
 
+    private Dictionary<string, Dictionary<string, FilePreview>> filePreviews = new();
+    private LoggedInUserDTO userDetails;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            userDetails = await LoggedInUserService.GetLoggedInUserAsync();
+            await UpdatingKycStatus();
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
     public void OpenFileUpload(string documentType)
     {
         nameType = documentType;
         isShowUploadFiles = true;
     }
 
-    private async Task UploadedFiles()
+    private async Task UploadedFiles(Dictionary<string, Dictionary<string, FilePreview>> filePreview)
     {
-        
+        Console.WriteLine("invoked");
+        filePreviews = filePreview;
+    }
+
+    //Saving the uploaded files in database and minio
+    private async Task SaveFiles()
+    {
+        string user = userDetails.Email.Split('@')[0];
+
+        if (filePreviews != null && filePreviews.Count > 0)
+        {
+            foreach (var fileCategory in filePreviews)
+            {
+                var fileType = fileCategory.Key;
+                foreach (var file in fileCategory.Value)
+                {
+                    try
+                    {
+                        var kycDetails = await DbContext.KYCDetails.Where(e => e.UserId == userDetails.Id && e.DocumentNumber == file.Key).ToListAsync();
+                        DateOnly date = DateOnly.FromDateTime(DateTime.UtcNow);
+                        string fileName = $"{user}_{fileType}_{file.Key}_{kycDetails.Count()+1}";
+                        var objName = $"{user}/{fileType}/{file.Key}/{fileName}";
+
+                        var buffer = Convert.FromBase64String(file.Value.PreviewUrl.Split(',')[1]);
+                        using var stream = new MemoryStream(buffer);
+
+                        await fileStorage.UploadFileAsync(null,objName,stream,file.Value.ContentType);
+
+                        var kyc = new KYCDetails()
+                            {
+                                DocumentType = fileType,
+                                DocumentNumber = file.Key,
+                                DocumentFilePath = objName,
+                                UserId = userDetails.Id
+                            };
+                        DbContext.KYCDetails.Add(kyc);
+                        await DbContext.SaveChangesAsync();
+                        await UpdatingKycStatus();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+            }
+        }
+    }
+
+    private async Task UpdatingKycStatus()
+    {
+        try
+        {
+            var kyc = await userService.GetUserDetailsByEmail(userDetails.Email);
+            var applicationUser = await _userManager.FindByIdAsync(userDetails.Id);
+
+            var kYCDetails = await DbContext.KYCDetails.Where(e => e.UserId == userDetails.Id && !e.IsDeleted).ToListAsync();
+
+            bool hasDocuments = kYCDetails.Any(k => (k.DocumentType == "DRIVING LICENSE" || k.DocumentType == "PASSPORT" || k.DocumentType == "AADHAR CARD"));     // Adjust the condition based on your schema
+
+            if (hasDocuments)
+            {
+                if (applicationUser != null && applicationUser.KYCstatus == "Not Started")
+                {
+                    applicationUser.KYCstatus = "Progress";
+                    await userService.UpdateUserAsync(applicationUser);
+                }
+            }
+            await DbContext.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
 }
 
 <style>
-    .userprofile-kyc-container{
-
+    .userprofile-kyc-container {
     }
-    .userprofile-kyc-text{
+
+    .userprofile-kyc-text {
         font-size: 10px;
         color: #9BA2AD;
     }
-    .userprofile-kyc-cards{
+
+    .userprofile-kyc-cards {
         width: 90%;
     }
 
-    .userprofile-kyc-cardblock{
+    .userprofile-kyc-cardblock {
         display: flex;
         justify-content: space-between;
         padding: 10px 20px;
@@ -83,7 +185,7 @@
         cursor: pointer;
     }
 
-    .userprofile-kyc-secondary-text-color{
-        color : #9BA2AD;
+    .userprofile-kyc-secondary-text-color {
+        color: #9BA2AD;
     }
 </style>

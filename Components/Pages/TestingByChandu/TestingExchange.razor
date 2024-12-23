@@ -1,0 +1,707 @@
+﻿@page "/TE"
+
+@using VaaradhiPay.Components.Pages.L1
+@using VaaradhiPay.Components.Pages.L1.ErrorTemplates
+@using VaaradhiPay.DTOs
+@using VaaradhiPay.Data
+@using VaaradhiPay.Services.Interfaces
+
+@inject ILoggedInUserService LoggedInUserService
+@inject ICoinTypeService CoinTypeService
+@inject ToastService Toast
+@inject PreloadService Load
+
+@inherits ComponentBase
+@rendermode InteractiveServer
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+        </div>
+    </div>
+    <div class="row">
+
+        <div class="col">
+            <div class="exchangeform-container1">
+                <p>Live 1usd = @inr INR</p>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Digital Currencies</th>
+                            <th>Buy</th>
+                            <th>Sell</th>
+                            <th>%</th>
+                            <th>Convenience Fee</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>USDT in INR</td>
+                            <td> <input type="number" @bind="Uinr" @bind:event="oninput" @onkeyup="Calculate" /></td>
+                            <td><input type="number" @bind="UinrSell" @bind:event="oninput" @onkeyup="Calculate" /></td>
+                            <td><input type="number" @bind="Upercentage" @bind:event="oninput" @onkeyup="PercentageCalculator"/></td>
+                            <td><input type="number" @bind="Tax" @bind:event="oninput" @onkeyup="Calculate " /></td>
+                        </tr>
+                        <tr>
+                            <td>NAFA in INR</td>
+                            <td>  <input type="number" @bind="Ninr" @bind:event="oninput" @onkeyup="Calculate"></td>
+                            <td> <input type="number" @bind="NinrSell" @bind:event="oninput" @onkeyup="Calculate"></td>
+                            <td><input type="number" @bind="Npercentage" @bind:event="oninput" @onkeyup="PercentageCalculator" /></td>
+                            <td><input type="number" @bind="NTax" @bind:event="oninput" @onkeyup="Calculate " /></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- for buy-->
+        <div class="col">
+            <div class="exchangeform-container">
+                <h2>BUY</h2>
+                <div class="input-container">
+                    <div class="input-wrapper">
+                        <p class="input-label-text">You Pay</p>
+                        <input class="main-input-field" type="number" @bind="youPayValue" @bind:event="oninput" @onkeyup="CalculateReceivedValue" />
+                    </div>
+                    <div class="input-dropdown">
+                        <select class="form-select form-select-sm" @bind="selectedCurrencyPay" @bind:event="oninput" @onchange="CalculateReceivedValue">
+                            @foreach (var coin in Currencies)
+                            {
+                                <option value="@coin">@coin</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-container">
+                    <div class="input-wrapper">
+                        <p class="input-label-text">You will receive Roughly</p>
+                        <p class="main-input-field m-0 p-0">@((Math.Floor(youReceiveValue * 10000) / 10000).ToString("F4"))</p>
+                    </div>
+                    <div class="input-dropdown">
+                        <select class="form-select form-select-sm" @bind="selectedCurrencyReceive" @bind:event="oninput" @onchange="CalculateReceivedValue">
+                            @foreach (var coin in Coins)
+                            {
+                                <option value="@coin">@coin</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- for Sell-->
+        <div class="col">
+            <div class="exchangeform-container">
+                <h2>Sell</h2>
+
+                <div class="input-container">
+                    <div class="input-wrapper">
+                        <p class="input-label-text">You Pay</p>
+                        <input class="main-input-field" type="number" @bind="SELLyouPayValue" @bind:event="oninput" @onkeyup="CalculateReceivedValue2" />
+                    </div>
+                    <div class="input-dropdown">
+                        <select class="form-select form-select-sm" @bind="selectedCurrencyReceive" @bind:event="oninput" @onchange="CalculateReceivedValue2">
+                            @foreach (var coin in Coins)
+                            {
+                                <option value="@coin">@coin</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-container">
+                    <div class="input-wrapper">
+                        <p class="input-label-text">You will receive Roughly</p>
+                        <p class="main-input-field m-0 p-0">@((Math.Floor(SELLyouReceiveValue * 10000) / 10000).ToString("F4"))</p>
+                    </div>
+                    <div class="input-dropdown">
+                        <select class="form-select form-select-sm" @bind="selectedCurrencyPay" @bind:event="oninput" @onchange="CalculateReceivedValue2">
+                            @foreach (var coin in Currencies)
+                            {
+                                <option value="@coin">@coin</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" style="margin-top:10%;margin-bottom:5%;">
+        <div class="col-12">
+            <h3>Currency Conversion Rates for Buy (Without Tax)</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Currency</th>
+                        <th>USDT</th>
+                        <th>NAFA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var currency in Currencies)
+                    {
+                        <tr>
+                            <td>@currency</td>
+                            <td>@GetCalculatedUSDTValue(currency).ToString("F2")</td>
+                            <td>@GetCalculatedNAFAValue(currency).ToString("F2")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- New table for Sell conversion rates -->
+    <div class="row" style="margin-top:10%;margin-bottom:5%;">
+        <div class="col-12">
+            <h3>Currency Conversion Rates for Sell (Without Tax)</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Currency</th>
+                        <th>USDT</th>
+                        <th>NAFA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var currency in Currencies)
+                    {
+                        <tr>
+                            <td>@currency</td>
+                            <td>@GetCalculatedUSDTValueForSell(currency).ToString("F2")</td>
+                            <td>@GetCalculatedNAFAValueForSell(currency).ToString("F2")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    private string selectedCurrencyPay = "INR";
+    private string selectedCurrencyReceive = "USDT";
+    private decimal youPayValue = 0;
+    private decimal youReceiveValue = 0;
+    private decimal SELLyouPayValue = 0;
+    private decimal SELLyouReceiveValue = 0;
+    private ErrorHandleDTO errorDetails = new();
+    private List<string> Currencies = new List<string> { "INR", "USD", "AED" };
+    private List<string> Coins = new List<string> { "USDT", "NAFA" };
+
+    private decimal nafa = 1M;
+    private decimal usdt = 1M;
+
+    private decimal inr = 84.15M;
+    private decimal Uinr;
+    private decimal UinrSell = 80M;
+
+    private decimal Ninr = 80M;
+    private decimal NinrSell = 80M;
+
+    // Define exchange rates for conversion
+    private decimal nafaSell = 1M;
+    private decimal usdtSell = 1M;
+    private decimal Tax = 0M;
+    private decimal NTax = 0M;
+
+    private decimal Upercentage = 0;
+    private decimal Npercentage = 0;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        Load.Show(); // Display loading spinner
+        try
+        {
+            await PercentageCalculator();
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            Toast.Notify(new ToastMessage
+                {
+                    Type = ToastType.Danger,
+                    Message = "Unable to load data. Please try again later."
+                });
+            errorDetails = new ErrorHandleDTO
+                {
+                    IsError = true,
+                    Message = "Unable to load data. Please try again later.",
+                    TechnicalMessage = ex.Message
+                };
+        }
+        finally
+        {
+            Load.Hide(); // Hide loading spinner
+        }
+    }
+    private async Task PercentageCalculator()
+    {
+        if(Upercentage > 0)
+        {
+            Uinr = inr + (inr * (Upercentage / 100));
+            UinrSell = inr - (inr * (Upercentage / 100));
+
+        }
+
+        if(Npercentage > 0)
+        {
+            Ninr = inr + (inr * (Npercentage / 100));
+            NinrSell = inr - (inr * (Npercentage / 100));
+        }
+        if(Upercentage == 0)
+        {
+            Uinr = inr + 5;
+            UinrSell = inr - 5;
+        }
+        if(Npercentage == 0){
+           
+            Ninr = inr + 5;
+            NinrSell = inr - 5;
+        }
+    }
+
+    private async Task Calculate()
+    {
+        await CalculateReceivedValue();
+        await CalculateReceivedValue2();
+    }
+
+    private async Task CalculateReceivedValue()
+    {
+        Console.WriteLine($"{selectedCurrencyPay} , {selectedCurrencyReceive}");
+        Load.Show(); // Display loading spinner
+
+        try
+        {
+            var baseCurrency = selectedCurrencyPay;
+            var targetCurrency = selectedCurrencyReceive;
+
+            // Validate the selected currencies
+            if (string.IsNullOrEmpty(baseCurrency) || string.IsNullOrEmpty(targetCurrency))
+            {
+                errorDetails = new ErrorHandleDTO
+                    {
+                        IsError = true,
+                        Message = "Selected currency is invalid. Please check your selection.",
+                    };
+                return;
+            }
+
+            if (baseCurrency == targetCurrency)
+            {
+                errorDetails = new ErrorHandleDTO
+                    {
+                        IsError = true,
+                        Message = "Selected currency is the same. Please check your selection.",
+                    };
+                return;
+            }
+
+            // Validate the entered amount
+            if (youPayValue < 1)
+            {
+                errorDetails = new ErrorHandleDTO
+                    {
+                        IsError = true,
+                        Message = "The entered amount must be greater than 0. Please enter a valid amount to proceed."
+                    };
+                return;
+            }
+
+
+            decimal usd = 1;
+            decimal Uusd = (Uinr * usd)/ inr;
+            decimal Nusd = (Ninr * usd) / inr;
+
+            // Logic for USD to USDT conversion
+            if (selectedCurrencyPay == "USD" && selectedCurrencyReceive == "USDT")
+            {
+                var payamount = youPayValue - (youPayValue * Tax);
+                youReceiveValue = (payamount * usdt) / Uusd;
+                Console.WriteLine("USD to USDT: " + youReceiveValue);
+            }
+
+            // Logic for USD to NAFA conversion
+            if (selectedCurrencyPay == "USD" && selectedCurrencyReceive == "NAFA")
+            {
+                var payamount = youPayValue - (youPayValue * NTax);
+                youReceiveValue = (payamount * nafa) / Nusd;
+                Console.WriteLine("USD to NAFA: " + youReceiveValue);
+            }
+
+            // Logic for INR to USDT conversion
+            // decimal inr = 80;
+            if (selectedCurrencyPay == "INR" && selectedCurrencyReceive == "USDT")
+            {
+                var payamount = youPayValue - (youPayValue * Tax);
+                youReceiveValue = (payamount * usdt) / Uinr;
+                Console.WriteLine("INR to USDT: " + youReceiveValue);
+            }
+
+            // Logic for INR to NAFA conversion
+            if (selectedCurrencyPay == "INR" && selectedCurrencyReceive == "NAFA")
+            {
+                var payamount = youPayValue - (youPayValue * NTax);
+                youReceiveValue = (payamount * nafa) / Ninr;
+                Console.WriteLine("INR to NAFA: " + youReceiveValue);
+            }
+
+            // Logic for AED to USDT conversion
+            decimal aed = 23.12M;
+            decimal Uaed = (Uinr * aed) / inr;
+            decimal Naed = (Ninr * aed) / inr;
+
+            if (selectedCurrencyPay == "AED" && selectedCurrencyReceive == "USDT")
+            {
+                var payamount = youPayValue - (youPayValue * Tax);
+                youReceiveValue = (payamount * usdt) / Uaed;
+                Console.WriteLine("AED to USDT: " + youReceiveValue);
+            }
+
+            // Logic for AED to NAFA conversion
+            if (selectedCurrencyPay == "AED" && selectedCurrencyReceive == "NAFA")
+            {
+                var payamount = youPayValue - (youPayValue * NTax);
+                youReceiveValue = (payamount * nafa) / Naed;
+                Console.WriteLine("AED to NAFA: " + youReceiveValue);
+            }
+
+            // Error Free
+            errorDetails = new ErrorHandleDTO { IsError = false };
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            Toast.Notify(new ToastMessage
+                {
+                    Type = ToastType.Danger,
+                    Message = "An error occurred while calculating the exchange value. Please try again."
+                });
+            errorDetails = new ErrorHandleDTO
+                {
+                    IsError = true,
+                    Message = "An error occurred while calculating the exchange value. Please try again.",
+                    TechnicalMessage = ex.Message
+                };
+        }
+        finally
+        {
+            Load.Hide(); // Hide loading spinner
+        }
+    }
+
+    private async Task CalculateReceivedValue2()
+    {
+        Console.WriteLine($"{selectedCurrencyPay} , {selectedCurrencyReceive}");
+        Load.Show(); // Display loading spinner
+
+        try
+        {
+            var baseCurrency = selectedCurrencyPay;
+            var targetCurrency = selectedCurrencyReceive;
+
+            // Validate the selected currencies
+            if (string.IsNullOrEmpty(baseCurrency) || string.IsNullOrEmpty(targetCurrency))
+            {
+                errorDetails = new ErrorHandleDTO
+                    {
+                        IsError = true,
+                        Message = "Selected currency is invalid. Please check your selection.",
+                    };
+                return;
+            }
+
+            if (baseCurrency == targetCurrency)
+            {
+                errorDetails = new ErrorHandleDTO
+                    {
+                        IsError = true,
+                        Message = "Selected currency is the same. Please check your selection.",
+                    };
+                return;
+            }
+
+            // Validate the entered amount
+            if (SELLyouPayValue < 1)
+            {
+                errorDetails = new ErrorHandleDTO
+                    {
+                        IsError = true,
+                        Message = "The entered amount must be greater than 0. Please enter a valid amount to proceed."
+                    };
+                return;
+            }
+
+
+            decimal usd = 1;
+            decimal Uusd = (UinrSell * usd) / inr;
+            decimal Nusd = (NinrSell * usd) / inr;
+
+            // Logic for USD to USDT conversion
+            if (selectedCurrencyPay == "USD" && selectedCurrencyReceive == "USDT")
+            {
+                var r = (SELLyouPayValue * Uusd) / usdtSell;
+                SELLyouReceiveValue = r - (r * Tax);
+                Console.WriteLine("USD to USDT: " + SELLyouReceiveValue);
+            }
+
+            // Logic for USD to NAFA conversion
+            if (selectedCurrencyPay == "USD" && selectedCurrencyReceive == "NAFA")
+            {
+                var r = (SELLyouPayValue * Nusd) / nafaSell;
+                SELLyouReceiveValue = r - (r * NTax);
+                Console.WriteLine("USD to NAFA: " + SELLyouReceiveValue);
+            }
+
+            // Logic for INR to USDT conversion
+            // decimal inr = 80;
+            if (selectedCurrencyPay == "INR" && selectedCurrencyReceive == "USDT")
+            {
+                var r = (SELLyouPayValue * UinrSell) / usdtSell;
+                SELLyouReceiveValue = r - (r * Tax);
+                Console.WriteLine("INR to USDT: " + SELLyouReceiveValue);
+            }
+
+            // Logic for INR to NAFA conversion
+            if (selectedCurrencyPay == "INR" && selectedCurrencyReceive == "NAFA")
+            {
+                var r = (SELLyouPayValue * NinrSell) / nafaSell;
+                SELLyouReceiveValue = r - (r * NTax);
+                Console.WriteLine("INR to NAFA: " + SELLyouReceiveValue);
+            }
+
+            // Logic for AED to USDT conversion
+            decimal aed = 23.12M;
+            decimal Uaed = (UinrSell * aed) / inr;
+            decimal Naed = (NinrSell * aed) / inr;
+            if (selectedCurrencyPay == "AED" && selectedCurrencyReceive == "USDT")
+            {
+                var r = (SELLyouPayValue * Uaed) / usdtSell;
+                SELLyouReceiveValue = r - (r * Tax);
+                Console.WriteLine("AED to USDT: " + SELLyouReceiveValue);
+            }
+
+            // Logic for AED to NAFA conversion
+            if (selectedCurrencyPay == "AED" && selectedCurrencyReceive == "NAFA")
+            {
+                var r = (SELLyouPayValue * Naed) / nafaSell;
+                SELLyouReceiveValue = r - (r * NTax);
+                Console.WriteLine("AED to NAFA: " + SELLyouReceiveValue);
+            }
+
+            // Error Free
+            errorDetails = new ErrorHandleDTO { IsError = false };
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            Toast.Notify(new ToastMessage
+                {
+                    Type = ToastType.Danger,
+                    Message = "An error occurred while calculating the exchange value. Please try again."
+                });
+            errorDetails = new ErrorHandleDTO
+                {
+                    IsError = true,
+                    Message = "An error occurred while calculating the exchange value. Please try again.",
+                    TechnicalMessage = ex.Message
+                };
+        }
+        finally
+        {
+            Load.Hide(); // Hide loading spinner
+        }
+    }
+
+    // Method to Get Calculated USDT Value (without tax)
+    private decimal GetCalculatedUSDTValue(string currency)
+    {
+        CalculateReceivedValue();
+        decimal value = 0;
+        decimal usd = 1;
+
+        // Logic for USD to USDT conversion
+        if (currency == "USD")
+        {
+            value = usdt;
+        }
+
+        // Logic for INR to USDT conversion
+        if (currency == "INR")
+        {
+            value = usdt / 80;  // Assuming INR to USD conversion rate is 80
+        }
+
+        // Logic for AED to USDT conversion
+        if (currency == "AED")
+        {
+            value = usdt / 23.12M;  // Assuming AED to USD conversion rate is 23.12
+        }
+
+        return youPayValue * value;
+    }
+
+    // Method to Get Calculated NAFA Value (without tax)
+    private decimal GetCalculatedNAFAValue(string currency)
+    {
+        decimal value = 0;
+        decimal usd = 1;
+
+        // Logic for USD to NAFA conversion
+        if (currency == "USD")
+        {
+            value = nafa;
+        }
+
+        // Logic for INR to NAFA conversion
+        if (currency == "INR")
+        {
+            value = nafa / 80;  // Assuming INR to USD conversion rate is 80
+        }
+
+        // Logic for AED to NAFA conversion
+        if (currency == "AED")
+        {
+            value = nafa / 23.12M;  // Assuming AED to USD conversion rate is 23.12
+        }
+
+        return youPayValue * value;
+    }
+
+    // Method to Get Calculated USDT Value for Sell (without tax)
+    private decimal GetCalculatedUSDTValueForSell(string currency)
+    {
+        decimal value = 0;
+        decimal usd = 1;
+
+        if (usdt > 0)
+        {
+            // Logic for USD to USDT conversion
+            if (currency == "USD")
+            {
+                value = (SELLyouPayValue * usd) / usdtSell;
+            }
+
+            // Logic for INR to USDT conversion
+            if (currency == "INR")
+            {
+                value = (SELLyouPayValue * 80) / usdtSell;  // Assuming INR to USD conversion rate is 80
+            }
+
+            // Logic for AED to USDT conversion
+            if (currency == "AED")
+            {
+                value = (SELLyouPayValue * 23.12M) / usdtSell;  // Assuming AED to USD conversion rate is 23.12
+            }
+        }
+
+        return value;
+    }
+
+    // Method to Get Calculated NAFA Value for Sell (without tax)
+    private decimal GetCalculatedNAFAValueForSell(string currency)
+    {
+        decimal value = 0;
+        decimal usd = 1;
+
+        if (nafaSell > 0)
+        {
+            // Logic for USD to NAFA conversion
+            if (currency == "USD")
+            {
+                value = (SELLyouPayValue * usd) / nafaSell;
+            }
+
+            // Logic for INR to NAFA conversion
+            if (currency == "INR")
+            {
+                value = (SELLyouPayValue * 80) / nafaSell;  // Assuming INR to USD conversion rate is 80
+            }
+
+            // Logic for AED to NAFA conversion
+            if (currency == "AED")
+            {
+                value = (SELLyouPayValue * 23.12M) / nafaSell;  // Assuming AED to USD conversion rate is 23.12
+            }
+
+        }
+        return value;
+    }
+}
+
+
+<style>
+
+    .exchangeform-container {
+        margin-top: 40%;
+        margin-left: 30%;
+        height: 80%;
+        display: flex;
+        justify-content: space-evenly;
+        flex-direction: column;
+    }
+
+        .exchangeform-container input {
+            width: 10%;
+        }
+
+    .exchangeform-container1 {
+        margin-top: 50%;
+        height: 80%;
+        display: flex;
+        justify-content: space-evenly;
+        flex-direction: column;
+    }
+
+        .exchangeform-container1 input {
+            width: 100%;
+        }
+
+    .input-container {
+        border-radius: 10px;
+        width: 100%;
+        border: 1px solid #D4D9E2;
+        background-color: white;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px 15px 5px 5px;
+    }
+
+    .input-label-text {
+        padding: 0px;
+        margin: 0px 0px 0px 2px;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .input-dropdown {
+        min-width: 32px;
+    }
+
+    .main-input-field {
+        border: none;
+        font-size: 16px;
+        font-weight: bold;
+        color: #000;
+        outline: none;
+        margin-left: 2px;
+        min-width: 190px;
+    }
+
+    .exchange-btn {
+        border-radius: 24px;
+        background-color: #DF0A0A;
+        width: 100%;
+        padding: 10px 5px;
+        font-weight: bolder;
+        color: white;
+        border: none;
+    }
+</style>
