@@ -84,6 +84,22 @@ namespace VaaradhiPay.Services.Implementations
             return string.IsNullOrEmpty(userId) ? null : userId;
         }
 
+        public async Task<(string? UserId, string? UserName, string? Role, string? Error)> GetLoggedInUserDetailsAsync()
+        {
+            var httpContext = _httpContextAccessor.HttpContext;
+
+            if (httpContext?.User?.Identity?.IsAuthenticated != true)
+            {
+                return (null, null, null, "User is not logged in.");
+            }
+
+            var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userName = httpContext.User.Identity?.Name;
+            var role = httpContext.User.FindFirst(ClaimTypes.Role)?.Value;
+
+
+            return (userId, userName, role, null);
+        }
 
         public string? GetUserClaim(string claimType)
         {

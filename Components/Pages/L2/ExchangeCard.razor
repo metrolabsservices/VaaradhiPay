@@ -33,7 +33,7 @@
             </div>
 
             @* exchange Form *@
-            <ExchangeForm OnTransactionCompleted="HandleTransactionCompleted"/>
+        <ExchangeForm OnTransactionCompleted="HandleTransactionCompleted" IsBuyTab="IsBuyTab" />
 
         </div>
     </div>
@@ -51,7 +51,7 @@
     private void HandleTabChange(bool isBuy)
     {
         IsBuyTab = isBuy;
-        Console.WriteLine(isBuy ? "Buy tab is active" : "Sell tab is active");
+        // Console.WriteLine(isBuy ? "Buy tab is active" : "Sell tab is active");
     }
 
     private void HandleTransactionCompleted(ExchangeTransactionDTO transaction)

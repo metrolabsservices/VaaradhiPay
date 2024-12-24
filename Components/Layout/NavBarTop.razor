@@ -15,7 +15,10 @@
 @inject ToastService ToastService
 @inject ILoggedInUserService LoggedInUserService
 @inject ExchangeTransactionService LocalStorage
+@inject PreloadService Loader
+@inject IJSRuntime JSRuntime
 
+<Preload />
 <div class="navbar_container">
     <Image Class="logoWhiteProp NavleftWing" Src="MediaFiles/Logos/VaaradhiPay_WhiteLogo.png" Alt="Vaaradhi Pay Logo" IsResponsive="true" />
     <div class="NavRightWing d-flex justify-content-lg-between align-items-center">
@@ -33,10 +36,8 @@
                     <DropdownDivider Class="m-0">Dropdown header</DropdownDivider>
                     <DropdownItem To="" Type="DropdownItemType.Button" Class="ps-3 pe-0 px-2">
                         <form action="Account/Logout" method="post">
-                            @* Anti-forgery token *@
                             <AntiforgeryToken />
                             <button type="submit" style="border:none;background-color:white;">
-                                @* ReturnUrl is used to redirect the user after logout *@
                                 <input type="hidden" name="ReturnUrl" value="@currentUrl" />
                                 <TextWithIcon IconName="bi bi-power" IconText="Logout" />
                             </button>
@@ -52,26 +53,57 @@
 </div>
 
 @code {
+    [Parameter] public string UserRole { get; set; }
+
     private string? userName = "NA";
+
+    private string userrole = "";
     private string currentUrl = "/dashboard";
+    private List<CustomButtonModel> buttons = new();
+
 
     protected override async Task OnInitializedAsync()
     {
+        Loader.Show();
         currentUrl = "public";
 
         if (LocalStorage.LoggedInInfo != null)
         {
             userName = $"{LocalStorage.LoggedInInfo.FirstName} {LocalStorage.LoggedInInfo.LastName}";
         }
+
+
+        AssignButtonsBasedOnRole();
         StateHasChanged();
+        Loader.Hide();
+
     }
 
-    private List<CustomButtonModel> buttons = new()
+
+    private void AssignButtonsBasedOnRole()
     {
-        new CustomButtonModel { DisplayText = "Dashboard", NavigationLink = "/dashboard" },
-        new CustomButtonModel { DisplayText = "Transactions", NavigationLink = "/transactions" },
-        // new CustomButtonModel { DisplayText = "Settings", NavigationLink = "/settings" }
-    };
+        buttons = UserRole switch
+        {
+            "Admin" => new List<CustomButtonModel>
+        {
+            new CustomButtonModel { DisplayText = "Admin Dashboard", NavigationLink = "/admin-dashboard" },
+            new CustomButtonModel { DisplayText = "Manage Users", NavigationLink = "/manage-users" },
+            new CustomButtonModel { DisplayText = "Settings", NavigationLink = "/admin-settings" }
+        },
+            "SuperAdmin" => new List<CustomButtonModel>
+        {
+            new CustomButtonModel { DisplayText = "Super Admin Panel", NavigationLink = "/superadmin-panel" },
+            new CustomButtonModel { DisplayText = "System Settings", NavigationLink = "/system-settings" },
+            new CustomButtonModel { DisplayText = "Audit Logs", NavigationLink = "/audit-logs" }
+        },
+            "User" => new List<CustomButtonModel>
+        {
+            new CustomButtonModel { DisplayText = "Dashboard", NavigationLink = "/dashboard" },
+            new CustomButtonModel { DisplayText = "Transactions", NavigationLink = "/transactions" }
+        },
+            _ => new List<CustomButtonModel>() // Default for unknown or no roles
+        };
+    }
 
     private void HandleButtonClick(CustomButtonModel button)
     {
@@ -81,7 +113,7 @@
     private async Task HandleLogout()
     {
         Console.WriteLine("--------- Log out clicked ------------");
-
+        await JSRuntime.InvokeVoidAsync("refreshPage");
         try
         {
             // Call the logout endpoint via HttpClient

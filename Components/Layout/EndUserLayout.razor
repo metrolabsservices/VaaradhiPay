@@ -13,7 +13,7 @@
 <div class="layout-container">
     <!-- Header -->
     <header class="layout-header sticky-top">
-       <NavBarTop />
+        <NavBarTop UserRole="@userrole" />
     </header>
 
     <!-- Main Body -->
@@ -30,15 +30,30 @@
 
 
 @code {
-    private LoggedInUserDTO userDetails;
+    private LoggedInUserDTO userDetail;
+
+    public string userrole = "User";
 
     protected override async Task OnInitializedAsync()
     {
-        userDetails = await loggedUser.GetLoggedInUserAsync();
-        if (userDetails != null)
+        userDetail = await loggedUser.GetLoggedInUserAsync();
+        if (userDetail != null)
         {
-            LocalStorage.LoggedInInfo = userDetails;
+            LocalStorage.LoggedInInfo = userDetail;
         }
+
+
+        var userDetails = await loggedUser.GetLoggedInUserDetailsAsync();
+
+        if (!string.IsNullOrEmpty(userDetails.Error))
+        {
+            Console.WriteLine($"Error: {userDetails.Error}");
+        }
+
+        Console.WriteLine($"User ID: {userDetails.UserId}");
+        Console.WriteLine($"User Name: {userDetails.UserName}");
+        Console.WriteLine($"Roles: {userDetails.Role}");
+        userrole = userDetails.Role;
     }
 }
 

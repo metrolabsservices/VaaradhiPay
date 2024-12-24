@@ -102,20 +102,7 @@ builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSe
 
 var app = builder.Build();
 
-app.MapGet("/", context =>
-{
-    if (context.User.Identity?.IsAuthenticated ?? false)
-    {
-        // Redirect to a page for logged-in users
-        context.Response.Redirect("/home");
-    }
-    else
-    {
-        // Redirect to the public page for non-logged-in users
-        context.Response.Redirect("/public");
-    }
-    return Task.CompletedTask;
-});
+
 
 // Seed roles after building the app
 //using (var scope = app.Services.CreateScope())
@@ -132,8 +119,8 @@ app.MapGet("/", context =>
 //    }
 //}
 
-//------ Hangfire --------- 
 app.UseHangfireDashboard();
+
 RecurringJob.AddOrUpdate<ExchangeRateService>(
     "FetchAndProcessInvestmentReceipts",
     service => service.FetchAndStoreExchangeRatesAsync(),
@@ -159,18 +146,35 @@ using (var scope = app.Services.CreateScope())
 {
     await SeedData.Initialize(scope.ServiceProvider);
 }
-app.UseHttpsRedirection();
 
+app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseRouting();
+
+app.UseAuthentication(); 
+app.UseAuthorization();  
+
 app.UseAntiforgery();
+
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-
-// Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
 
-
+app.MapGet("/", context =>
+{
+    if (context.User.Identity?.IsAuthenticated ?? false)
+    {
+        // Redirect to a page for logged-in users
+        context.Response.Redirect("/home");
+    }
+    else
+    {
+        // Redirect to the public page for non-logged-in users
+        context.Response.Redirect("/public");
+    }
+    return Task.CompletedTask;
+});
 
 app.Run();

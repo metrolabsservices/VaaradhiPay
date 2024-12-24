@@ -55,6 +55,7 @@
 
 @code {
     [Parameter] public EventCallback<ExchangeTransactionDTO> OnTransactionCompleted { get; set; }
+    [Parameter] public bool IsBuyTab { get; set; }
 
     private Modal UserLogRequired = default!;
     private List<CoinType> AvailableCoins = new();
@@ -64,6 +65,11 @@
     private decimal youReceiveValue = 0;  
     private ErrorHandleDTO errorDetails = new(); 
 
+    protected override Task OnParametersSetAsync()
+    {
+        Console.WriteLine($"IsBuyTab: {IsBuyTab}"); // Log the current tab status to the console
+        return Task.CompletedTask;
+    }
 
     protected override async Task OnInitializedAsync()
     {

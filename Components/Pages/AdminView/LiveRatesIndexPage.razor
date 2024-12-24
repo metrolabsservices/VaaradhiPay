@@ -1,0 +1,65 @@
+﻿@page "/liverate"
+@using VaaradhiPay.Data
+@using VaaradhiPay.Utilities
+
+
+@inject ApplicationDbContext DbContext
+@inject ToastService Toast
+
+
+
+<div class="container-fluid row">
+    <div class="col-12 col-md-6 liverate-secondary-container">
+        <div class="d-flex justify-content-around">
+            <h3 class="text-danger fw-bold m-0">Live Rate</h3>
+            <ul>
+                <li class="">1 USDT = @inrRate INR</li>
+            </ul>
+        </div>
+
+    </div>
+    <div class="col-12 col-md-6 liverate-secondary-container">
+
+
+    </div>
+</div>
+
+@code {
+    private string inrRate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var inrRates = DbContext.Currencies
+                    .Where(c => c.ISOCode == "INR")
+                    .Select(c => c.Rate)
+                    .FirstOrDefault();
+            inrRate = inrRates.ToString();
+            inrRate = UtilityMethods.TruncateDecimalString(inrRate, 2);
+
+        }
+        catch (Exception ex)
+        {
+            Toast.Notify(new ToastMessage
+                {
+                    Type = ToastType.Danger,
+                    Message = $"Error fetching INR rate: {ex.Message}"
+                });
+        }
+    }
+}
+
+<style>
+    .liverate-secondary-container{
+        background-color: white;
+        border-radius: 15px;
+        padding: 15px;
+        height: 400px;
+        width: 100%;
+    }
+
+    .liverate-secondary-container-header{
+
+    }
+</style>
