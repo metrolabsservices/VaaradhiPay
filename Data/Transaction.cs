@@ -43,6 +43,7 @@ namespace VaaradhiPay.Data
         Approved,    // Admin approved the transaction
         Declined,    // Admin rejected the transaction
         Completed,   // Payment completed successfully
-        Cancelled    // User cancelled the transaction
+        Cancelled,    // User cancelled the transaction
+        Partial       //User filled the details partially
     }
 }

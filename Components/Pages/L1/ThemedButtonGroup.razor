@@ -1,5 +1,4 @@
-﻿
-<button class="@GetButtonClasses()" @onclick="OnClick">
+﻿<button class="@GetButtonClasses()" @onclick="OnClick">
     @Text
 </button>
 
@@ -12,9 +11,9 @@
     }
 
     [Parameter] public string Text { get; set; } = string.Empty; // Button text
-    [Parameter] public ButtonTypeCust Type { get; set; } = ButtonTypeCust.Primary;  // Default button type
+    [Parameter] public ButtonTypeCust Type { get; set; } = ButtonTypeCust.Primary; // Default button type
     [Parameter] public EventCallback OnClick { get; set; } // Event for click handler
-   
+
     private string GetButtonClasses()
     {
         return Type switch
@@ -47,18 +46,26 @@
     }
 
         .btn-primary-custom:hover {
-            background-color: #C1272D; /* Slightly darker red for hover effect */
+            background-color: #C1272D;
+            /* Slightly darker red for hover effect */
         }
 
     /* Secondary button */
     .btn-secondary-custom {
         background-color: #FCE2E0;
-        color: #DF0A0A; /* Red text for contrast */
+        color: #DF0A0A;
+        /* Red text for contrast */
     }
 
         .btn-secondary-custom:hover {
-            background-color: #F9D2CE; /* Slightly darker pink for hover effect */
+            background-color: #F9D2CE;
+            /* Slightly darker pink for hover effect */
         }
 
+    @@media (min-width: 992px) {
+        .btn-cstm {
+            width: 170px;
+        }
+    }
 </style>
 

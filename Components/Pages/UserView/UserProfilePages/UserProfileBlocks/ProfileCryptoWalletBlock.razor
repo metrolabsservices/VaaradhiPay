@@ -1,0 +1,256 @@
+﻿@page "/add-wallet"
+@using Microsoft.AspNetCore.Components.Web
+@using VaaradhiPay.DTOs
+@using VaaradhiPay.Data
+@using VaaradhiPay.Services.Implementations
+@using VaaradhiPay.Services.Interfaces
+@rendermode InteractiveServer
+@inject IJSRuntime JSRuntime
+@inject TetherWalletService tetherwalletservice
+@inject ILoggedInUserService loggedUser
+@inject ExchangeTransactionService LocalStorage
+
+<style>
+    .CryptoWallet-body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /* height: 100vh; */
+        /* background-color: #f9f9f9; */
+    }
+
+    .CryptoWallet-modal {
+        background-color: #fff;
+        border-radius: 8px;
+        /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
+        width: 350px; /* Reduced width */
+        padding: 25px; /* Reduced padding */
+        position: relative;
+    }
+
+    .modal-content {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        width: 80%;
+        color: var(--bs-modal-color);
+        pointer-events: auto;
+        background-color: var(--bs-modal-bg);
+        background-clip: padding-box;
+        border: var(--bs-modal-border-width) solid var(--bs-modal-border-color);
+        border-radius: var(--bs-modal-border-radius);
+        outline: 0;
+    }
+
+    .CryptoWallet-modal h2 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+
+    .CryptoWallet-wallettype {
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: block;
+    }
+
+    .CryptoWallet-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 24px;
+        cursor: pointer;
+        color: #000;
+    }
+
+    .CryptoWallet-wallet-types {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap; /* Allow wrapping if there are too many items to fit on one line */
+        margin-bottom: 20px;
+    }
+
+    .CryptoWallet-wallet-type {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 15px;
+        border: 2px solid #DF0A0A;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+        font-weight: bold;
+        position: relative;
+        transition: background-color 0.3s ease;
+        margin-right: 10px; /* Adds some space between the radio buttons */
+    }
+
+        .CryptoWallet-wallet-type input[type="radio"] {
+            appearance: none;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #67757C;
+            border-radius: 50%;
+            background-color: #fff;
+            cursor: pointer;
+        }
+
+            .CryptoWallet-wallet-type input[type="radio"]:checked {
+                background-color: #e60023;
+            }
+
+                .CryptoWallet-wallet-type input[type="radio"]:checked::after {
+                    content: '';
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 8px;
+                    height: 8px;
+                    background-color: #fff;
+                    border-radius: 50%;
+                }
+
+        .CryptoWallet-wallet-type label {
+            cursor: pointer;
+            margin-left: 20px;
+        }
+
+    .CryptoWallet-form-group {
+        margin-bottom: 15px;
+    }
+
+        .CryptoWallet-form-group label {
+            font-size: 12px;
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+    .CryptoWallet-input {
+        width: 100%;
+        height: 40px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 0 10px;
+        font-size: 14px;
+    }
+
+    .CryptoWallet-save-btn {
+        width: 180px;
+        height: 40px;
+        background-color: #DF0A0A;
+        border: none;
+        border-radius: 20px;
+        color: #fff;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+        .CryptoWallet-save-btn:hover {
+            background-color: #cc001f;
+        }
+
+    .open-modal-btn {
+        background-color: #e60023;
+        border: none;
+        border-radius: 20px;
+        color: #fff;
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        margin: 20px;
+        transition: background-color 0.3s ease;
+    }
+
+        .open-modal-btn:hover {
+            background-color: #cc001f;
+        }
+</style>
+
+
+<div>
+    <EditForm Model="@wallet" OnValidSubmit="HandleFormSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="CryptoWallet-wallet-types">
+            @foreach (var walletType in WalletTypes)
+            {
+                <div class="CryptoWallet-wallet-type">
+                    <input type="radio" id="@walletType.Key" name="wallet-type" @onchange="(e) => UpdateWalletType(e, walletType.Key)" checked="@IsSelected(wallet.WalletType, walletType.Key)" />
+                    <label for="@walletType.Key">@walletType.Value</label>
+                </div>
+            }
+        </div>
+
+        <div class="CryptoWallet-form-group">
+            <label for="wallet-name">Crypto Wallet Name</label>
+            <InputText id="CryptoWallet-name" class="CryptoWallet-input" @bind-Value="wallet.WalletName" />
+        </div>
+
+        <div class="CryptoWallet-form-group">
+            <label for="CryptoWallet-address">Crypto Wallet Address</label>
+            <InputText id="CryptoWallet-address" class="CryptoWallet-input" @bind-Value="wallet.WalletAddress" />
+        </div>
+
+        <div class="CryptoWallet-buttondiv text-center">
+            <button class="CryptoWallet-save-btn" type="submit">Save</button>
+        </div>
+
+    </EditForm>
+</div>
+
+@code {
+    private TetherWallet wallet = new TetherWallet();
+
+    [Parameter] public EventCallback OnFormSubmit { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        wallet.UserId = LocalStorage.LoggedInInfo.Id;
+    }
+
+    private async void HandleFormSubmit()
+    {
+        // wallet.UserId = userDetails.Id;
+        Console.WriteLine($"Wallet Name: {wallet.WalletName}");
+        Console.WriteLine($"Wallet Address: {wallet.WalletAddress}");
+        Console.WriteLine($"Selected Wallet Type: {wallet.WalletType}");
+
+        await tetherwalletservice.AddTetherWalletAsync(wallet);
+
+        wallet = new TetherWallet();
+
+        // Save logic here (e.g., API call or database save)
+        await OnFormSubmit.InvokeAsync();
+    }
+    private Dictionary<string, string> WalletTypes { get; set; } = new()
+    {
+        { "bep20", "BEP20" },
+        { "erc20", "ERC20" },
+        { "trc20", "TRC20" }
+    };
+
+    private void UpdateWalletType(ChangeEventArgs e, string key)
+    {
+        wallet.WalletType = key;
+        Console.WriteLine("Updated Selected Wallet Type: " + key);
+    }
+
+    private bool IsSelected(string selectedValue, string value)
+    {
+        return selectedValue == value;
+    }
+}

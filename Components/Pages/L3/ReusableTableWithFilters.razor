@@ -1,0 +1,413 @@
+﻿@using VaaradhiPay.Components.Pages.AdminView
+@using VaaradhiPay.Services.Interfaces
+@using VaaradhiPay.Components.Pages.TransactionsPages
+@using static VaaradhiPay.Components.Pages.AdminView.CheckTransactionStatus
+@inject CheckTransactionStatus transactionstatus
+
+@typeparam TItem
+
+@inject IPaginationService<TItem> PaginationService
+
+<style>
+    .table-container {
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        margin-top: 50px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-left: 80px;
+        margin-right: 80px;
+    }
+
+    .table-header {
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+         
+       
+    }
+
+
+    .table-bordered {
+        width: 100%;
+        border-collapse: collapse;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+        .table-bordered th, .table-bordered td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        .table-bordered th {
+            background-color: #f3f4f6;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .table-bordered tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+
+    .pagination {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        margin-top: 15px;
+        gap: 5px;
+    }
+
+        .pagination span {
+            margin: 0 10px;
+            color: #333;
+        }
+
+    .btn {
+        border-radius: 4px;
+    }
+
+    .btn-outline-danger {
+        background-color: #fff;
+        color: #dc3545;
+        border: 1px solid #dc3545;
+    }
+
+        .btn-outline-danger:hover {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+    .form-control {
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        height: 36px;
+    }
+
+    .form-select {
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        height: 36px;
+        width: 40%;
+    }
+
+    .clear-search-btn {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+        font-size: 14px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+    }
+
+    button.btn-reset {
+        width: 80px !important;
+        height: 36px !important;
+        border-color: #DF0A0A !important;  
+        color: #DF0A0A !important;  
+    }
+
+    button.btn-add {
+        width: 100px !important;
+        height: 36px !important;
+        background-color: #DF0A0A !important;
+        color: white; /* Ensure the text color remains consistent */
+    }
+
+        button.btn-add:hover {
+            background-color: #DF0A0A !important;  
+            color: white !important;  
+            border: none;  
+            box-shadow: none;  
+        }
+
+</style>
+
+
+<div class="table-container">
+
+    <div style="border-bottom: 2px solid #D4D9E2;">
+        <div class="table-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <select @bind="SelectedFilter" @bind:event="onchange" class="form-select me-2">
+                    <option value="">All</option>
+                    @foreach (var filter in Filters ?? new List<string>())
+                    {
+                        <option value="@filter">@filter</option>
+                    }
+                </select>
+                <div class="position-relative">
+                    <!-- Search Input Field -->
+                    <input @bind-value="SearchTerm" @bind-value:event="oninput" class="form-control" placeholder="Search" />
+
+                    <!-- Clear Button for Search Term -->
+                    @if (!string.IsNullOrEmpty(SearchTerm))
+                    {
+                        <button class="clear-search-btn btn btn-link text-secondary fw-bold text-decoration-none" @onclick="ClearSearch">X</button>
+                    }
+                </div>
+
+            </div>
+            <div>
+                <button class="btn me-2 btn-reset" @onclick="ResetFilters">Reset</button>
+                @if (AddButtonAction.HasDelegate)
+                {
+                    <button class="btn text-white btn-add" @onclick="AddButtonAction">+ Add</button>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div style="overflow-x:auto;">
+        <table class="table mt-3" style="width:1500px;">
+            <thead>
+                <tr>
+                    @foreach (var header in Headers ?? new List<string>())
+                    {
+                        <th>@header</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @if (PaginatedItems.Any())
+                {
+                    @foreach (var item in PaginatedItems)
+                    {
+                        <tr>
+                            @foreach (var property in ItemProperties ?? new List<string>())
+                            {
+                                <td>@GetColumnValue(item, property)</td>
+                                @if (property.Contains("Status"))
+                                {
+                                    <button class="btn btn-info btn-sm" @onclick="(() => transactionstatus.OpenStatusModal(item as FinancialTransactionDto))">
+                                       Status
+                                    </button>
+                                }
+                            }
+
+                            <td class="text-center">
+                                @if (OnView.HasDelegate || !IsViewOnly)
+                                {
+                                    <button class="btn btn-info btn-sm" @onclick="(() => ViewItem(item))">
+                                        <i class="bi bi-eye"></i> View
+                                    </button>
+                                }
+                                <!-- Conditionally show the Edit button if OnEdit is provided -->
+                                @if (OnEdit.HasDelegate)
+                                {
+                                    <button class="btn btn-warning btn-sm" @onclick="(() => EditItem(item))">Edit</button>
+                                }
+
+                                <!-- Conditionally show the Delete button if OnDelete is provided -->
+                                @if (OnDelete.HasDelegate)
+                                {
+                                    <button class="btn btn-danger btn-sm" @onclick="(() => DeleteItem(item))">Delete</button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="@Headers?.Count ?? 1" class="text-center">No Records Found</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <CustomPagination CurrentPage="@CurrentPage"
+                     TotalPages="@TotalPages"
+                     totalRecords="@FilteredItems.Count"
+                     PageSize="@PageSize"
+                     OnPageChange="ChangePage"
+                     OnPageSizeChange="ChangePageSize" />
+</div>
+<Modal @ref="ViewModal" Title="Items Details">
+    <BodyTemplate>
+        <div class="modal-body">
+            @if (SelectedItem != null)
+            {
+                @foreach (var property in ItemProperties ?? new List<string>())
+                {
+                    <p><strong>@property:</strong> @GetColumnValue(SelectedItem, property)</p>
+                }
+            }
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" @onclick="CloseModal">Close</button>
+        </div>
+
+    </BodyTemplate>
+
+</Modal>
+@code {
+    [Parameter] public List<string> ItemProperties { get; set; } = new();
+    [Parameter] public List<TItem> Items { get; set; } = new();
+    [Parameter] public List<string> Filters { get; set; } = new();
+    [Parameter] public string SearchTerm { get; set; } = string.Empty;
+    [Parameter] public List<string> Headers { get; set; } = new();
+    [Parameter] public EventCallback AddButtonAction { get; set; }
+    [Parameter] public EventCallback<object> OnView { get; set; }
+    [Parameter] public bool IsViewOnly { get; set; }
+    public int PageSize { get; set; } = 5;
+    private Modal ViewModal = default!;
+    [Parameter] public Func<TItem, string?> FilterSelector { get; set; }
+
+    [Parameter] public EventCallback<TItem> OnEdit { get; set; }
+    [Parameter] public EventCallback<TItem> OnDelete { get; set; }
+
+    private string SelectedFilter { get; set; } = string.Empty;
+    private int CurrentPage { get; set; } = 1;
+    private int TotalPages => (int)Math.Ceiling(FilteredItems.Count / (double)PageSize);
+    private bool CanNavigateToNextPage => CurrentPage < TotalPages;
+    private bool CanNavigateToPreviousPage => CurrentPage > 1;
+
+    [Parameter] public EventCallback<string> OnSearchChanged { get; set; }
+
+    private TItem? SelectedItem { get; set; }
+    private bool IsModalOpen { get; set; } = false;
+
+    private void ClearSearch()
+    {
+        SearchTerm = string.Empty;
+        CurrentPage = 1;
+        OnSearchChanged.InvokeAsync(SearchTerm);
+    }
+
+    private async Task EditItem(TItem item)
+    {
+        await OnEdit.InvokeAsync(item);
+    }
+
+    private async Task DeleteItem(TItem item)
+    {
+        await OnDelete.InvokeAsync(item);
+    }
+
+    private string GetColumnValue(TItem item, string property)
+    {
+        var propertyInfo = typeof(TItem).GetProperty(property);
+        return propertyInfo?.GetValue(item)?.ToString() ?? string.Empty;
+    }
+
+    // Apply global search to all items
+    private List<TItem> ApplySearch(List<TItem> items)
+    {
+        if (string.IsNullOrEmpty(SearchTerm)) return items;
+
+        return items.Where(item =>
+            ItemProperties.Any(property =>
+            {
+                var propertyInfo = typeof(TItem).GetProperty(property);
+                var value = propertyInfo?.GetValue(item)?.ToString();
+                return !string.IsNullOrEmpty(value) &&
+                       value.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase);
+            })).ToList();
+    }
+
+    private List<TItem> ApplyFilter(List<TItem> items)
+    {
+        if (string.IsNullOrEmpty(SelectedFilter) || FilterSelector == null) return items;
+        return items
+            .Where(item => FilterSelector(item) == SelectedFilter)
+            .ToList();
+    }
+
+    // This is the updated `FilteredItems` property:
+    private List<TItem> FilteredItems
+    {
+        get
+        {
+            // Apply search to all items
+            var allItems = ApplySearch(Items);
+            // Apply filter to the search results
+            return ApplyFilter(allItems);
+        }
+    }
+
+    // Paginate the filtered items
+    private List<TItem> PaginatedItems
+    {
+        get
+        {
+            // Get the items after applying the search and filter
+            var items = FilteredItems;
+            // Apply pagination based on the filtered items
+            return items
+                .Skip((CurrentPage - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+        }
+    }
+
+    private async void ResetFilters()
+    {
+        SearchTerm = string.Empty;
+        SelectedFilter = string.Empty;
+        CurrentPage = 1;
+        Console.WriteLine($"Filters reset: {SelectedFilter}");
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void FilterChanged(ChangeEventArgs e)
+    {
+        SelectedFilter = e.Value?.ToString() ?? string.Empty;
+        CurrentPage = 1; // Reset to the first page on filter change
+    }
+
+    private void PreviousPage()
+    {
+        if (CanNavigateToPreviousPage) CurrentPage--;
+    }
+
+    private void NextPage()
+    {
+        if (CanNavigateToNextPage) CurrentPage++;
+    }
+
+    private void OnPageSizeChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int newPageSize) && newPageSize > 0)
+        {
+            PageSize = newPageSize;
+            CurrentPage = 1; // Reset to the first page
+        }
+    }
+
+    private async Task ChangePage(int newPage)
+    {
+        if (newPage >= 1 && newPage <= TotalPages)
+        {
+            CurrentPage = newPage;
+        }
+    }
+
+    private async Task ChangePageSize(int newSize)
+    {
+        if (newSize > 0)
+        {
+            PageSize = newSize;
+            CurrentPage = 1; // Reset to first page when page size changes
+        }
+    }
+
+    private async Task ViewItem(TItem item)
+    {
+        SelectedItem = item;
+        await ViewModal.ShowAsync();
+    }
+
+    private async Task CloseModal()
+    {
+        await ViewModal.HideAsync();
+        SelectedItem = default;
+    }
+}

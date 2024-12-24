@@ -1,5 +1,461 @@
-﻿<h3>ProfileIndexPage</h3>
+﻿@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.VisualBasic
+@using VaaradhiPay.DTOs
+@using VaaradhiPay.Data
+@using VaaradhiPay.Services.Implementations
+@using VaaradhiPay.Services.Interfaces
+@rendermode InteractiveServer
+@inject BankAccountService bankAccountService
+@inject ILoggedInUserService loggedUser
+@inject IJSRuntime JSRuntime
+@inject TetherWalletService tetherwalletservice
+@inject UPIAddressService UpiAddressService
 
-@code {
+<!-- #region Profile cart css -->
+
+
+<style>
+    .user-profile-profile-crypto-wallet {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .user-profile-profile-crypto-wallet-header h2 {
+        font-size: 14px;
+        font-weight: 400;
+        text-transform: uppercase;
+        color: #000000;
+        letter-spacing: 3px;
+        padding: 10px 0 0 35px;
+    }
+
+    .user-profile-profile-crypto-wallet-header p {
+        font-size: 14px;
+        font-weight: 600;
+        color: #67757C;
+        padding: 8px 0 0 35px;
+    }
+
+    .user-profile-profile-crypto-wallet-add {
+        cursor: pointer;
+        display: flex;
+        padding-right: 80px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+        .user-profile-profile-crypto-wallet-add h1 {
+            font-weight: 600;
+            font-size: 14px;
+            columns: #000000;
+            text-transform: uppercase;
+            margin: 0%;
+        }
+
+        .user-profile-profile-crypto-wallet-add i {
+            font-size: 2rem;
+        }
+
+    .user-profile-profile-hr1 {
+        width: 90%;
+        margin: 0 0 0 30px;
+    }
+
+    .hashed-background {
+         border-radius:4px;
+         font-size: 13px;
+        margin-bottom:-5px;
+        color:#67757C;
+        
+    }
+    /* Custom class for hr element */
+.custom-hr {
+    margin: 1rem 0;               /* Space above and below the horizontal line */
+    color: #D4D9E2;          /* Color of the horizontal line */
+    border: 0;                    /* Removes the default border */
+    border-bottom: 2px solid #333;  /* Custom solid line with thickness and color */
+    margin-bottom:0px;
+    min-width: 280px
 
 }
+
+    .user-profile-profile-scroller  {
+        max-height: 75px;
+        overflow: hidden;
+        -ms-overflow-style: none; /* hide scrollbar in ie and edge */
+        scrollbar-width: none; /* hide scrollbar in firefox */
+    }
+
+    .user-profile-profile-scroller::-webkit-scrollbar {
+            display: none; /* hide scrollbar in chrome, safari, and opera */
+        }
+
+
+    .user-profile-profile-icon i:hover {
+        color: #007bff; /* change color on hover */
+        transition: color 0.3s ease;
+    }
+
+
+</style>
+
+<!-- #endregion -->
+
+<div class="user-profile-profile-crypto-wallet">
+    <div class="user-profile-profile-crypto-wallet-header">
+        <h2>Crypto Wallet</h2>
+        @if (TetherWalletList.Count <= 0)
+        {
+            <p>No details to show</p>
+        }
+        else
+        {
+            <div class="user-profile-profile-scroller overflow-auto ps-5" style="max-height: 75px;">
+                @foreach (var wallet in TetherWalletList)
+                {
+                    <div class="d-flex align-items-center hashed-background">
+                        <span>
+                            <i class="bi bi-wallet"></i>
+                            @wallet.WalletName, @wallet.WalletAddress
+                        </span>
+
+                        <!-- Info Icon: Hover or click to set modal data -->
+                        <span class="user-profile-profile-icon ms-2" style="cursor: pointer;"
+                              @onmouseover="() => SetSelectedWallet(wallet)">
+                            <i class="bi bi-info-circle text-secondary me-2"></i>
+                        </span>
+                    </div>
+
+                    <hr class="custom-hr" />
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Modal for displaying full wallet details -->
+    <div class="modal fade" id="cryptoWalletModal" tabindex="-1" aria-labelledby="cryptoWalletModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cryptoWalletModalLabel">Crypto Wallet Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @if (SelectedWallet != null)
+                    {
+                        <div class="row mb-3">
+                            <div class="col-4 fw-bold">Wallet Name:</div>
+                            <div class="col-8">@SelectedWallet.WalletName</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-4 fw-bold">Wallet Address:</div>
+                            <div class="col-8">@SelectedWallet.WalletAddress</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-4 fw-bold">Wallet Type:</div>
+                            <div class="col-8">@SelectedWallet.WalletType</div>
+                        </div>
+                    }
+                    else
+                    {
+                        <p>No details available.</p>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="user-profile-profile-crypto-wallet-add" @onclick='() => OpenModal("CryptoWallet")'>
+        <i class="bi bi-plus"></i>
+        <h1>Add</h1>
+    </div>
+</div>
+
+<hr class="user-profile-profile-hr1">
+
+<div class="user-profile-profile-crypto-wallet">
+    <div class="user-profile-profile-crypto-wallet-header">
+        <h2>Bank Account Details</h2>
+        @if (BankAccountDetails.Count <= 0)
+        {
+            <p>No details to show</p>
+        }
+        else
+        {
+            <div class="user-profile-profile-scroller overflow-auto ps-5" style="max-height: 75px;">
+                @foreach (var account in BankAccountDetails)
+                {
+                    <div class="d-flex align-items-center hashed-background">
+                        <!-- Display Account Info (Last 4 digits of Account Number) -->
+                        <span>
+                            <i class="bi bi-bank"></i>
+                            @account.AccountHolderName, @account.BankName, ***-***-@account.AccountNumber.Substring(account.AccountNumber.Length - 4)
+                        </span>
+
+                        <!-- Info Icon: Hover to show modal with full details -->
+                        <span class="user-profile-profile-icon ms-2" style="cursor: pointer;" onmouseover="openModal('@account.AccountNumber')">
+                            <i class="bi bi-info-circle text-secondary me-2"></i>
+                        </span>
+                    </div>
+                    <hr class="custom-hr" />
+
+                    <!-- Modal for displaying full bank account details -->
+                    <div class="modal fade" id="bankAccountModal-@account.AccountNumber" tabindex="-1" aria-labelledby="bankAccountModalLabel-@account.AccountNumber" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="bankAccountModalLabel-@account.AccountNumber">Bank Account Details</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row mb-3">
+                                        <div class="col-4 fw-bold">Account Holder:</div>
+                                        <div class="col-8">@account.AccountHolderName</div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-4 fw-bold">Bank Name:</div>
+                                        <div class="col-8">@account.BankName</div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-4 fw-bold">Account Number:</div>
+                                        <div class="col-8">@account.AccountNumber</div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-4 fw-bold">Branch Code:</div>
+                                        <div class="col-8">@account.BranchCode</div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-4 fw-bold">IFSC Code:</div>
+                                        <div class="col-8">@account.IFSCCode</div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-4 fw-bold">Currency Type:</div>
+                                        <div class="col-8">@account.CurrencyType</div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-4 fw-bold">Account Type:</div>
+                                        <div class="col-8">@account.AccountType</div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-4 fw-bold">Active:</div>
+                                        <div class="col-8">@((account.IsActive ? "Yes" : "No"))</div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-4 fw-bold">Verified:</div>
+                                        <div class="col-8">@((account.IsVerified ? "Yes" : "No"))</div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-4 fw-bold">Last Updated:</div>
+                                        <div class="col-8">@account.UpdatedDateTime.ToString("yyyy-MM-dd HH:mm:ss")</div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="user-profile-profile-crypto-wallet-add" @onclick='() => OpenModal("Bank")'>
+        <i class="bi bi-plus"></i>
+        <h1>Add</h1>
+    </div>
+</div>
+
+
+
+<hr class="user-profile-profile-hr1">
+<div class="user-profile-profile-crypto-wallet">
+    <div class="user-profile-profile-crypto-wallet-header">
+        <h2>UPI Details</h2>
+        @if (UPIAddressList.Count <= 0)
+        {
+            <p>No details to show</p>
+        }
+        else
+        {
+            <div class="user-profile-profile-scroller overflow-auto ps-5" style="max-height: 75px;">
+                @foreach (var upi in UPIAddressList)
+                {
+                    <div class="d-flex align-items-center hashed-background">
+                        <span>
+                            <i class="bi bi-bank"></i>
+                            @upi.UpiUserName, @upi.Address
+                        </span>
+
+                        <!-- Info Icon: Hover or click to set modal data -->
+                       <span class="user-profile-profile-icon ms-2" style="cursor: pointer;" 
+                              @onmouseover="() => SetSelectedUPI(upi)">
+                            <i class="bi bi-info-circle text-secondary me-2"></i>
+                        </span>
+                    </div>
+
+                    <hr class="custom-hr" />
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Modal for displaying full UPI details -->
+    <div class="modal fade" id="upiModal" tabindex="-1" aria-labelledby="upiModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="upiModalLabel">UPI Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @if (SelectedUPI != null)
+                    {
+                        <div class="row mb-3">
+                            <div class="col-4 fw-bold">Name:</div>
+                            <div class="col-8">@SelectedUPI.UpiUserName</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-4 fw-bold">UPI Address:</div>
+                            <div class="col-8">@SelectedUPI.Address</div>
+                        </div>
+                    }
+                    else
+                    {
+                        <p>No details available.</p>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="user-profile-profile-crypto-wallet-add" @onclick='() => OpenModal("UPI")'>
+        <i class="bi bi-plus"></i>
+        <h1>Add</h1>
+    </div>
+</div>
+
+ <Modal @ref="UpiModal" IsScrollable="true"/>
+ <Modal @ref="BankModal" IsScrollable="true"/>
+ <Modal @ref="CryptoModal" IsScrollable="true"/>
+
+
+
+
+@code {
+    private BankAccount SelectedBankAccount { get; set; }
+
+    private UPIAddress SelectedUPI { get; set; }
+    private TetherWallet SelectedWallet { get; set; } // Selected wallet for modal
+    private List<BankAccount> BankAccountDetails = new();
+    private List<TetherWallet> TetherWalletList { get; set; } = new List<TetherWallet>(); // List of wallets
+    private List<UPIAddress> UPIAddressList { get; set; } = new List<UPIAddress>(); // List of wallets
+
+    private LoggedInUserDTO userDetails;
+
+    private Modal UpiModal = default!;
+    private Modal BankModal = default!;
+    private Modal CryptoModal = default!;
+
+    private async Task SetSelectedUPI(UPIAddress upi)
+    {
+        SelectedUPI = upi;
+        await JSRuntime.InvokeVoidAsync("openUPIModal");
+
+    }
+    private void SetSelectedBankAccount(BankAccount account)
+    {
+        SelectedBankAccount = account;
+    }
+    private async Task SetSelectedWallet(TetherWallet wallet)
+    {
+        SelectedWallet = wallet;
+
+        // Trigger modal to open programmatically
+        await JSRuntime.InvokeVoidAsync("openWalletModal");
+    }
+
+
+
+    private async Task OpenModal(string modaltype)
+    {
+
+        if (modaltype == "UPI")
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "OnFormSubmit", EventCallback.Factory.Create(this, CloseUPIModal) }
+            }; 
+
+            await UpiModal.ShowAsync<ProfileUPIBlock>(title: "Upi Form", parameters: parameters);
+        }
+        else if (modaltype == "Bank")
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "OnFormSubmit", EventCallback.Factory.Create(this, CloseBankModal) }
+            }; 
+
+            await BankModal.ShowAsync<ProfileBankBlock>(title: "Bank Form", parameters: parameters);
+
+        }
+        else if (modaltype == "CryptoWallet")
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "OnFormSubmit", EventCallback.Factory.Create(this, CloseCryptoModal) }
+            }; 
+
+            await CryptoModal.ShowAsync<ProfileCryptoWalletBlock>(title: "CryptoWallet Form", parameters: parameters);
+
+        }
+
+    }
+
+    private async Task CloseUPIModal()
+    {
+        await UpiModal.HideAsync();
+    }
+    private async Task CloseBankModal()
+    {
+        await BankModal.HideAsync();
+    }
+    private async Task CloseCryptoModal()
+    {
+        await CryptoModal.HideAsync();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        userDetails = await loggedUser.GetLoggedInUserAsync();
+
+        BankAccountDetails = await bankAccountService.GetBankAccountsByUserIdAsync(userDetails.Id);
+        TetherWalletList = await tetherwalletservice.GetActiveTetherWalletsByUserAsync(userDetails.Id);
+        UPIAddressList = await UpiAddressService.GetActiveUPIAddressesByUserAsync(userDetails.Id);
+    }
+}
+<script>
+    function openModal(accountNumber) {
+        var modal = new bootstrap.Modal(document.getElementById('bankAccountModal-' + accountNumber));
+        modal.show();
+    }
+
+    function openUPIModal() {
+        // Trigger the modal open action
+        var modal = new bootstrap.Modal(document.getElementById('upiModal'));
+        modal.show();
+    }
+
+    window.openWalletModal = function () {
+        var modal = new bootstrap.Modal(document.getElementById('cryptoWalletModal'));
+        modal.show();
+    };
+
+</script>
+

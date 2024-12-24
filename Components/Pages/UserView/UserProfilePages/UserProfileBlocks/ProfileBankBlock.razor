@@ -1,0 +1,427 @@
+﻿@using VaaradhiPay.Components.Pages.TestingByChandu
+@using VaaradhiPay.DTOs
+@using VaaradhiPay.Data
+@using VaaradhiPay.Services.Implementations
+@using VaaradhiPay.Services.Interfaces
+@inject BankAccountService bankAccountService
+@inject ExchangeTransactionService LocalStorage
+@inject IFileStorageService fileStorageService
+
+<style>
+    .user-profile-bankaccount-overflow-auto {
+        max-height: 75px;
+        overflow: hidden;
+        -ms-overflow-style: none; /* Hide scrollbar in IE and Edge */
+        scrollbar-width: none; /* Hide scrollbar in Firefox */
+    }
+
+        .user-profile-bankaccount-overflow-auto::-webkit-scrollbar {
+            display: none; /* Hide scrollbar in Chrome, Safari, and Opera */
+        }
+
+
+    .user-profile-bankaccount-ms-2 i:hover {
+        color: #007bff; /* Change color on hover */
+        transition: color 0.3s ease;
+    }
+
+    /* Modal Styling */
+    .user-profile-bankaccount-open-modal-btn {
+        background-color: #e60023;
+        border: none;
+        border-radius: 20px;
+        color: #fff;
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        margin: 20px;
+        transition: background-color 0.3s ease;
+    }
+
+    .user-profile-bankaccount-customfileinput {
+        margin-left: 42px;
+    }
+
+    .user-profile-bankaccount-open-modal-btn:hover {
+        background-color: #cc001f;
+    }
+
+    .user-profile-bankaccount-input-fields-div {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+        .user-profile-bankaccount-input-fields-div label {
+            align-items: start !important;
+            text-align-last;
+        }
+
+
+    .user-profile-bankaccount-bank-account-body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .user-profile-bankaccount-bank-account-modal {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 500px;
+        padding: 30px;
+        position: relative;
+    }
+
+        .user-profile-bankaccount-bank-account-modal h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+    .user-profile-bankaccount-bank-account-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 24px;
+        cursor: pointer;
+        color: #000;
+    }
+
+    .user-profile-bankaccount-bank-account-form-group {
+        margin-bottom: 15px;
+        padding-right: 0px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        align-content: flex-start;
+    }
+
+
+        .user-profile-bankaccount-bank-account-form-group label {
+            font-size: 12px;
+            display: block;
+            margin-bottom: 5px;
+            text-align: left;
+            color: #666;
+        }
+
+
+    .user-profile-bankaccount-bank-account-input {
+        width: 356px;
+        height: 50px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 0 10px;
+        font-size: 14px;
+    }
+
+
+    .user-profile-bankaccount-bank-account-save-btn {
+        margin-top: 30px;
+        width: 180px;
+        height: 40px;
+        background-color: #DF0A0A;
+        border: none;
+        border-radius: 20px;
+        color: #fff;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+        .user-profile-bankaccount-bank-account-save-btn:hover {
+            background-color: #cc001f;
+        }
+
+    .user-profile-bankaccount-open-modal-btn {
+        background-color: #e60023;
+        border: none;
+        border-radius: 20px;
+        color: #fff;
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        margin: 20px;
+        transition: background-color 0.3s ease;
+    }
+
+        .user-profile-bankaccount-open-modal-btn:hover {
+            background-color: #cc001f;
+        }
+
+
+    .user-profile-bankaccount-closemodel {
+        color: black;
+        font-size: 20px;
+        font-weight: 30px;
+    }
+
+
+    .user-profile-bankaccount-modal-content {
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-profile-bankaccount-modal-header {
+        border-bottom: 1px solid #ddd;
+    }
+
+    .user-profile-bankaccount-modal-title {
+        width: 217px;
+        height: 28px;
+        top: 32px;
+        left: 23px;
+        gap: 0px;
+        opacity: 0px;
+        font-size: 18px;
+        font-weight: 650;
+        line-height: 55px;
+    }
+
+    .user-profile-bankaccount-modal-body {
+        padding: 20px;
+    }
+
+    /* Form Styling */
+    .user-profile-bankaccount-form-group {
+        margin-bottom: 15px;
+    }
+
+    font-weight: 600;
+
+
+
+    .user-profile-bankaccount-label {
+        font-family: Poppins;
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 5px;
+        line-height: 55px;
+        display: block;
+        color: #67757C;
+    }
+
+    .user-profile-bankaccount-labelfont {
+        display: inline-block;
+        margin-bottom: .5rem;
+        color: #67757C;
+    }
+
+    .user-profile-bankaccount-form-control {
+        width: 100%;
+        padding: 23px 12px;
+        font-size: 0.9rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+        .user-profile-bankaccount-form-control:focus {
+            border-color: #007bff;
+            outline: none;
+            background-color: #fff;
+        }
+
+    /* File Input */
+    .user-profile-bankaccount-custom-file-container {
+        position: relative;
+        width: 91%;
+        border-radius: 4px;
+        padding: 8px;
+        background-color: #f9f9f9;
+        cursor: pointer;
+    }
+
+    .user-profile-bankaccount-custom-file-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #666;
+        font-size: 0.9rem;
+        cursor: pointer;
+        padding: 7px 12px;
+    }
+
+    .user-profile-bankaccount-custom-file-input {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 36px;
+        height: 50px;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .user-profile-bankaccount-custom-file-label::after {
+        position: absolute;
+        top: 4px;
+        right: 0;
+        bottom: 0;
+        margin: 4px;
+        z-index: 3;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: calc(1.5em + .75rem);
+        padding: 19px 10px;
+        line-height: 1.5;
+        color: black;
+        content: "Browse File";
+        background-color: #FCE2E0;
+        border-left: inherit;
+        border-radius: 4px;
+        font-size: 15px;
+        font-weight: 600; /* Slightly bold */
+    }
+
+
+    .user-profile-bankaccount-note {
+        font-size: 0.8rem;
+        color: red;
+        margin: 5px 0;
+    }
+
+    /* Save Button */
+    .user-profile-bankaccount-btn-save {
+        margin-top: 30px;
+        background-color: #e60023;
+        color: #fff;
+        padding: 8px 16px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 24px;
+        cursor: pointer;
+        width: 180px;
+    }
+
+        .user-profile-bankaccount-btn-save:hover {
+            background-color: #d62828;
+            color: #fff;
+        }
+
+    }
+
+    .user-profile-bankaccount-modal-header .close {
+        padding: 1rem 1rem;
+        margin: -1rem -1rem -1rem auto;
+        width: 16px;
+        height: 16px;
+        top: -0px;
+        gap: 0px;
+        opacity: 0px;
+        background: #000000;
+    }
+
+</style>
+
+<div>
+
+    <EditForm Model="BankAccountModel" OnValidSubmit="SaveBankAccount" class="form">
+        <div class="user-profile-bankaccount-input-fields-div">
+            <div class="user-profile-bankaccount-bank-account-form-group">
+                <label for="BankName"> Bank Name</label>
+                <InputText id="BankName" class="user-profile-bankaccount-bank-account-input" @bind-Value="BankAccountModel.BankName" placeholder="" />
+            </div>
+            <div class="user-profile-bankaccount-bank-account-form-group">
+                <label for="AccountName">Bank Account Name</label>
+                <InputText id="AccountName" class="user-profile-bankaccount-bank-account-input" @bind-Value="BankAccountModel.AccountHolderName" placeholder="" />
+            </div>
+            <div class="user-profile-bankaccount-bank-account-form-group">
+                <label for="AccountNumber">Bank Account Number</label>
+                <InputText id="AccountNumber" class="user-profile-bankaccount-bank-account-input" @bind-Value="BankAccountModel.AccountNumber" placeholder="" />
+            </div>
+            <div class="user-profile-bankaccount-bank-account-form-group">
+                <label for="branchcode">Branch Code</label>
+                <InputText id="branchcode" class="user-profile-bankaccount-bank-account-input" @bind-Value="BankAccountModel.BranchCode" placeholder="" />
+            </div>
+            <div class="user-profile-bankaccount-bank-account-form-group">
+                <label for="IFSCCode">IFSC Code</label>
+                <InputText id="IFSCCode" class="user-profile-bankaccount-bank-account-input" @bind-Value="BankAccountModel.IFSCCode" placeholder="" />
+            </div>
+            <div class="user-profile-bankaccount-bank-account-form-group">
+                <label for="CurrencyType">Currency Type</label>
+                <InputSelect id="CurrencyType" class="user-profile-bankaccount-bank-account-input" @bind-Value="BankAccountModel.CurrencyType">
+                    <option value="" disabled selected>Select Currency</option>
+                    <option value="USD">USD</option>
+                    <option value="INR">INR</option>
+                    <option value="AED">AED</option>
+                </InputSelect>
+            </div>
+            <div class="user-profile-bankaccount-bank-account-form-group">
+                <label for="accountType">Account Type</label>
+                <InputSelect id="accountType" class="user-profile-bankaccount-bank-account-input" @bind-Value="BankAccountModel.AccountType">
+                    <option value="" disabled selected>Select AccountType</option>
+
+                    <option value="Saving">Saving</option>
+                    <option value="Business">Business</option>
+                    <option value="Checking">Checking</option>
+                </InputSelect>
+            </div>
+            <div class="user-profile-bankaccount-bank-account-form-group  user-profile-bankaccount-customfileinput">
+                <label for="FileUpload">Bank Account Proof (Upload statement or cheque)</label>
+                <p class="user-profile-bankaccount-note">NOTE: Only (JPEG/PNG/PDF) file types are allowed and MAX size: 10mb</p>
+                <div class="user-profile-bankaccount-custom-file-container">
+                    <label for="FileUpload" class="user-profile-bankaccount-custom-file-label">
+                        <span>@(SelectedFileName ?? "Browse file")</span>
+                        <InputFile id="FileUpload" class="user-profile-bankaccount-custom-file-input" OnChange="OnFileSelected" />
+                    </label>
+                </div>
+            </div>
+            <div class="user-profile-bankaccount-bank-account-form-group text-center">
+                <button type="submit" class="user-profile-bankaccount-bank-account-save-btn">Save</button>
+            </div>
+        </div>
+    </EditForm>
+
+</div>
+
+
+@code {
+
+    private BankAccount BankAccountModel = new();
+    private string SelectedFileName { get; set; }
+
+    [Parameter] public EventCallback OnFormSubmit { get; set; }
+    private IBrowserFile selectedFile;
+    private async Task SaveBankAccount()
+    {
+        BankAccountModel.UserId = LocalStorage.LoggedInInfo.Id;
+
+        if (selectedFile != null)
+        {
+            try
+            {
+                // After uploading, update the proof file path
+                BankAccountModel.ProofFilePath = await fileStorageService.UploadingFiles(selectedFile, "BankAccount");
+                Console.WriteLine($"File '{SelectedFileName}' uploaded successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error uploading file: {ex.Message}");
+                // Handle error appropriately, e.g., show an error message
+            }
+        }
+
+        // Handle saving logic here
+        await bankAccountService.AddBankAccountAsync(BankAccountModel);
+
+        await OnFormSubmit.InvokeAsync();
+
+        Console.WriteLine($"Bank Account Saved: {BankAccountModel.BankName}");
+    }
+
+    private void OnFileSelected(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+        SelectedFileName = selectedFile.Name;
+        BankAccountModel.ProofFilePath = SelectedFileName;
+        Console.WriteLine($"File Selected: {SelectedFileName}");
+    }
+}

@@ -13,6 +13,8 @@ using Hangfire;
 using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using VaaradhiPay.DTOs;
+using VaaradhiPay.Components.Pages.AdminView;
+using VaaradhiPay.Components.Pages.TestingByChandu;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -72,8 +74,15 @@ builder.Services.AddScoped<IEmailSenderService, EmailSenderService>();
 builder.Services.AddScoped<IBankAccountService, BankAccountService>();
 builder.Services.AddScoped<AdminBankAccountService>();
 builder.Services.AddSingleton<ExchangeTransactionService>();
+builder.Services.AddScoped<IAdminBankAccountService, AdminBankAccountService>();
+builder.Services.AddScoped<CheckTransactionStatus>();
+builder.Services.AddScoped<BankAccountService>();
+
+//................................
 builder.Services.AddScoped<ITetherWalletService, TetherWalletService>();
 builder.Services.AddScoped<IUPIAddressService, UPIAddressService>();
+builder.Services.AddScoped<TetherWalletService>();
+builder.Services.AddScoped<UPIAddressService>();
 
 
 // -------------------------

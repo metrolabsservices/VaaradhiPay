@@ -1,11 +1,19 @@
 ﻿@using VaaradhiPay.DTOs
+@using VaaradhiPay.Data
+@using VaaradhiPay.Services.Interfaces
 @inject IJSRuntime JSRuntime
-
+@inject IBucketManager MinioService
+@inject IFileStorageService fileStorageService
 
 <div class="row mb-4 kyc-upload-main-container">
     @if (isFrontUploaded)
     {
-
+        <div class="col-12 col-md-6 kyc-upload-container">
+            <p class="kycuploadingblock-upload-text-primary">Uploaded @KycType front</p>
+            <div class="uploaded-file ms-1">
+                <img src="@FrontUrl"  width="180" height="130" />
+            </div>
+        </div>
     }
     else
     {
@@ -17,6 +25,9 @@
                 var file = filePreviews[KycType][UploadDirectionFront];
                 <div class="uploaded-file ms-1">
                     <img src="@file.PreviewUrl" alt="@file.FileName" width="180" height="130" />
+                    <button class="btn btn-danger btn-sm mt-2" @onclick="() => RemoveFile(KycType, UploadDirectionFront)">
+                        Remove
+                    </button>
                 </div>
             }
             else
@@ -32,7 +43,12 @@
 
     @if (isBackUploaded)
     {
-
+        <div class="col-12 col-md-6 kyc-upload-container">
+            <p class="kycuploadingblock-upload-text-primary">Uploaded @KycType back</p>
+            <div class="uploaded-file ms-1">
+                <img src="@BackUrl" width="180" height="130" />
+            </div>
+        </div>
     }
     else
     {
@@ -43,6 +59,9 @@
                 var file = filePreviews[KycType][UploadDirectionBack];
                 <div class="uploaded-file ms-1">
                     <img src="@file.PreviewUrl" alt="@file.FileName" width="180" height="130" />
+                    <button class="btn btn-danger btn-sm mt-2" @onclick="() => RemoveFile(KycType, UploadDirectionBack)">
+                        Remove
+                    </button>
                 </div>
             }
             else
@@ -69,8 +88,11 @@
     [Parameter]
     public string KycType { get; set; }
     [Parameter]
-    public EventCallback<Dictionary<string, Dictionary<string, FilePreview>>> onUploadCheck { get; set; }
+    public EventCallback<Dictionary<string, Dictionary<string, FilePreviewDTO>>> onUploadCheck { get; set; }
+    [Parameter]
+    public List<KYCDetails> kYCDetails { get; set; }
 
+    private Dictionary<string, Dictionary<string, FilePreviewDTO>> filePreviews = new();
 
     public string UploadDirection { get; set; }
 
@@ -81,9 +103,35 @@
     private string UploadDirectionBack = "BACK";
     private bool isFrontUploaded = false;
     private bool isBackUploaded = false;
+    private string FrontUrl;
+    private string BackUrl;
 
-    private Dictionary<string, Dictionary<string, FilePreview>> filePreviews = new();
-
+    protected override async Task OnParametersSetAsync()
+    {
+        if (kYCDetails != null && kYCDetails.Any())
+        {
+            foreach (var detail in kYCDetails)
+            {
+                try
+                {
+                    if (detail.DocumentNumber == UploadDirectionFront)
+                    {
+                        isFrontUploaded = true;
+                        FrontUrl = await fileStorageService.GeneratePresignedUrlAsync(null,detail.DocumentFilePath);
+                    }
+                    if (detail.DocumentNumber == UploadDirectionBack)
+                    {
+                        isBackUploaded = true;
+                        BackUrl = await fileStorageService.GeneratePresignedUrlAsync(null,detail.DocumentFilePath);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
+        }
+    }
 
     private async Task UploadonClick(string UploadDirect)
     {
@@ -120,7 +168,7 @@
                 return;
             }
 
-            var filePreview = new FilePreview
+            var filePreview = new FilePreviewDTO
                 {
                     FileName = file.Name,
                     PreviewUrl = await GetFilePreviewUrl(file),
@@ -130,7 +178,7 @@
             // Ensure the documentType is initialized in the dictionary
             if (!filePreviews.ContainsKey(documentType))
             {
-                filePreviews[documentType] = new Dictionary<string, FilePreview>();
+                filePreviews[documentType] = new Dictionary<string, FilePreviewDTO>();
             }
 
             // Set the file preview for the appropriate side (front/back)
@@ -167,17 +215,28 @@
         }
     }
 
-    private async Task UploadCheck(Dictionary<string, Dictionary<string, FilePreview>> filePreviews)
+    private async Task UploadCheck(Dictionary<string, Dictionary<string, FilePreviewDTO>> filePreviews)
     {
         await onUploadCheck.InvokeAsync(filePreviews);
         StateHasChanged();
     }
 
-    public class FilePreview
+    private void RemoveFile(string documentType, string uploadDirection)
     {
-        public string FileName { get; set; }
-        public string PreviewUrl { get; set; }
-        public string ContentType { get; set; }
+        // Remove the file from the filePreviews dictionary
+        if (filePreviews.ContainsKey(documentType) && filePreviews[documentType].ContainsKey(uploadDirection))
+        {
+            filePreviews[documentType].Remove(uploadDirection);
+
+            // If the dictionary for the document type is empty, remove it
+            if (!filePreviews[documentType].Any())
+            {
+                filePreviews.Remove(documentType);
+            }
+
+        }
+
+        StateHasChanged(); // Update the UI
     }
 }
 

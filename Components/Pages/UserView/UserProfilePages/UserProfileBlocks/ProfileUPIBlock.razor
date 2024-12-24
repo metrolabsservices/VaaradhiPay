@@ -1,0 +1,239 @@
+﻿@page "/Upi-Account"
+@using Microsoft.AspNetCore.Components.Web
+@using VaaradhiPay.Data
+@using VaaradhiPay.Services.Implementations
+@rendermode InteractiveServer
+@inject UPIAddressService UpiAddressService
+@inject ExchangeTransactionService LocalStorage
+
+<style>
+    /* General Modal Styles */
+    .modal-content {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        width: 80%;
+        color: var(--bs-modal-color);
+        pointer-events: auto;
+        background-color: var(--bs-modal-bg);
+        background-clip: padding-box;
+        border: var(--bs-modal-border-width) solid var(--bs-modal-border-color);
+        border-radius: var(--bs-modal-border-radius);
+        outline: 0;
+    }
+
+    /* Body Styling */
+    .upi-body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      /*   height: 100vh; */
+    }
+
+    /* Modal Container */
+    .upi-modal {
+        background-color: #fff;
+        border-radius: 8px;
+      /*   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
+        width: 100%;  /* 100% width for smaller devices */
+        max-width: 600px; /* Max width for larger screens */
+        padding: 20px; /* Reduced padding for responsiveness */
+        position: relative;
+    }
+
+    .upi-modal h2 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+
+    /* Close Button */
+    .upi-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 24px;
+        cursor: pointer;
+        color: #000;
+    }
+
+    /* Form Group */
+    .upi-form-group {
+        margin-bottom: 15px;
+    }
+
+    .upi-form-group label {
+        font-size: 12px;
+        display: block;
+        margin-bottom: 5px;
+        color: #666;
+    }
+
+    /* Input Fields */
+    .upi-input {
+        width: 100%;
+        height: 40px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 0 10px;
+        font-size: 14px;
+    }
+
+    /* Save Button */
+    .upi-save-btn {
+        width: 180px;
+        height: 40px;
+        background-color: #DF0A0A;
+        border: none;
+        border-radius: 20px;
+        color: #fff;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .upi-save-btn:hover {
+        background-color: #cc001f;
+    }
+
+    /* Open Modal Button */
+    .upi-open-modal-btn {
+        background-color: #e60023;
+        border: none;
+        border-radius: 20px;
+        color: #fff;
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        margin: 20px;
+        transition: background-color 0.3s ease;
+    }
+
+    .upi-open-modal-btn:hover {
+        background-color: #cc001f;
+    }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1040;
+    }
+
+    /* Modal Visibility */
+    .modal.show {
+        display: block;
+    }
+
+    .modal {
+        display: none;
+    }
+
+    /* Responsive Styles */
+    @@media (max-width: 768px) {
+        .upi-modal {
+            width: 90%; /* Increase width on smaller screens */
+            padding: 15px; /* Reduce padding on smaller screens */
+        }
+
+        .upi-modal h2 {
+            font-size: 16px; /* Smaller font size for titles */
+        }
+
+        .upi-input {
+            font-size: 12px; /* Adjust input font size */
+        }
+
+        .upi-save-btn {
+            width: 100%; /* Full width on mobile */
+            font-size: 16px; /* Larger text for better readability */
+        }
+
+        .upi-open-modal-btn {
+            width: 100%; /* Full width for opening button on mobile */
+            font-size: 16px;
+            margin: 10px 0;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .upi-modal {
+            width: 95%; /* Almost full width on very small screens */
+            padding: 10px; /* Further reduced padding */
+        }
+
+        .upi-modal h2 {
+            font-size: 14px; /* Smaller font size for better fitting */
+        }
+
+        .upi-input {
+            height: 35px; /* Slightly smaller input fields */
+        }
+
+        .upi-save-btn {
+            height: 45px; /* Larger button height on mobile */
+            font-size: 18px; /* Bigger text for buttons */
+        }
+
+        .upi-open-modal-btn {
+            font-size: 18px; /* Larger text for opening button */
+            padding: 12px; /* Increase padding for easier tapping */
+        }
+    }
+</style>
+
+
+<div class="upi-body">
+    <div class="upi-modal">
+        <EditForm Model="upi" OnValidSubmit="HandleFormSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="upi-form-group">
+                <label for="upi-name">Name</label>
+                <InputText id="upi-name" class="upi-input" @bind-Value="upi.UpiUserName" />
+            </div>
+
+            <div class="upi-form-group">
+                <label for="upi-address">UPI Address</label>
+                <InputText id="upi-address" class="upi-input" @bind-Value="upi.Address" />
+            </div>
+            <div class="upi-buttondiv text-center">
+                <button class="upi-save-btn" type="submit">Save</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+
+@code {
+
+    [Parameter] public EventCallback OnFormSubmit { get; set; }
+
+    private UPIAddress upi = new UPIAddress();
+
+    protected override async Task OnInitializedAsync()
+    {
+        upi.UserId = LocalStorage.LoggedInInfo.Id;
+    }
+
+    private async void HandleFormSubmit()
+    {
+        await UpiAddressService.AddUPIAddressAsync(upi);
+        Console.WriteLine($"UPI Name: {upi.UpiUserName}");
+        Console.WriteLine($"UPI Address: {upi.UPIAddressId}");
+
+        upi = new UPIAddress();
+        // Save logic here (e.g., API call or database save)
+        await OnFormSubmit.InvokeAsync();
+    }
+}

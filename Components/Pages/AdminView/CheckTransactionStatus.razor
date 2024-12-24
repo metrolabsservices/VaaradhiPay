@@ -1,0 +1,250 @@
+﻿@page "/transactionStatus"
+@using Microsoft.EntityFrameworkCore
+@using VaaradhiPay.Data
+@inject ApplicationDbContext DbContext
+@rendermode InteractiveServer
+
+<h3>Financial Transactions</h3>
+@* <Button @onclick="modeltest">btn</Button> *@
+<!-- Modal for Transaction Status Update -->
+<Modal @ref="modal" Title="Change Transaction Status">
+    <BodyTemplate>
+        <div class="d-flex flex-column align-items-center text-center">
+            <!-- Accept Button -->
+            <button class="btn btn-success mb-2 me-5" @onclick="AcceptStatus">Accept</button>
+
+            <!-- Reject Button -->
+            <button class="btn btn-danger mb-3" @onclick="RejectStatus">Reject</button>
+
+            <!-- Partial Button -->
+            <button class="btn btn-warning mb-3" @onclick="PartialStatus">Partial</button>
+
+            <!-- Rejection Reason and Save Button -->
+            @if (isRejecting)
+            {
+                <div class="mt-3 w-100">
+                    <label for="rejectReason" class="form-label">Reason for Rejection:</label>
+                    <input id="rejectReason" class="form-control" @bind="rejectReason" placeholder="Enter reason" />
+                    <button class="btn btn-primary mt-3" @onclick="SaveRejection">Save</button>
+                </div>
+            }
+
+            <!-- Partial Reason and Save Button -->
+            @if (isPartial)
+            {
+                <div class="mt-3 w-100">
+                    <label for="partialReason" class="form-label">Reason for Partial Payment:</label>
+                    <input id="partialReason" class="form-control" @bind="partialReason" placeholder="Enter reason" />
+                    <button class="btn btn-primary mt-3" @onclick="SavePartial">Save</button>
+                </div>
+            }
+        </div>
+    </BodyTemplate>
+</Modal>
+
+<!-- Reusable Table Component -->
+<ReusableTable TItem="FinancialTransactionDto"
+               Items="@transactions"
+               Headers="TableHeaders"
+               ItemProperties="ItemProperties"
+               FilterSelector="GetFilterTransactions"
+               Filters="@CurrencyFilters"
+               SearchTerm="@searchTerm" />
+
+@code {
+    private FinancialTransactionDto selectedTransaction;
+    private bool isRejecting = false;
+    private bool isPartial = false;
+    private string rejectReason = string.Empty;
+    private string partialReason = string.Empty;
+    private Modal modal=default!;
+
+    private List<FinancialTransactionDto> transactions = new();
+    private List<string> TableHeaders = new() {
+        "Transaction ID",
+        "User Transaction ID",
+        "Admin Transaction Ref ID",
+        "Pay Currency",
+        "Receive Currency",
+        "Amount Paid",
+        "Amount Received",
+        "Conversion Rate",
+        "Status",
+        "Transaction Date",
+        "View"
+    };
+    private List<string> ItemProperties = new() {
+        "TransactionId",
+        "UserTransactionId",
+        "AdminTransactionRefId",
+        "PayCurrency",
+        "ReceiveCurrency",
+        "AmountPaid",
+        "AmountReceived",
+        "ConversionRate",
+        "Status",
+        "TransactionDateTime"
+    };
+
+    private List<string> CurrencyFilters = new() { "INR", "USD", "AED" };
+    private string searchTerm;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            transactions = await DbContext.FinancialTransactions
+                .Include(t => t.AdminBankAccount)
+                .Include(t => t.UserBankAccount)
+                .Select(t => new FinancialTransactionDto
+                    {
+                        TransactionId = t.TransactionId,
+                        UserTransactionId = t.UserTransactionId ?? string.Empty,
+                        AdminTransactionRefId = t.AdminTransactionRefId ?? string.Empty,
+                        PayCurrency = t.PayCurrency ?? "N/A",
+                        ReceiveCurrency = t.ReceiveCurrency ?? "N/A",
+                        AmountPaid = t.AmountPaid,
+                        AmountReceived = t.AmountReceived,
+                        ConversionRate = t.ConversionRate,
+                        Status = t.Status.ToString() ?? "Unknown",
+                        TransactionDateTime = t.TransactionDateTime
+                    })
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading data: {ex.Message}");
+            transactions = new List<FinancialTransactionDto>();
+        }
+    }
+
+    private string? GetFilterTransactions(FinancialTransactionDto transaction)
+    {
+        return CurrencyFilters.Contains(transaction.PayCurrency) ? transaction.PayCurrency : null;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && modal == null)
+        {
+            // Modal is initialized here after the first render
+            await Task.Delay(10); // Optional small delay
+        }
+    }
+
+
+    public async Task OpenStatusModal(FinancialTransactionDto transaction)
+    {
+        if (modal != null)
+        {
+            selectedTransaction = transaction;
+            rejectReason = string.Empty;
+            partialReason = string.Empty;
+            isRejecting = false;
+            isPartial = false;
+
+            // Make sure the modal is properly initialized before showing it
+            await modal.ShowAsync();
+        }
+        else
+        {
+            // Log an error or show a fallback message
+            Console.WriteLine("Modal is not initialized.");
+        }
+    }
+
+    private async Task AcceptStatus()
+    {
+        if (selectedTransaction != null)
+        {
+            selectedTransaction.Status = "Completed";
+            await SaveTransactionStatus(selectedTransaction);
+            await modal.HideAsync();
+        }
+    }
+
+    private async Task RejectStatus()
+    {
+        isRejecting = true;
+    }
+
+    private async Task PartialStatus()
+    {
+        isPartial = true;
+    }
+
+    private async Task SaveRejection()
+    {
+        if (string.IsNullOrWhiteSpace(rejectReason))
+        {
+            Console.Error.WriteLine("Rejection reason cannot be empty.");
+            return;
+        }
+
+        if (selectedTransaction != null)
+        {
+            selectedTransaction.Status = "Rejected";
+            await SaveTransactionStatus(selectedTransaction);
+            isRejecting = false;
+            await modal.HideAsync();
+        }
+    }
+
+    private async Task SavePartial()
+    {
+        if (string.IsNullOrWhiteSpace(partialReason))
+        {
+            Console.Error.WriteLine("Partial payment reason cannot be empty.");
+            return;
+        }
+
+        if (selectedTransaction != null)
+        {
+            selectedTransaction.Status = "Partial";
+            await SaveTransactionStatus(selectedTransaction);
+            isPartial = false;
+            await modal.HideAsync();
+        }
+    }
+
+    private async Task SaveTransactionStatus(FinancialTransactionDto transaction)
+    {
+        try
+        {
+            var entity = await DbContext.FinancialTransactions.FindAsync(transaction.TransactionId);
+            if (entity != null)
+            {
+                entity.Status = (TransactionStatus)Enum.Parse(typeof(TransactionStatus),transaction.Status);
+                entity.TransactionNote = transaction.Status == "Rejected" ? rejectReason : partialReason;
+
+                var finalTransaction = new FinancialTransaction
+                    {
+                        Status = entity.Status,
+                        TransactionNote = entity.TransactionNote
+
+                    };
+                DbContext.FinancialTransactions.Update(finalTransaction);
+                await DbContext.SaveChangesAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error saving status: {ex.Message}");
+        }
+    }
+
+    public class FinancialTransactionDto
+    {
+        public int TransactionId { get; set; }
+        public string UserTransactionId { get; set; }
+        public string AdminTransactionRefId { get; set; }
+        public string PayCurrency { get; set; }
+        public string ReceiveCurrency { get; set; }
+        public decimal AmountPaid { get; set; }
+        public decimal AmountReceived { get; set; }
+        public decimal ConversionRate { get; set; }
+        public string Status { get; set; }
+        public DateTime TransactionDateTime { get; set; }
+    }
+
+}

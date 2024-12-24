@@ -1,0 +1,275 @@
+﻿@page "/add-bank-account"
+@using VaaradhiPay.Data
+@using VaaradhiPay
+@using VaaradhiPay.Services.Interfaces
+@inject NavigationManager Navigation
+@inject IAdminBankAccountService BankAccountService
+@inject IJSRuntime JS
+@using VaaradhiPay.Components.Pages.L3
+@rendermode InteractiveServer
+<ConfirmDialog @ref="dialog" />
+
+<!-- Modal -->
+<Modal @ref="BankModal" Title="Bank Account Form">
+    <BodyTemplate>
+                <EditForm Model="NewBankAccount" OnValidSubmit="HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label for="bankName" class="form-label">Bank Name</label>
+                            <InputText id="bankName" class="form-control" @bind-Value="NewBankAccount.BankName" />
+                            <ValidationMessage For="@(() => NewBankAccount.BankName)" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="accountNumber" class="form-label">Account Number</label>
+                            <InputText id="accountNumber" class="form-control" @bind-Value="NewBankAccount.AccountNumber" />
+                            <ValidationMessage For="@(() => NewBankAccount.AccountNumber)" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label for="accountHolder" class="form-label">Account Holder</label>
+                            <InputText id="accountHolder" class="form-control" @bind-Value="NewBankAccount.AccountHolder" />
+                            <ValidationMessage For="@(() => NewBankAccount.AccountHolder)" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="branchCode" class="form-label">Branch Code</label>
+                            <InputText id="branchCode" class="form-control" @bind-Value="NewBankAccount.BranchCode" />
+                            <ValidationMessage For="@(() => NewBankAccount.BranchCode)" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label for="ifscCode" class="form-label">IFSC Code</label>
+                            <InputText id="ifscCode" class="form-control" @bind-Value="NewBankAccount.IfscCode" />
+                            <ValidationMessage For="@(() => NewBankAccount.IfscCode)" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="currencyType" class="form-label">Currency Type</label>
+                            <InputSelect id="currencyType" class="form-control" @bind-Value="NewBankAccount.CurrencyType">
+                                <option value="">Select Currency</option>
+                                <option value="INR">INR</option>
+                                <option value="USD">USD</option>
+                                <option value="AED">AED</option>
+                            </InputSelect>
+                            <ValidationMessage For="@(() => NewBankAccount.CurrencyType)" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label for="lowerlimit" class="form-label">Lower Limit</label>
+                            <InputNumber id="lowerlimit" class="form-control" @bind-Value="NewBankAccount.LowerLimit" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="upperlimit" class="form-label">Upper Limit</label>
+                            <InputNumber id="upperlimit" class="form-control" @bind-Value="NewBankAccount.UpperLimit" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <div class="col-md-6">
+                            <label for="accountType" class="form-label">Account Type</label>
+                            <InputSelect id="accountType" class="form-control" @bind-Value="NewBankAccount.AccountType">
+                                <option value="">Select Account Type</option>
+                                <option value="Savings">Savings</option>
+                                <option value="Current">Current</option>
+                            </InputSelect>
+                            <ValidationMessage For="@(() => NewBankAccount.AccountType)" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="bankAvailability" class="form-label">Bank Availability</label>
+                            <InputSelect id="bankAvailability" class="form-control" @bind-Value="NewBankAccount.BankAvailability">
+                                <option value="">Select Status</option>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </InputSelect>
+                            <ValidationMessage For="@(() => NewBankAccount.BankAvailability)" />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success">@btn</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Cancel</button>
+                </EditForm>     
+ </BodyTemplate>
+</Modal>
+<div class="m-2">
+    @if (bankAccounts == null || bankAccounts.Count == 0)
+    {
+        <div class="position-relative" style="height: 65vh">
+            <div class="position-absolute top-50 start-50 translate-middle">
+                <div>
+                    <figure class="text-center">
+                        <i class="bi bi-ban fs-1 text-danger"></i>
+                        <blockquote class="blockquote">
+                            <p>Click to add New <a class="text-primary text-decoration-none" @onclick="OpenModal">Bank Accounts</a></p>
+                        </blockquote>
+                        <figcaption class="blockquote-footer">
+                            Data Not Found
+                        </figcaption>
+                    </figure>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+
+        <ReusableTableWithFilters TItem="AdminBankAccount"
+                                  Items="@bankAccounts"
+                                  Headers="TableHeaders"
+                                  ItemProperties="ItemProperties"
+                                  FilterSelector="(AdminBankAccount) => AdminBankAccount.BankAvailability"
+                                  OnEdit="HandleEdit"
+                                  OnDelete="DeletePopConfirmHandler"
+                                  SearchTerm="@searchTerm"
+                                  Filters="@BankStatus"
+                                  AddButtonAction="@OpenModal" />
+
+    }
+</div>
+<!-- Bank Accounts Table -->
+@code {
+    private Modal BankModal = default;
+    private AdminBankAccount NewBankAccount = new AdminBankAccount();
+    private List<string> BankStatus = new() { "Active", "Inactive" };
+    private List<AdminBankAccount> bankAccounts = new List<AdminBankAccount>();
+    private List<string> TableHeaders = new() { "Bank Name", "Account Holder", "Account Number", "Branch Code", "IFSC Code", "Total Credited Amount", "Bank Availability", "Currency Type", "Account Type","Lower Limit","Upper Limit", "Actions" };
+    private List<string> ItemProperties = new() { "BankName", "AccountHolder", "AccountNumber", "BranchCode", "IfscCode", "TotalCreditedAmount", "BankAvailability", "CurrencyType", "AccountType", "LowerLimit", "UpperLimit" };
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBankAccountsAsync();
+    }
+    private async Task LoadBankAccountsAsync()
+    {
+        bankAccounts = await BankAccountService.GetPaginatedAdminBankAccountsAsync("", 1, 10);
+    }
+
+    private string _selectedStatusFilter = "All";
+    private bool isEditMode = false;
+    private string searchTerm = string.Empty;
+    private ConfirmDialog dialog = default!;
+    private string btn = "Save";
+    private string selectedStatusFilter
+    {
+        get => _selectedStatusFilter;
+        set
+        {
+            if (_selectedStatusFilter != value)
+            {
+                _selectedStatusFilter = value;
+                PerformSearch(); // Trigger the search when the dropdown value changes
+            }
+        }
+    }
+    private async Task PerformSearch()
+    {
+        List<AdminBankAccount> filtered = new List<AdminBankAccount>();
+
+        // Apply search term filtering if searchTerm is not empty
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            filtered = filtered.Where(a =>
+                (a.AccountNumber != null && a.AccountNumber.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                (a.AccountHolder != null && a.AccountHolder.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                (a.BankName != null && a.BankName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                (a.BranchCode != null && a.BranchCode.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                (a.IfscCode != null && a.IfscCode.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                (a.CurrencyType != null && a.CurrencyType.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                (a.AccountType != null && a.AccountType.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                (a.TotalCreditedAmount.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+            ).ToList();
+        }
+
+        // Update the bankAccounts list with the filtered results
+        bankAccounts = filtered;
+
+        // Trigger a UI update
+        StateHasChanged();
+    }
+
+    private void ResetSearch()
+    {
+        searchTerm = string.Empty;
+        selectedStatusFilter = "All";
+        PerformSearch(); // Trigger search with reset values
+    }
+
+    private async Task HandleValidSubmit()
+    {
+
+        if (NewBankAccount.Id == 0)
+        {
+            await BankAccountService.AddBankAccountAsync(NewBankAccount);
+        }
+        else
+        {
+            await BankAccountService.UpdateBankAccountAsync(NewBankAccount);
+        }
+
+        ResetForm();
+        CloseModal();
+        await LoadBankAccountsAsync();
+    }
+
+    private async Task HandleEdit(AdminBankAccount specificaccount)
+    {
+        isEditMode = true;
+        btn = "Save Changes";
+        var account = await BankAccountService.GetBankAccountByIdAsync(specificaccount.Id);
+        if (account != null)
+        {
+            NewBankAccount = account;
+            await BankModal.ShowAsync();
+        }
+    }
+
+    private async Task DeletePopConfirmHandler(AdminBankAccount account)
+    {
+        var confirmation = await dialog.ShowAsync(
+            title: "Are you sure you want to delete this?",
+            message1: "This will delete the record. Once deleted can not be rolled back.",
+            message2: "Do you want to proceed?");
+
+        if (confirmation)
+        {
+            await HandleDelete(account.Id);
+        }
+    }
+    private async Task HandleDelete(int id)
+    {
+        await BankAccountService.DeleteBankAccountAsync(id);
+        await LoadBankAccountsAsync(); // Reload the table
+    }
+   
+    private async Task OpenModal()
+    {
+        isEditMode = false;
+        btn = "Save";
+        NewBankAccount = new AdminBankAccount(); // Reset form
+        await BankModal.ShowAsync();
+    }
+    private void ResetForm()
+    {
+        NewBankAccount = new AdminBankAccount();
+    }
+    private void OnModalClose()
+    {
+        ResetForm();
+    }
+
+    private async Task CloseModal()
+    {
+        await BankModal.HideAsync();
+    }
+
+}

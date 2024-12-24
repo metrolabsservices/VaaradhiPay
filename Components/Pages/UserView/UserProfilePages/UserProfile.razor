@@ -20,48 +20,48 @@
 
 
 
-<div class="row justify-content-around">
-    <div class="col-12 col-md-4 mb-3 mb-md-0">
+<div class="info-input-div row justify-content-center">
+    <div class="up-info-card col-6 col-md-4 mb-3 mb-md-0">
         <UserProfileInfo />
     </div>
-    <div class="col-12 col-md-8 userprofile-tab-container">
+    <div class="col-6 col-md-8 userprofile-tab-container" style="overflow:auto;scrollbar-width:none;">
         <TabSwitcherKeyContentBlock Tabs="UserProfileTab" activeTab="1" />
     </div>
-   
+
 </div>
 
 @code {
-    private List<TabItemDTO> UserProfileTab = new List<TabItemDTO>  {
-        new TabItemDTO
-            {
-                TabId = 1,
-                Name = "KYC",
-                Content =@<KycPage />
-            },
-            new TabItemDTO
-            {
-                TabId = 2,
-                Name = "Profile",
-                Content = @<ProfileIndexPage />
-            },
-            new TabItemDTO
-            {
-                TabId = 3,
-                Name = "Settings",
-                Content = @<SettingsIndexPage />
-            },
-            new TabItemDTO
-            {
-                TabId = 4,
-                Name = "Change Password",
-                Content = @<ChangePasswordIndexPage />
-            },
-            new TabItemDTO
-            {
-                TabId = 5,
-                Name = "EDD",
-                Content = @<p>EDD</p>
-            }
+    private List<TabItemDTO> UserProfileTab = new List<TabItemDTO> {
+    new TabItemDTO
+    {
+    TabId = 1,
+    Name = "KYC",
+    Content =@<KycPage />
+    },
+    new TabItemDTO
+    {
+    TabId = 2,
+    Name = "Profile",
+    Content = @<ProfileIndexPage />
+    },
+    new TabItemDTO
+    {
+    TabId = 3,
+    Name = "Settings",
+    Content = @<SettingsIndexPage />
+    },
+    new TabItemDTO
+    {
+    TabId = 4,
+    Name = "Change Password",
+    Content = @<ChangePasswordIndexPage />
+    },
+    new TabItemDTO
+    {
+    TabId = 5,
+    Name = "EDD",
+    Content = @<p>EDD</p>
+    }
     };
 
 
@@ -71,27 +71,42 @@
 }
 
 <style>
-    .userprofile-tab-container{
-        width: 50%;
-        height: 500px;
+    .info-input-div {
+        display: flex;
+        flex-direction: row;
+        gap: 30px;
+    }
+
+    .up-info-card {
+        display: flex;
+        align-items: flex-end;
+        flex-direction: column;
+    }
+
+    .userprofile-tab-container {
+        width: 752px;
+        height: 412px;
         background-color: white;
         border-radius: 15px;
         box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.25);
     }
-     @@media (max-width: 768px) {
+
+    @@media (max-width: 768px) {
         .userprofile-tab-container {
-            width: 100%; /* Forces full width for smaller screens */
-            margin-top: 10px; /* Add some spacing between blocks */
+            width: 100%;
+            /* Forces full width for smaller screens */
+            margin-top: 10px;
+            /* Add some spacing between blocks */
         }
     }
 
-    .userprofile-senddetails-btn{
-        background-color: red;
+    .userprofile-senddetails-btn {
+        background-color: #DF0A0A;
         color: white;
-        border-radius: 15px;
+        border-radius: 24px;
         border: none;
         padding: 8px 15px;
         font-size: 15px;
-        font-weight : bold;
+        font-weight: bold;
     }
 </style>

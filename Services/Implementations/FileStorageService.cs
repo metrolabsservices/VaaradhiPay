@@ -6,6 +6,8 @@ using Minio.DataModel.Args;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using VaaradhiPay.Services.Interfaces;
+using VaaradhiPay.DTOs;
+using Microsoft.AspNetCore.Components.Forms;
 
 namespace VaaradhiPay.Services.Implementations
 {
@@ -14,9 +16,10 @@ namespace VaaradhiPay.Services.Implementations
         private readonly IMinioClient _minioClient;
         private readonly IBucketManager _bucketManager;
         private readonly ILogger<FileStorageService> _logger;
+        private readonly ExchangeTransactionService LocalStorage;
         private readonly string _defaultBucket;
 
-        public FileStorageService(IMinioClient minioClient, IBucketManager bucketManager, ILogger<FileStorageService> logger, IConfiguration configuration)
+        public FileStorageService(IMinioClient minioClient, IBucketManager bucketManager, ILogger<FileStorageService> logger, IConfiguration configuration, ExchangeTransactionService localStorage)
         {
             _minioClient = minioClient;
             _bucketManager = bucketManager;
@@ -29,6 +32,7 @@ namespace VaaradhiPay.Services.Implementations
             //    : configuration["Minio:Buckets:ProductionBucket"];
 
             _defaultBucket = configuration["Minio:Buckets:DeveloperBucket"];
+            LocalStorage = localStorage;
         }
 
         public async Task UploadFileAsync(string bucketName, string objectName, Stream data, string contentType)
@@ -140,5 +144,52 @@ namespace VaaradhiPay.Services.Implementations
                 throw;
             }
         }
+
+        public async Task<string> UploadingFilesForKYC(KeyValuePair<string, FilePreviewDTO> file, string DocumentType, int? count)
+        {
+            try
+            {
+                string user = LocalStorage.LoggedInInfo.Email.Split('@')[0];
+                string fileName = $"{user}_{DocumentType}_{file.Key}_{count + 1}";
+                var objName = $"{user}/{DocumentType}/{fileName}";
+                var buffer = Convert.FromBase64String(file.Value.PreviewUrl.Split(',')[1]);
+                using var stream = new MemoryStream(buffer);
+                await UploadFileAsync(null, objName, stream, file.Value.ContentType);
+                return objName;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return null;
+            }
+        }
+
+        public async Task<string> UploadingFiles(IBrowserFile selectedFile, string DocumentType)
+        {
+            try
+            {
+                string user = LocalStorage.LoggedInInfo.Email.Split('@')[0];
+                string fileName = $"{user}_{DocumentType}";
+                var objName = $"{user}/{DocumentType}/{fileName}";
+                // Read the file as a stream
+                using var stream = selectedFile.OpenReadStream();
+                // Convert the selected file to a stream for uploading
+
+                // Upload the file to Minio
+                await UploadFileAsync(
+                    null,  // Bucket name (could be configured)
+                    objName,    // File name to upload
+                    stream,              // File stream
+                    selectedFile.ContentType // Use the file's content type (like "application/pdf", etc.)
+                );
+                return objName;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
+
     }
 }

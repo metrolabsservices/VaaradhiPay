@@ -30,8 +30,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Components\Pages\AdminView\" />
-    <Folder Include="Components\Pages\L3\" />
     <Folder Include="Components\Pages\L4\" />
     <Folder Include="Utilities\" />
   </ItemGroup>

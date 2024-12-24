@@ -15,6 +15,8 @@ namespace VaaradhiPay.Data
         public string BankAvailability { get; set; } = "Active"; // In-Active - Active
         public string CurrencyType { get; set; }  // USD - INR - AED 
         public string AccountType { get; set; }  // Savings - Business - Checking.
+        public int LowerLimit { get; set; }
+        public int UpperLimit { get; set; }
         public DateTime UpdatedDateTime { get; set; } 
         public DateTime CreatedDateTime { get; set; } = DateTime.UtcNow;
         public bool IsDeleted { get; set; } = false;

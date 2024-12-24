@@ -10,15 +10,17 @@
 
 @inject ILoggedInUserService LoggedInUserService
 @inject ApplicationDbContext DbContext
-@inject IFileStorageService fileStorage
 @inject IUserService userService
 @inject UserManager<ApplicationUser> _userManager
+@inject ToastService ToastService
+@inject IFileStorageService fileStorageService
+@inject PreloadService load
 
 <div class="userprofile-kyc-container">
     <h4 class="fw-bold">Upload ID Proof</h4>
     <p class="userprofile-kyc-text mb-4">Please upload the documnet from the list below</p>
 
-    <div class="row g-4 justify-content-evenly mb-4 userprofile-kyc-cards mx-auto">
+    <div class="row justify-content-center mb-4 userprofile-kyc-cards">
         <div class="col-12 col-md-6 col-lg-3 userprofile-kyc-cardblock" @onclick="() => OpenFileUpload(DrivingLicense)">
             <i class="userprofile-kyc-secondary-text-color me-3 bi bi-person-vcard" />
             <p class="p-0 m-0 fw-bold">Driving License</p>
@@ -37,20 +39,16 @@
     @if (isShowUploadFiles)
     {
         <div>
-            <KycUploadingBlock KycType="@nameType" onUploadCheck="UploadedFiles" />
+            <KycUploadingBlock KycType="@nameType" onUploadCheck="UploadedFiles" kYCDetails="kycDetails"/>
         </div>
     }
 
-    <div class="">
-        <p class="userprofile-kyc-text mb-2">Phone Number</p>
 
-    </div>
-    <div class="text-end">
-        <button class="userprofile-senddetails-btn" @onclick="SaveFiles"> Send Details</button>
+    <div class="text-end position-relative">
+        <button class="userprofile-senddetails-btn position-absolute bottom-0 end-0" @onclick="SaveFiles"> Send Details</button>
     </div>
 
 </div>
-
 
 
 @code {
@@ -62,29 +60,65 @@
 
     private bool isShowUploadFiles = false;
 
-    private Dictionary<string, Dictionary<string, FilePreview>> filePreviews = new();
+    private Dictionary<string, Dictionary<string, FilePreviewDTO>> filePreviews = new();
     private LoggedInUserDTO userDetails;
+    private List<KYCDetails> kycDetails;
+    private bool isKYCExist = false;
+    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1,1);
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
+            _semaphore.WaitAsync();
+            load.Show();
             userDetails = await LoggedInUserService.GetLoggedInUserAsync();
-            await UpdatingKycStatus();
+            if (userDetails != null)
+            {
+                kycDetails = await DbContext.KYCDetails.Where(e => e.UserId == userDetails.Id).ToListAsync();
+                if (kycDetails != null && kycDetails.Any())
+                {
+                    isKYCExist = true;
+                    Console.WriteLine("kyc details loaded");
+                }
+                await UpdatingKycStatus();
+            }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            _semaphore.Release();
+            StateHasChanged();
+            load.Hide();
         }
     }
 
     public void OpenFileUpload(string documentType)
     {
-        nameType = documentType;
-        isShowUploadFiles = true;
+        if (kycDetails == null || !kycDetails.Any())
+        {
+            nameType = documentType;
+            isShowUploadFiles = true;
+        }
+        else
+        {
+            var kyc = kycDetails.Select(e => e.DocumentType).ToList();
+            if (kyc.Contains(documentType))
+            {
+                nameType = documentType;
+                isShowUploadFiles = true;
+            }
+            else
+            {
+                ToastService.Notify(new ToastMessage { Type = ToastType.Warning, Message = "Details alredy exists" });
+            }
+        }
     }
 
-    private async Task UploadedFiles(Dictionary<string, Dictionary<string, FilePreview>> filePreview)
+    private async Task UploadedFiles(Dictionary<string, Dictionary<string, FilePreviewDTO>> filePreview)
     {
         Console.WriteLine("invoked");
         filePreviews = filePreview;
@@ -104,15 +138,9 @@
                 {
                     try
                     {
-                        var kycDetails = await DbContext.KYCDetails.Where(e => e.UserId == userDetails.Id && e.DocumentNumber == file.Key).ToListAsync();
-                        DateOnly date = DateOnly.FromDateTime(DateTime.UtcNow);
-                        string fileName = $"{user}_{fileType}_{file.Key}_{kycDetails.Count()+1}";
-                        var objName = $"{user}/{fileType}/{file.Key}/{fileName}";
-
-                        var buffer = Convert.FromBase64String(file.Value.PreviewUrl.Split(',')[1]);
-                        using var stream = new MemoryStream(buffer);
-
-                        await fileStorage.UploadFileAsync(null,objName,stream,file.Value.ContentType);
+                        var kycDetail = kycDetails.Where(e => e.DocumentNumber == file.Key).ToList();
+                       
+                        var objName = await fileStorageService.UploadingFilesForKYC(file, fileType, kycDetail.Count());
 
                         var kyc = new KYCDetails()
                             {
@@ -138,22 +166,24 @@
     {
         try
         {
-            var kyc = await userService.GetUserDetailsByEmail(userDetails.Email);
-            var applicationUser = await _userManager.FindByIdAsync(userDetails.Id);
-
-            var kYCDetails = await DbContext.KYCDetails.Where(e => e.UserId == userDetails.Id && !e.IsDeleted).ToListAsync();
-
-            bool hasDocuments = kYCDetails.Any(k => (k.DocumentType == "DRIVING LICENSE" || k.DocumentType == "PASSPORT" || k.DocumentType == "AADHAR CARD"));     // Adjust the condition based on your schema
-
-            if (hasDocuments)
+            if(kycDetails != null)
             {
-                if (applicationUser != null && applicationUser.KYCstatus == "Not Started")
+                var applicationUser = await _userManager.FindByIdAsync(userDetails.Id);
+
+                var kYCDetail = kycDetails.Where(e => !e.IsDeleted).ToList();
+
+                bool hasDocuments = kYCDetail.Any(k => (k.DocumentType == "DRIVING LICENSE" || k.DocumentType == "PASSPORT" || k.DocumentType == "AADHAR CARD"));     // Adjust the condition based on your schema
+
+                if (hasDocuments)
                 {
-                    applicationUser.KYCstatus = "Progress";
-                    await userService.UpdateUserAsync(applicationUser);
+                    if (applicationUser != null && applicationUser.KYCstatus == "Not Started")
+                    {
+                        applicationUser.KYCstatus = "Progress";
+                        await userService.UpdateUserAsync(applicationUser);
+                    }
                 }
+                await DbContext.SaveChangesAsync();
             }
-            await DbContext.SaveChangesAsync();
         }
         catch (Exception ex)
         {
@@ -172,16 +202,17 @@
     }
 
     .userprofile-kyc-cards {
-        width: 90%;
+        gap: 30px;
+        --bs-gutter-x: 0;
     }
 
     .userprofile-kyc-cardblock {
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-start;
         padding: 10px 20px;
         border: 1px solid #D4D9E2;
-        border-radius: 10px;
-        width: 200px;
+        border-radius: 4px;
+        width: 210px;
         cursor: pointer;
     }
 

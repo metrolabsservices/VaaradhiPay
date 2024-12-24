@@ -1,0 +1,276 @@
+﻿@namespace VaaradhiPay
+
+@rendermode InteractiveServer
+
+@code {
+    [Parameter]
+    public int CurrentPage { get; set; } // 1
+
+    [Parameter]
+    public int TotalPages { get; set; }
+
+    [Parameter]
+    public int PageSize { get; set; } //= 20;
+
+    [Parameter]
+    public int totalRecords { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnPageChange { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnPageSizeChange { get; set; }
+
+    private async Task ChangePage(int newPageNumber)
+    {
+        Console.WriteLine($"CurrentPage: {CurrentPage}, NewPage: {newPageNumber}, TotalPages: {TotalPages}");
+
+        if (newPageNumber >= 1 && newPageNumber <= TotalPages)
+        {
+            // Update the current page
+            CurrentPage = newPageNumber;
+            // Trigger the page change callback to notify the parent
+            await OnPageChange.InvokeAsync(newPageNumber);
+        }
+    }
+
+    private async Task ChangePageSize(ChangeEventArgs e)
+    {
+        var newSize = int.Parse(e.Value.ToString());
+        PageSize = newSize;
+        CurrentPage = 1; // Reset to page 1 on page size change
+        await OnPageSizeChange.InvokeAsync(newSize);
+    }
+}
+
+@* <div hidden="@(TotalPages <= 1 && totalRecords <= PageSize)" class="pagination-container mx-1 mt-3"> *@
+<div class="pagination-container mx-1 mt-3">
+    <nav aria-label="Page navigation">
+        <ul class="custom-pagination">
+            <!-- First Page Button -->
+            <li class="custom-page-item @(CurrentPage == 1 ? "disabled" : "")">
+                <a class="custom-page-link custom-page-arrow" @onclick="() => ChangePage(1)">
+                    @* <i class="bi bi-chevron-double-left page-arrows-btn-lr"></i> *@
+
+                    <i class="bi bi-chevron-bar-left page-arrows-btn-lr"></i>
+                </a>
+            </li>
+
+            <!-- Previous Page Button -->
+            <li class="custom-page-item @(CurrentPage == 1 ? "disabled" : "")">
+                <a class="custom-page-link custom-page-arrow" @onclick="() => ChangePage(CurrentPage - 1)">
+                    <i class="bi bi-chevron-left page-arrows-btn-lr"></i>
+                </a>
+            </li>
+
+            <!-- Page Numbers -->
+            @if (TotalPages > 1)
+            {
+                @for (var i = 1; i <= TotalPages; i++)
+                {
+                    var pageNumber = i; // Capture loop variable in a local variable
+                    if (i == 1 || i == TotalPages || (i >= CurrentPage - 1 && i <= CurrentPage + 1))
+                    {
+                        <li class="custom-page-item @(CurrentPage == i ? "active" : "")">
+                            <a class="custom-page-link" @onclick="@(async () =>await ChangePage(pageNumber))">@i</a>
+                        </li>
+                    }
+                    else if (i == CurrentPage - 3 || i == CurrentPage + 3)
+                    {
+                        <li class="custom-page-item">
+                            <span class="custom-page-link">...</span>
+                        </li>
+                    }
+                }
+            }
+
+
+            <!-- Next Page Button -->
+            <li class="custom-page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                <a class="custom-page-link custom-page-arrow" @onclick="() => ChangePage(CurrentPage + 1)">
+                    <i class="bi bi-chevron-right page-arrows-btn-lr"></i>
+
+                </a>
+            </li>
+
+            <!-- Last Page Button -->
+            <li class="custom-page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                <a class="custom-page-link custom-page-arrow" @onclick="() => ChangePage(TotalPages)">
+                    @* <i class="bi bi-chevron-double-right page-arrows-btn-lr"></i> *@
+                    <i class="bi bi-chevron-bar-right page-arrows-btn-lr"></i>
+
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Page Size Selector -->
+    <div class="page-size-selector align-items-center">
+        <label class="fw-bold">
+            Records:
+            <select class="custom-form-select" id="pageSizeSelect" @onchange="ChangePageSize">
+                <option value="5" selected="@(PageSize == 5)">5 / page</option>
+                <option value="10" selected="@(PageSize == 10)">10 / page</option>
+                <option value="20" selected="@(PageSize == 20)">20 / page</option>
+                <option value="50" selected="@(PageSize == 50)">50 / page</option>
+            </select>
+        </label>
+
+    </div>
+</div>
+
+
+<style>
+    .pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 50px;
+        overflow-x: auto;
+    }
+
+    .custom-pagination {
+        display: flex;
+        list-style-type: none;
+        padding-left: 0;
+        margin: 0;
+        flex-wrap: nowrap;
+    }
+
+    .custom-page-item {
+        margin-right: 0.5rem;
+    }
+
+        .custom-page-item.disabled a {
+            color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .custom-page-item.active a {
+            background-color: #DF0A0A;
+            color: white;
+            border: 1px solid white;
+        }
+
+    .custom-page-arrow {
+        border: none !important;
+    }
+
+    .page-arrows-btn-lr {
+        font-size: 9px;
+    }
+
+    .custom-page-link {
+        text-decoration: none;
+        padding: 0.5rem;
+        border-radius: 50%;
+        color: black;
+        /* background-color: white; */
+        background-color: #FCE2E0;
+        cursor: pointer;
+        width: 2.5rem;
+        height: 2.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        transition: background-color 0.2s, color 0.2s;
+    }
+
+        .custom-page-link:hover {
+            background-color: #DF0A0A;
+            color: white;
+        }
+
+    .page-size-selector {
+        display: flex;
+        align-items: center;
+        margin-right: 1rem;
+    }
+
+    .custom-form-select {
+        width: auto;
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #495057;
+        background-color: white;
+        border: 1px solid #D4D9E2;
+        border-radius: 0.25rem;
+    }
+
+        .custom-form-select:focus {
+            outline: none;
+            /* border-color: #800000; */
+        }
+
+    @@media (max-width: 855px) {
+        .pagination-container {
+            display: flex;
+            flex-direction: column;
+            height: auto;
+        }
+
+        .page-size-selector {
+            margin-top: 15px;
+            margin-bottom: 10px;
+            margin-right: 0px;
+        }
+    }
+
+    @@media (max-width: 360px) {
+        .custom-page-link {
+            font-size: 9px;
+            width: 1.65rem;
+            height: 1.65rem;
+        }
+
+        .custom-page-item {
+            margin-right: 0.3rem;
+        }
+
+        .custom-form-select {
+            padding: 0.1rem 0.75rem;
+        }
+    }
+
+    @@media (min-width: 361px) and (max-width: 420px) {
+        .custom-page-link {
+            font-size: 10px;
+            width: 2rem;
+            height: 2rem;
+        }
+
+        .custom-page-item {
+            margin-right: 0.4rem;
+        }
+
+        .custom-form-select {
+            padding: 0.2rem 0.75rem;
+        }
+    }
+
+    @@media (min-width: 421px) and (max-width: 700px) {
+        .custom-page-link {
+            font-size: 11px;
+            width: 2rem;
+            height: 2rem;
+        }
+
+        .custom-page-item {
+            margin-right: 0.4rem;
+        }
+
+        .custom-form-select {
+            padding: 0.25rem 0.75rem;
+        }
+    }
+
+    @@media (min-width: 701px) and (max-width: 855px) {
+        .custom-page-link {
+            font-size: 11px;
+            width: 2rem;
+            height: 2rem;
+        }
+    }
+</style>
