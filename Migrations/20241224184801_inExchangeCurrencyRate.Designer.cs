@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using VaaradhiPay.Data;
@@ -11,9 +12,11 @@ using VaaradhiPay.Data;
 namespace VaaradhiPay.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241224184801_inExchangeCurrencyRate")]
+    partial class inExchangeCurrencyRate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -478,58 +481,43 @@ namespace VaaradhiPay.Migrations
                     b.ToTable("CurrencyExtractionAudits");
                 });
 
-            modelBuilder.Entity("VaaradhiPay.Data.ExchangeRateHistory", b =>
+            modelBuilder.Entity("VaaradhiPay.Data.ExchangeCurrencyRates", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
-                    b.Property<decimal>("BuyRateNafa")
+                    b.Property<decimal>("Buy")
                         .HasColumnType("numeric");
 
-                    b.Property<decimal>("BuyRateUsdt")
-                        .HasColumnType("numeric");
+                    b.Property<string>("ChangedBy")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                    b.Property<DateTime>("CreatedDate")
+                    b.Property<DateTime>("ChangedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<decimal>("CurrentInrRate")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal?>("ExchangePercentageNafa")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal?>("ExchangePercentageUsdt")
-                        .HasColumnType("numeric");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("ModifiedBy")
+                    b.Property<string>("Currency")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("ModifiedID")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("SellRateNafa")
+                    b.Property<decimal>("LiveINR")
                         .HasColumnType("numeric");
 
-                    b.Property<decimal>("SellRateUsdt")
+                    b.Property<decimal>("Sell")
                         .HasColumnType("numeric");
 
-                    b.Property<decimal?>("TaxAmountNafa")
+                    b.Property<decimal>("Tax")
                         .HasColumnType("numeric");
 
-                    b.Property<decimal?>("TaxAmountUsdt")
+                    b.Property<decimal>("percentage")
                         .HasColumnType("numeric");
 
-                    b.HasKey("Id");
+                    b.HasKey("ID");
 
-                    b.ToTable("ExchangeRateHistories");
+                    b.ToTable("ExchangeCurrencyRates");
                 });
 
             modelBuilder.Entity("VaaradhiPay.Data.FinancialTransaction", b =>

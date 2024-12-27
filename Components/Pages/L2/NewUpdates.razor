@@ -1,0 +1,144 @@
+@page "/newupdates"
+
+@using VaaradhiPay.Components.Layout
+
+@rendermode InteractiveServer
+
+@layout EmptyLayout
+
+@inherits ComponentBase
+
+<div class="new-updates-container">
+    <h2 class="new-updates-heading">New Updates!</h2>
+    <div class="new-updates-inner-container">
+        <div class="new-updates-box">
+            <div><img class="new-updates-img" src="https://i.postimg.cc/pLSXGFTn/image1.png"></div>
+            <div class="new-updates-content1">
+                <p>Just Rolled Out</p>
+                <h2>Express <i class="bi bi-currency-rupee new-updates-currency-icon"></i> INR</h2>
+                <h1>Withdrawls</h1>
+            </div>
+        </div>
+        <div class="new-updates-box">
+            <div class="new-updates-content2">
+                <h1>Refer & Win</h1>
+                <p>win extraordinary bonus & <br> discounts by referring a friend</p>
+            </div>
+            <div><img class="new-updates-img" src="https://i.postimg.cc/k5tMkg6Y/image2.png"></div>
+        </div>
+        <div class="new-updates-box">
+            <div><img class="new-updates-img" src="https://i.postimg.cc/pLSXGFTn/image1.png"></div>
+            <div class="new-updates-content3">
+                <h1>Early Refunds</h1>
+                <p>Get Early refunds of any failed<br> or processing exchanges</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .new-updates-heading {
+        font-weight: 600;
+        font-size: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+        margin-top: 10px;
+    }
+
+    .new-updates-content1 p {
+        font-size: 16px;
+        font-family: "Poppins";
+        font-weight: 600;
+        margin: 0;
+        padding: 10px 0 0 0;
+    }
+
+    .new-updates-content1 h1 {
+        margin: 0;
+        padding: 0;
+        font-family: "Poppins";
+        font-size: 40px;
+        font-weight: 600;
+        padding: 5px 0 0 0;
+    }
+
+    .new-updates-content1 h2 {
+        margin: 0;
+        padding: 0;
+        font-family: "Poppins";
+        font-size: 24px;
+        font-weight: 600;
+        padding: 5px 0 0 0;
+    }
+
+    .new-updates-content2 h1 {
+        margin: 0;
+        padding: 0;
+        font-family: "Poppins";
+        font-size: 40px;
+        font-weight: 600;
+        padding: 5px 0 0 15px;
+    }
+
+    .new-updates-content3 h1 {
+        margin: 0;
+        padding: 0;
+        font-family: "Poppins";
+        font-size: 38px;
+        font-weight: 600;
+        padding: 5px 0 0 20px;
+    }
+
+    .new-updates-content2 p,
+    .new-updates-content3 p {
+        font-size: 16px;
+        font-family: "Poppins";
+        font-weight: 600;
+        margin: 0;
+        padding: 0 0 0 20px;
+    }
+
+    .new-updates-container {
+        border: solid #000000 1.5px;
+        border-radius: 10px;
+        height: 390px;
+        width: 521px;
+        padding: 0%;
+        margin: 0;
+    }
+
+    .new-updates-inner-container {
+        width: 460px;
+        height: 311px;
+        margin-left: 30px;
+        overflow-x: scroll;
+        background-size: cover;
+        scrollbar-width: none;
+        border-radius: 10px;
+    }
+
+    .new-updates-img {
+        width: 140px;
+        height: 112px;
+        padding: 10px;
+    }
+
+    .new-updates-box {
+        display: flex;
+        flex-direction: row;
+        width: 450px;
+        height: 145px;
+        border-radius: 10px;
+        background-color: #FCE2E0;
+        margin: 10px 0 0 5px;
+    }
+
+    .new-updates-currency-icon {
+        background-color: #DF0A0A;
+        border-radius: 50%;
+        color: white;
+        font-size: 15px;
+        padding: 3px;
+        padding-bottom: 1px;
+    }
+</style>

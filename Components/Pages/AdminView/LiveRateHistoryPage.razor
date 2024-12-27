@@ -1,0 +1,49 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using VaaradhiPay.Data
+@inject ApplicationDbContext DbContext
+
+
+<div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>USDT</th>
+                <th>NAFA</th>
+                <th>Changed By</th>
+                <th>Date Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (exchangeRateHistories != null && exchangeRateHistories.Any())
+            {
+
+                @foreach (var er in exchangeRateHistories)
+                {
+                    <tr>
+                        <td>
+                            @er.BuyRateUsdt @er.SellRateUsdt
+                        </td>
+                        <td>
+                            @er.BuyRateNafa @er.SellRateNafa
+                        </td>
+                        <td>
+                            @er.ModifiedBy
+                        </td>
+                        <td>
+                            @er.CreatedDate
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private List<ExchangeRateHistory> exchangeRateHistories;
+
+    protected override async Task OnInitializedAsync()
+    {
+        exchangeRateHistories = await DbContext.ExchangeRateHistories.OrderByDescending(e => e.CreatedDate).ToListAsync();
+    }
+}

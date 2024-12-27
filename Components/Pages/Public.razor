@@ -5,6 +5,8 @@
 @using Microsoft.AspNetCore.WebUtilities
 @using VaaradhiPay.Components.Layout
 @using VaaradhiPay.Components.Pages.SignInSignUpFlow
+@using VaaradhiPay.Components.Pages.L2
+@using VaaradhiPay.Components.Pages.TestingBlocks
 
 @rendermode InteractiveServer
 
@@ -18,27 +20,52 @@
 <Modal @ref="signin_signup_modal1" IsScrollable="true" />
 
 <header class="public-layout-header">
-        <nav class="navbar navbar-expand-lg">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="/home">
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/home">
                 <img class="public-layout-logo" alt="Vaaradhi pay img" src="MediaFiles/Logos/VaaradhiPay_Logo.png" />
-                </a>
-                <div class="d-flex">
-                <Button Size="ButtonSize.Small" Class="public-layout-buttons public-layout-button-odd" @onclick="@(() => NavigateToPage("login"))"> Login </Button>
-                <Button Size="ButtonSize.Small" Class="public-layout-buttons" @onclick="@(() => NavigateToPage("register"))"> SIGN UP </Button>
-                </div>
+            </a>
+            <div class="d-flex">
+                <Button Size="ButtonSize.Small" Class="public-layout-buttons public-layout-button-odd"
+                    @onclick="@(() => NavigateToPage("login"))"> Login </Button>
+                <Button Size="ButtonSize.Small" Class="public-layout-buttons"
+                    @onclick="@(() => NavigateToPage("register"))"> SIGN UP </Button>
             </div>
-        </nav>
+        </div>
+    </nav>
 </header>
 
 <main class="public-layout-content">
+    <div class="public-top-content">
+        <div class="public-exchange-card">
+            <ExchangeCard />
+        </div>
+        <div class="public-text-content">
+            <PublicTextContent />
+        </div>
+    </div>
+    <div class="public-middle-content">
+        <div class="public-lasthour-exchanges">
+            <LastHourExchanges />
+        </div>
+        <div class="public-new-updates">
+            <NewUpdates />
+        </div>
+    </div>
+    <div>
+        <div>
+            <ProfileAvatarGroup />
+        </div>
+        <div>
+            <ReviewSwapContent />
+        </div>
+    </div>
 </main>
-<footer class="public-layout-footer d-flex justify-content-evenly align-items-center py-2 bg-black text-white">
-    <p class="mb-0">&copy; 2024 VaaradhiPay. All Rights Reserved.</p>
-    <p class="mb-0">Terms of Use | Privacy Policy</p>
+<footer class="layout-footer">
+    <Footer />
 </footer>
 
-@code{
+@code {
     private Modal signin_signup_modal = default!;
     private Modal signin_signup_modal1 = default!;
     private bool isModalProcessing = false;
@@ -61,19 +88,19 @@
         {
             var parameters = new Dictionary<string, object>();
             await signin_signup_modal1.ShowAsync<VaaradhiPayLoginPage>(
-                title: "Login",
-                parameters: parameters
+            title: "Login",
+            parameters: parameters
             );
         }
         else if (message == "register")
         {
             var parameters = new Dictionary<string, object>
-            {
-                { "OnRegistrationSuccess", EventCallback.Factory.Create(this, CloseRegisterModal) }
-            };
+{
+{ "OnRegistrationSuccess", EventCallback.Factory.Create(this, CloseRegisterModal) }
+};
             await signin_signup_modal.ShowAsync<VaaradhiPayRegisterPage>(
-                title: "Sign Up",
-                parameters: parameters
+            title: "Sign Up",
+            parameters: parameters
             );
         }
 
@@ -94,8 +121,7 @@
 
 
 <style>
-
-    .public-layout-buttons{
+    .public-layout-buttons {
         background-color: #DF0A0A;
         color: white;
         font-size: 10px;
@@ -104,7 +130,7 @@
         border-radius: 15px;
     }
 
-    .public-layout-button-odd{
+    .public-layout-button-odd {
         background-color: transparent !important;
         color: black;
         font-size: 12px;
@@ -113,6 +139,7 @@
     /* Public Layout Header */
     .public-layout-header {
         position: sticky;
+        z-index: 1;
         top: 0;
         border-bottom: 1px solid white;
         background-color: #FCE2E0;
@@ -121,14 +148,15 @@
     /* Public Layout Logo */
     .public-layout-logo {
         height: 2.8rem;
-        width: 6rem;
+        width: 6rem; 
     }
-     /* Public Layout Content */
+
+    /* Public Layout Content */
     .public-layout-content {
-        min-height: 80vh;
+        /* min-height: 80vh; */
         padding: 2rem;
         background-color: #FFF5F4;
-        overflow: auto;
+        /* overflow: auto; */
     }
 
     /* Public Layout Footer */
@@ -139,4 +167,42 @@
         font-size: 0.9rem;
     }
 
+
+    /* Public page component css */
+
+    .public-middle-content {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 100px;
+    }
+
+    .public-top-content {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        gap: 100px;
+        margin-bottom: 100px;
+    }
+
+    @@media (max-width: 1080px) {
+        .public-top-content {
+            gap: 20px;
+        }
+
+        .public-middle-content {
+            flex-direction: column;
+            align-items: center;
+            gap: 60px;
+        }
+    }
+
+    @@media (max-width: 1000px) {
+        .public-top-content {
+            flex-direction: column-reverse;
+            align-items: center;
+            gap: 40px;
+        }
+    }
 </style>

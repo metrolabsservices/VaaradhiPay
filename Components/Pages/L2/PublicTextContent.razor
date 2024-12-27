@@ -1,0 +1,74 @@
+@page "/publictextcontent"
+
+@using VaaradhiPay.Components.Layout
+
+@rendermode InteractiveServer
+
+@layout EmptyLayout
+
+@inherits ComponentBase
+
+
+<div class="public-text-logos">
+    <div class="public-text-img">
+        <h2>Yay!</h2>
+        <img src="https://static-00.iconduck.com/assets.00/party-popper-emoji-2045x2048-3cdxvcsw.png" alt="img">
+    </div>
+    <div class="public-text">
+        <h2>You are at the right place to Buy and Sell USDT, NAFA dollar and INR.</h2>
+    </div>
+    <div class="public-logos">
+        <p>We Support</p>
+        <img src="https://cdn.worldvectorlogo.com/logos/tether-1.svg" alt="img">
+        <h5>tether,</h5>
+        <img src="https://i.postimg.cc/DyshcMGL/gold.png">
+        <h5>NAFA dollar</h5>
+    </div>
+</div>
+
+<style>
+    .public-text-img h2,
+    .public-text h2 {
+        font-size: 36px;
+        font-weight: 600;
+        line-height: 55px;
+    }
+
+    .public-text-img img,
+    .public-logos img {
+        height: 46px;
+        width: 46px;
+    }
+
+    .public-text-img {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .public-text {
+        width: 560px;
+        margin-bottom: 60px;
+    }
+
+    .public-logos {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .public-logos img {
+        border-radius: 50%;
+    }
+
+    .public-logos h5,
+    .public-logos p {
+        margin-bottom: 0px;
+    }
+
+    @@media (max-width: 570px) {
+        .public-text {
+            width: 100%;
+        }
+    }
+</style>

@@ -1,0 +1,203 @@
+﻿@namespace AllInOneHrms.Components.Pages.Reusable
+@typeparam TItem
+
+
+
+
+<div class="container search-component">
+    <div class="row align-items-center">
+        <!-- Search Input -->
+        <div class="col-2 search">
+            <input type="text" id="search" class="form-control search-text" placeholder="Search by Ref No" @bind="searchtext" />
+        </div>
+
+        <!-- Date Range Inputs -->
+        <div class="col-2 d-flex align-items-center search">
+            <label for="fromDate" class="search-date me-2">From</label>
+            <input type="date" id="fromDate" class="form-control" @bind="FromDate" />
+        </div>
+
+        <div class="col-2 d-flex align-items-center search">
+
+            <label for="toDate" class="search-date me-2">To</label>
+            <input type="date" id="toDate" class="form-control" @bind="ToDate" />
+        </div>
+
+        <!-- Buttons -->
+        <div class="col-1 d-flex">
+            <button class="search-btn btn-lg btn-danger me-2  ps-4 pe-4" @onclick="OnSearchClick">Search</button>
+        </div>
+
+        <div class="col-2 d-flex ms-4">
+            <button class="reset-btn btn btn-outline-danger rounded-circle" @onclick="OnResetClick"><i class="bi bi-arrow-repeat"></i></button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string searchtext { get; set; }
+
+    [Parameter]
+    public DateOnly? FromDate { get; set; }
+    public string FormattedFromDate => FromDate?.ToString("dd/MM/yyyy");
+    [Parameter]
+    public DateOnly? ToDate { get; set; }
+    public string FormattedToDate => ToDate?.ToString("dd/MM/yyyy");
+
+    [Parameter]
+    public EventCallback<SearchParams> OnSearch { get; set; }
+
+    [Parameter]
+    public EventCallback<SearchParams> OnReset { get; set; }
+
+    private async Task OnSearchClick()
+    {
+        if (!string.IsNullOrWhiteSpace(searchtext) && searchtext.Length >= 3)
+        {
+            // Create a new SearchParams object with the current values
+            var searchParams = new SearchParams
+                {
+                    searchTerm = searchtext,
+                    FromDate = FromDate,
+                    ToDate = ToDate
+                };
+
+            // Invoke the callback with the SearchParams object
+            await OnSearch.InvokeAsync(searchParams);
+        }
+        else
+        {
+            //ShowMessage(ToastType.Warning, "Invalid Input", "Please enter at least 3 characters to search.");
+        }
+    }
+
+    private async Task OnResetClick()
+    {
+        if (OnReset.HasDelegate)
+        {
+            var searchParams = new SearchParams
+                {
+                    searchTerm = string.Empty,
+                    FromDate = default,
+                    ToDate = default
+                };
+            await OnReset.InvokeAsync(searchParams);
+        }
+
+    }
+
+    public class SearchParams
+    {
+        public string searchTerm { get; set; }
+        public DateOnly? FromDate { get; set; }
+        public DateOnly? ToDate { get; set; }
+    }
+}
+
+<style>
+
+    /* Container Styling */
+    .search-component {
+        padding: 20px;
+        padding-top: 0px;
+        border-radius: 10px;
+        color: #333;
+        font-size: 14px;
+    }
+
+    .search {
+        width: 207px;
+        margin: 0px 50px 0px 0px;
+        padding: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        gap: 10px;
+        font-size: 1rem;
+        background-color: #f3f3f3;
+    }
+
+    .search-component input[type="date"], input[type="text"] {
+        border: none;
+        background-color: #f3f3f3;
+        padding: 0;
+    }
+
+
+    /* Buttons */
+    .search-btn {
+        color:white;
+        background-color: #dc3545;
+        border: none;
+        font-size: 1rem;
+        transition: background-color 0.3s ease-in-out;
+        border-radius: 24px;
+        width: 100px;
+        height:40px;
+    }
+
+        .search-btn:hover {
+            background-color: #c82333;
+        }
+
+    .reset-btn {
+        border-color: #DF0A0A;
+        font-size: 1rem;
+        transition: all 0.3s ease-in-out;
+    }
+
+        .reset-btn:hover {
+            background-color: #dc3545;
+            color: white;
+            transform: rotate(360deg);
+        }
+
+    /* Icon Styling */
+    .reset-btn i {
+        font-size: 1.5rem;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .reset-btn:hover i {
+        transform: rotate(360deg);
+    }
+
+    .search-component label {
+        font-weight: bold;
+    }
+</style>
+
+@*
+
+How to use this component  -->
+
+<VaaradhiPayComponents TItem="Employee"
+                       searchtext="employeeSearchTerm"
+                       FromDate="FromDate"
+                       ToDate="ToDate"
+                       OnSearch="Searching" />
+
+ private void Searching(SearchParams searchParams)
+    {
+        Console.WriteLine("From Date:" +searchParams.FromDate);
+        Console.WriteLine("From Date:" +searchParams.ToDate);
+        Console.WriteLine("you searched for:" + searchParams.searchTerm);
+        Console.WriteLine("Search method invoked");
+    }
+
+     private void Reset(SearchParams searchParams)
+    {
+        Console.WriteLine("From Date:" + searchParams.FromDate);
+        Console.WriteLine("From Date:" + searchParams.ToDate);
+        Console.WriteLine("you searched for:" + searchParams.searchTerm);
+        Console.WriteLine("Reset button invoked");
+    }
+
+    public class SearchParams
+    {
+        public string searchTerm { get; set; }
+        public DateOnly FromDate { get; set; }
+        public DateOnly ToDate { get; set; }
+    }
+ *@
+

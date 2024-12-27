@@ -15,7 +15,7 @@
 
 <div class="exchangeform-container">
     <div class="input-container">
-        <div class="input-wrapper">
+        <div class="input-wrapper input-field-exc-card">
             <p class="input-label-text">You Pay</p>
             <input class="main-input-field" type="number" @bind="youPayValue" @bind:event="oninput" @onkeyup="CalculateReceivedValue" />
         </div>
@@ -31,7 +31,7 @@
     </div>
 
     <div class="input-container">
-        <div class="input-wrapper">
+        <div class="input-wrapper input-field-exc-card">
             <p class="input-label-text">You will receive Roughly</p>
             @* <input class="main-input-field" type="number" value="@youReceiveValue" readonly /> *@
             <p class="main-input-field m-0 p-0">@youReceiveValue.ToString("F2")</p>
@@ -306,7 +306,7 @@
     }
 
     @@media (max-width: 370px) {
-        .input-wrapper {
+        .input-field-exc-card {
             width: 155px;
         }
     }

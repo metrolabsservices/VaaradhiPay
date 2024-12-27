@@ -171,6 +171,7 @@
             }
         }
     }
+
     private async Task PerformSearch()
     {
         List<AdminBankAccount> filtered = new List<AdminBankAccount>();
@@ -245,6 +246,7 @@
             await HandleDelete(account.Id);
         }
     }
+
     private async Task HandleDelete(int id)
     {
         await BankAccountService.DeleteBankAccountAsync(id);
@@ -258,10 +260,12 @@
         NewBankAccount = new AdminBankAccount(); // Reset form
         await BankModal.ShowAsync();
     }
+
     private void ResetForm()
     {
         NewBankAccount = new AdminBankAccount();
     }
+
     private void OnModalClose()
     {
         ResetForm();

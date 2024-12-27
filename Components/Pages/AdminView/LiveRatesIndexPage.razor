@@ -1,31 +1,137 @@
 ﻿@page "/liverate"
+@using Microsoft.EntityFrameworkCore
 @using VaaradhiPay.Data
+@using VaaradhiPay.Services.Implementations
 @using VaaradhiPay.Utilities
-
 
 @inject ApplicationDbContext DbContext
 @inject ToastService Toast
+@inject ExchangeTransactionService LocalStorage
 
+@rendermode InteractiveServer
 
-
-<div class="container-fluid row">
+<h4 class="text-center text-white pb-5">Admin Live Rates</h4>
+<div class="liverrate-container row justify-content-around">
     <div class="col-12 col-md-6 liverate-secondary-container">
-        <div class="d-flex justify-content-around">
-            <h3 class="text-danger fw-bold m-0">Live Rate</h3>
+        <div class="d-flex flex-column">
+            <h5 class="text-danger fw-bold m-0 pb-3">Live Rate</h5>
             <ul>
                 <li class="">1 USDT = @inrRate INR</li>
             </ul>
         </div>
+        <div class="cust-table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Digital Currencies</th>
+                        <th>Buy</th>
+                        <th>Sell</th>
+                        <th>%</th>
+                        <th>Tax</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="cust-tr cust-top">
+                        <td>USDT</td>
+                        <td>@exchangeRateHistories.BuyRateUsdt</td>
+                        <td>@exchangeRateHistories.SellRateUsdt</td>
+                        <td>@exchangeRateHistories.ExchangePercentageUsdt</td>
+                        <td>@exchangeRateHistories.TaxAmountUsdt</td>
+                    </tr>
+                    <tr class="cust-tr">
+                        <td>NAFA</td>
+                        <td>@exchangeRateHistories.BuyRateNafa</td>
+                        <td>@exchangeRateHistories.SellRateNafa</td>
+                        <td>@exchangeRateHistories.ExchangePercentageNafa</td>
+                        <td>@exchangeRateHistories.TaxAmountNafa</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="d-flex justify-content-end">
+            <button class="cust-btn" @onclick="OpenModal">Change</button>
+        </div>
 
     </div>
+
     <div class="col-12 col-md-6 liverate-secondary-container">
-
-
+        <LiveRateHistoryPage />
     </div>
 </div>
 
+<Modal @ref="ChangeModal" Title="Change Values">
+    <BodyTemplate>
+        <EditForm Model="exchangeRateHistories" OnValidSubmit="OnHandleValidSubmit">
+            <div class="ps-3">
+                <div>
+                    <h5 class="text-danger m-0">Live Rate</h5>
+                    <ul>
+                        <li class="">1 USDT = @inrRate INR</li>
+                    </ul>
+                </div>
+                <div class="cust-table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>USDT</th>
+                                <th>NAFA</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="cust-tr cust-top">
+                                <td>BUY</td>
+                                <td>
+                                    <InputNumber @bind-Value="exchangeRateHistories.BuyRateUsdt" class="cust-input-field" />
+                                </td>
+                                <td>
+                                    <InputNumber @bind-Value="exchangeRateHistories.BuyRateNafa" class="cust-input-field" />
+                                </td>
+                            </tr>
+                            <tr class="cust-tr">
+                                <td>SELL</td>
+                                <td>
+                                    <InputNumber @bind-Value="exchangeRateHistories.SellRateUsdt" class="cust-input-field" />
+                                </td>
+                                <td>
+                                    <InputNumber @bind-Value="exchangeRateHistories.SellRateNafa" class="cust-input-field" />
+                                </td>
+                            </tr>
+                            <tr class="cust-tr">
+                                <td>%</td>
+                                <td>
+                                    <input class="cust-input-field" type="number" @bind="exchangeRateHistories.ExchangePercentageUsdt" @bind:event="oninput" @onkeyup="PercentageCalculation" />
+                                </td>
+                                <td>
+                                    <input class="cust-input-field" type="number" @bind="exchangeRateHistories.ExchangePercentageNafa" @bind:event="oninput" @onkeyup="PercentageCalculation" />
+                                </td>
+                            </tr>
+                            <tr class="cust-tr">
+                                <td>TAX</td>
+                                <td>
+                                    <InputNumber @bind-Value="exchangeRateHistories.TaxAmountUsdt" class="cust-input-field" />
+                                </td>
+                                <td>
+                                    <InputNumber @bind-Value="exchangeRateHistories.TaxAmountNafa" class="cust-input-field" />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-center">
+                    <button class="cust-btn" type="submit">Change</button>
+                </div>
+            </div>
+        </EditForm>
+    </BodyTemplate>
+</Modal>
+
 @code {
     private string inrRate;
+    private Modal ChangeModal = default;
+
+    private ExchangeRateHistory exchangeRateHistories = new ExchangeRateHistory();
 
     protected override async Task OnInitializedAsync()
     {
@@ -37,6 +143,13 @@
                     .FirstOrDefault();
             inrRate = inrRates.ToString();
             inrRate = UtilityMethods.TruncateDecimalString(inrRate, 2);
+            exchangeRateHistories = await DbContext.ExchangeRateHistories.OrderByDescending(e => e.Id).FirstOrDefaultAsync();
+
+            if (exchangeRateHistories == null)
+            {
+                // Handle case where exchangeRateHistories is null
+                exchangeRateHistories = new ExchangeRateHistory(); // Provide a default instance
+            }
 
         }
         catch (Exception ex)
@@ -48,18 +161,131 @@
                 });
         }
     }
+
+    private async Task OnHandleValidSubmit()
+    {
+        try
+        {
+            var eh = new ExchangeRateHistory
+                {
+                    BuyRateNafa = exchangeRateHistories.BuyRateNafa,
+                    BuyRateUsdt = exchangeRateHistories.BuyRateUsdt,
+                    SellRateNafa = exchangeRateHistories.SellRateNafa,
+                    SellRateUsdt = exchangeRateHistories.SellRateUsdt,
+                    TaxAmountNafa = exchangeRateHistories.TaxAmountNafa,
+                    TaxAmountUsdt = exchangeRateHistories.TaxAmountUsdt,
+                    ExchangePercentageNafa = exchangeRateHistories.ExchangePercentageNafa,
+                    ExchangePercentageUsdt = exchangeRateHistories.ExchangePercentageUsdt,
+                    CurrentInrRate = decimal.Parse(inrRate),
+                    ModifiedBy = LocalStorage.LoggedInInfo.Email,
+                    ModifiedID = LocalStorage.LoggedInInfo.Id
+                };
+            await DbContext.ExchangeRateHistories.AddAsync(eh);
+            await DbContext.SaveChangesAsync();
+            await CloseModal();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private async Task PercentageCalculation()
+    {
+        if (exchangeRateHistories.ExchangePercentageUsdt > 0)
+        {
+            exchangeRateHistories.BuyRateUsdt = decimal.Parse(inrRate) + (decimal.Parse(inrRate) * (decimal)(exchangeRateHistories.ExchangePercentageUsdt / 100));
+            exchangeRateHistories.SellRateUsdt = decimal.Parse(inrRate) - (decimal.Parse(inrRate) * (decimal)(exchangeRateHistories.ExchangePercentageUsdt / 100));
+        }
+        if (exchangeRateHistories.ExchangePercentageNafa > 0)
+        {
+            exchangeRateHistories.BuyRateNafa = decimal.Parse(inrRate) + (decimal.Parse(inrRate) * (decimal)(exchangeRateHistories.ExchangePercentageNafa / 100));
+            exchangeRateHistories.SellRateNafa = decimal.Parse(inrRate) - (decimal.Parse(inrRate) * (decimal)(exchangeRateHistories.ExchangePercentageNafa / 100));
+        }
+    }
+
+    private async Task OpenModal()
+    {
+        await ChangeModal.ShowAsync();
+    }
+
+    private async Task CloseModal()
+    {
+        await ChangeModal.HideAsync();
+    }
 }
 
 <style>
-    .liverate-secondary-container{
+    .liverate-secondary-container {
         background-color: white;
         border-radius: 15px;
         padding: 15px;
-        height: 400px;
-        width: 100%;
+        height: auto;
+        width: 660px;
+        box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.25);
     }
 
-    .liverate-secondary-container-header{
+    .liverate-secondary-container-header {
+    }
 
+    .cust-input-field {
+        width: 150px;
+        height: 40px;
+        font-size: 18px;
+        padding-left: 10px;
+        border-radius: 6px;
+        border: 1px solid #d4d9e2;
+    }
+
+    .cust-btn {
+        width: 160px;
+        height: 40px;
+        border-radius: 24px;
+        font-size: 14px;
+        background-color: #df0a0a;
+        color: white;
+        border: none;
+    }
+
+    .cust-tr {
+        border-style: hidden;
+    }
+
+    .cust-top {
+        border-top: 1px solid black;
+    }
+
+    /* Adjust card width for smaller screens */
+    @@media (max-width: 1024px) {
+        .liverate-secondary-container {
+            width: calc(91% - -82px); /* Half width for tablets */
+        }
+    }
+
+    /* Adjust card width for phones (like 720px and below) */
+    @@media (max-width: 720px) {
+        .liverate-secondary-container {
+            width: calc(100% - 20px); /* Full width for smaller screens */
+        }
+    }
+
+    /* Adjust card width for very small screens (320px) */
+    @@media (max-width: 320px) {
+        .liverate-container {
+            padding: 10px; /* Reduce padding for small screens */
+        }
+
+        .liverate-secondary-container {
+            width: 110%; /* Full width for small phones */
+        }
+
+        .currency-row {
+            flex-direction: column; /* Stack items vertically */
+            gap: 10px; /* Reduce gap for smaller screens */
+        }
+
+        .change-button {
+            padding: 10px 20px; /* Adjust button size */
+        }
     }
 </style>

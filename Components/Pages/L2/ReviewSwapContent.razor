@@ -1,0 +1,224 @@
+@page "/customerreviews"
+
+@rendermode InteractiveServer
+
+<div class="review-container">
+    <div class="review-container-content">
+        @foreach (var review in reviews.Select((r, i) => new { Review = r, Index = i }))
+        {
+            <div class="review-content @(review.Index == currentIndex ? "visible" : "hidden")">
+                <div class="review-content-img">
+                    <img src="@review.Review.ImageUrl" alt="image">
+                </div>
+                <div class="review-content-text">
+                    <h3>@review.Review.Name</h3>
+                    <p>@review.Review.Comment</p>
+                    <h6>@review.Review.Title</h6>
+                </div>
+            </div>
+        }
+        <div class="left-arrow-div" @onclick="PrevSlide">
+            <span class="left-arrow"><i class="bi bi-chevron-left"></i></span>
+        </div>
+        <div class="right-arrow-div" @onclick="NextSlide">
+            <span class="right-arrow"><i class="bi bi-chevron-right"></i></span>
+        </div>
+    </div>
+</div>
+
+<style>
+    .review-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .review-content {
+        display: none;
+        flex-direction: row;
+        align-items: center;
+        gap: 50px;
+        justify-content: center;
+        @* text-align: center; *@
+    }
+
+    .review-content.visible {
+        display: flex; /* Only the active review is displayed */
+    }
+
+    .review-content-img img {
+        width: 250px;
+        height: 250px;
+        border-radius: 50%;
+    }
+
+    .review-content-text {
+        width: 380px;
+    }
+
+    .review-content-text h3 {
+        margin-bottom: 20px;
+    }
+
+    .review-content-text h3,
+    .review-content-text h6 {
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    .review-content-text p {
+        font-size: 18px;
+        font-weight: normal;
+        line-height: 33px;
+        margin-bottom: 10px;
+    }
+
+    .bi-chevron-left,
+    .bi-chevron-right {
+        font-size: 100px;
+        color: grey;
+    }
+
+    .bi-chevron-right {
+        position: absolute;
+        top: 40px;
+        right: 150px;
+        cursor: pointer;
+    }
+
+    .bi-chevron-left {
+        position: absolute;
+        top: 40px;
+        left: 150px;
+        cursor: pointer;
+    }
+    .review-container-content {
+        position: relative;
+        width: 100%;
+    }
+    @@media (max-width: 1200px) {
+        .bi-chevron-left {
+            left: 10px;
+        }
+        .bi-chevron-right {
+            right: 10px;
+        }
+    }
+    @@media (max-width: 920px) {
+        .bi-chevron-left {
+            left: 50px;
+            font-size: 60px;
+            top: 80px;
+        }
+        .bi-chevron-right {
+            right: 50px;
+            font-size: 60px;
+            top: 80px;
+        }
+        .review-content{
+            flex-direction: column;
+        }
+        .review-content {
+            text-align: center;
+        }
+    }
+    @@media (max-width: 540px) {
+        .bi-chevron-left {
+            left: -20px;
+            font-size: 60px;
+            top: 80px;
+        }
+        .bi-chevron-right {
+            right: -20px;
+            font-size: 60px;
+            top: 80px;
+        }
+    }
+    @@media (max-width: 376px) {
+        .bi-chevron-left {
+            left: -40px;
+            font-size: 50px;
+            top: 80px;
+        }
+        .bi-chevron-right {
+            right: -40px;
+            font-size: 50px;
+            top: 80px;
+        }
+        .review-content-text {
+            width: auto;
+        }
+    }
+
+</style>
+
+@code {
+    private List<Review> reviews = new()
+    {
+        new Review
+        {
+            Name = "John Doe",
+            Comment = "Their team are easy to work with and helped me make amazing websites in a short amount of time. Thanks guys for all your hard work. Trust us we looked for a very long time.",
+            Title = "Director, Company",
+            ImageUrl = "https://assets.thenorthface.com/image/upload/q_auto:best,f_auto:image/v1727287263/240924-accessories-m-cspot"
+        },
+        new Review
+        {
+            Name = "John Baby",
+            Comment = "Their team are easy to work with and helped me make amazing websites in a short amount of time. Thanks guys for all your hard work. Trust us we looked for a very long time.",
+            Title = "Producer, Company",
+            ImageUrl = "https://s.abcnews.com/images/GMA/girl-day-abc-jpo-181010_hpMain_1x1_992.jpg"
+        },
+        new Review
+        {
+            Name = "Don Lee",
+            Comment = "Their team are easy to work with and helped me make amazing websites in a short amount of time. Thanks guys for all your hard work. Trust us we looked for a very long time.",
+            Title = "Actor, Company",
+            ImageUrl = "https://cdnb.artstation.com/p/assets/images/images/033/244/315/large/qino-layer-119.jpg?1608895558"
+        },
+        new Review
+        {
+            Name = "Dinosaur",
+            Comment = "Their team are easy to work with and helped me make amazing websites in a short amount of time. Thanks guys for all your hard work. Trust us we looked for a very long time.",
+            Title = "Producer, Company",
+            ImageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLrMnvIU6RUFFuhQjFz9bO42XVMQV76mP5qg&s"
+        }
+    };
+
+    private int currentIndex = 0;
+
+    protected override void OnInitialized()
+    {
+        StartAutoSlide();
+    }
+
+    private async void StartAutoSlide()
+    {
+        while (true)
+        {
+            await Task.Delay(5000); // Wait for 5 seconds
+            NextSlide();
+            StateHasChanged(); // Trigger a UI refresh
+        }
+    }
+
+    private void NextSlide()
+    {
+        currentIndex = (currentIndex + 1) % reviews.Count;
+        StateHasChanged();
+    }
+
+    private void PrevSlide()
+    {
+        currentIndex = (currentIndex - 1 + reviews.Count) % reviews.Count;
+        StateHasChanged();
+    }
+
+    private class Review
+    {
+        public string Name { get; set; }
+        public string Comment { get; set; }
+        public string Title { get; set; }
+        public string ImageUrl { get; set; }
+    }
+}

@@ -2,87 +2,107 @@
 
 @using VaaradhiPay.Components.Pages.L1
 @using VaaradhiPay.DTOs
+@using VaaradhiPay.Components.Layout
 
+@rendermode InteractiveServer
 
+@layout EmptyLayout
+
+@inherits ComponentBase
+
+<div class="profile-avatar-header">
+    <h1>Our Customer Love What we do</h1>
+    <p>Transform your Ideas into Reality with Vaaradhi</p>
+</div>
 <div class="comments-avatar-group mt-5">
     @for (int i = 0; i < 5; i++)
+
     {
         <AvatarGroup AvatarImage="@ProfileList[i].ProfilePicturePath" AvatarName="@ProfileList[i].Name" />
     }
-
+</div>
+<div class="profile-avatar-text">
+    <p>30+ Customer Reviews</p>
 </div>
 
 @code {
     private List<ProfileAvatarDTO> ProfileList = new List<ProfileAvatarDTO>
-    {
-        new ProfileAvatarDTO
-        {
-            UserId = "1",
-            Name = "Belicia De Beneditti",
-            ProfilePicturePath = "http://dummyimage.com/325x261.png/ff4444/ffffff"
-        },
-        new ProfileAvatarDTO
-        {
-            UserId = "2",
-            Name = "Karylin Saltsberger",
-            ProfilePicturePath = "http://dummyimage.com/191x283.png/dddddd/000000"
-        },
-        new ProfileAvatarDTO
-        {
-            UserId = "3",
-            Name = "Trista Jee",
-            ProfilePicturePath = "http://dummyimage.com/276x261.png/5fa2dd/ffffff"
-        },
-        new ProfileAvatarDTO
-        {
-            UserId = "4",
-            Name = "Arleyne Brendish",
-            ProfilePicturePath = "http://dummyimage.com/113x111.png/dddddd/000000"
-        },
-        new ProfileAvatarDTO
-        {
-            UserId = "5",
-            Name = "Maisey Jaggs",
-            ProfilePicturePath = "http://dummyimage.com/264x203.png/cc0000/ffffff"
-        },
-        new ProfileAvatarDTO
-        {
-            UserId = "6",
-            Name = "Emmerich McKeefry",
-            ProfilePicturePath = "http://dummyimage.com/163x188.png/cc0000/ffffff"
-        },
-        new ProfileAvatarDTO
-        {
-            UserId = "7",
-            Name = "Odele Haggart",
-            ProfilePicturePath = "http://dummyimage.com/255x185.png/5fa2dd/ffffff"
-        },
-        new ProfileAvatarDTO
-        {
-            UserId = "8",
-            Name = "Antonie Shelvey",
-            ProfilePicturePath = "http://dummyimage.com/331x259.png/cc0000/ffffff"
-        },
-        new ProfileAvatarDTO
-        {
-            UserId = "9",
-            Name = "Marie-jeanne Teresse",
-            ProfilePicturePath = "http://dummyimage.com/338x308.png/ff4444/ffffff"
-        },
-        new ProfileAvatarDTO
-        {
-            UserId = "10",
-            Name = "Skipton Haughian",
-            ProfilePicturePath = "http://dummyimage.com/149x110.png/5fa2dd/ffffff"
-        }
-    };
+{
+new ProfileAvatarDTO
+{
+UserId = "1",
+Name = "Belicia De Beneditti",
+ProfilePicturePath = "http://dummyimage.com/325x261.png/ff4444/ffffff"
+},
+new ProfileAvatarDTO
+{
+UserId = "2",
+Name = "Karylin Saltsberger",
+ProfilePicturePath = "http://dummyimage.com/191x283.png/dddddd/000000"
+},
+new ProfileAvatarDTO
+{
+UserId = "3",
+Name = "Trista Jee",
+ProfilePicturePath = "http://dummyimage.com/276x261.png/5fa2dd/ffffff"
+},
+new ProfileAvatarDTO
+{
+UserId = "4",
+Name = "Arleyne Brendish",
+ProfilePicturePath = "http://dummyimage.com/113x111.png/dddddd/000000"
+},
+new ProfileAvatarDTO
+{
+UserId = "5",
+Name = "Maisey Jaggs",
+ProfilePicturePath = "http://dummyimage.com/264x203.png/cc0000/ffffff"
+},
+new ProfileAvatarDTO
+{
+UserId = "6",
+Name = "Emmerich McKeefry",
+ProfilePicturePath = "http://dummyimage.com/163x188.png/cc0000/ffffff"
+},
+new ProfileAvatarDTO
+{
+UserId = "7",
+Name = "Odele Haggart",
+ProfilePicturePath = "http://dummyimage.com/255x185.png/5fa2dd/ffffff"
+},
+new ProfileAvatarDTO
+{
+UserId = "8",
+Name = "Antonie Shelvey",
+ProfilePicturePath = "http://dummyimage.com/331x259.png/cc0000/ffffff"
+},
+new ProfileAvatarDTO
+{
+UserId = "9",
+Name = "Marie-jeanne Teresse",
+ProfilePicturePath = "http://dummyimage.com/338x308.png/ff4444/ffffff"
+},
+new ProfileAvatarDTO
+{
+UserId = "10",
+Name = "Skipton Haughian",
+ProfilePicturePath = "http://dummyimage.com/149x110.png/5fa2dd/ffffff"
+}
+};
 
 }
 
 <style>
-    .comments-avatar-group{
+    .comments-avatar-group {
         display: flex;
         align-items: center;
         justify-content: center;
+    }
+
+    .profile-avatar-text,
+    .profile-avatar-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 </style>

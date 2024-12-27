@@ -13,4 +13,20 @@
             return numberString.Substring(0, endIndex);
         }
     }
+
+    public static class CurrencySets
+    {
+        public static readonly Dictionary<string, string> PaperCurrencySet = new Dictionary<string, string>
+         {
+             { "INR", "INR" },
+             { "USD", "USD" },
+             { "AED", "AED" }
+         };
+
+        public static readonly Dictionary<string, string> DigitalCurrencySet = new Dictionary<string, string>
+         {
+             { "USDT", "USDT" },
+             { "NAFA", "NAFA" }
+         };
+    }
 }
