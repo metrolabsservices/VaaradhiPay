@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VaaradhiPay.Data;
+using VaaradhiPay.DTOs;
 using VaaradhiPay.Services.Interfaces;
 
 namespace VaaradhiPay.Services.Implementations
@@ -45,6 +46,45 @@ namespace VaaradhiPay.Services.Implementations
                 .Where(a => a.Status == AdminWalletStatus.Active && !a.IsDeleted)
                 .ToListAsync();
         }
+
+        public async Task<(AdminTetherWalletAccount? Account, ErrorHandleDTO Error)> GetRandomAdminTetherWalletAccountAsync(string currencyType)
+        {
+            try
+            {
+                // Fetch active tether wallet accounts with the specified currency type
+                var activeAccounts = await _context.AdminTetherWalletAccounts
+                    .Where(a => a.Status == AdminWalletStatus.Active &&
+                                !a.IsDeleted &&
+                                a.CurrencyType == currencyType)
+                    .ToListAsync();
+
+                if (activeAccounts.Any())
+                {
+                    // Select a random account
+                    var random = new Random();
+                    var randomAccount = activeAccounts[random.Next(activeAccounts.Count)];
+                    return (randomAccount, new ErrorHandleDTO { IsError = false });
+                }
+
+                // No accounts found for the given currency type
+                return (null, new ErrorHandleDTO
+                {
+                    IsError = true,
+                    Message = $"No active wallet account found for currency type: {currencyType}"
+                });
+            }
+            catch (Exception ex)
+            {
+                // Handle unexpected exceptions
+                return (null, new ErrorHandleDTO
+                {
+                    IsError = true,
+                    Message = "An error occurred while fetching the wallet account.",
+                    TechnicalMessage = ex.Message
+                });
+            }
+        }
+
 
         public async Task AddTetherWalletAccountAsync(AdminTetherWalletAccount tetherWalletAccount)
         {

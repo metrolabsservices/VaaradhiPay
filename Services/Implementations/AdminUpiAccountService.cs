@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VaaradhiPay.Data;
+using VaaradhiPay.DTOs;
 using VaaradhiPay.Services.Interfaces;
 
 namespace VaaradhiPay.Services.Implementations
@@ -44,6 +45,44 @@ namespace VaaradhiPay.Services.Implementations
             return await _context.AdminUpiAccounts
                 .Where(a => a.Status == AdminUpiStatus.Active && !a.IsDeleted)
                 .ToListAsync();
+        }
+
+        public async Task<(AdminUpiAccount? Account, ErrorHandleDTO Error)> GetRandomAdminUpiAccountAsync(string currencyType)
+        {
+            try
+            {
+                // Fetch active UPI accounts with the specified currency type
+                var activeAccounts = await _context.AdminUpiAccounts
+                    .Where(a => a.Status == AdminUpiStatus.Active &&
+                                !a.IsDeleted &&
+                                a.CurrencyType.ToString() == currencyType)
+                    .ToListAsync();
+
+                if (activeAccounts.Any())
+                {
+                    // Select a random account
+                    var random = new Random();
+                    var randomAccount = activeAccounts[random.Next(activeAccounts.Count)];
+                    return (randomAccount, new ErrorHandleDTO { IsError = false });
+                }
+
+                // No accounts found for the given currency type
+                return (null, new ErrorHandleDTO
+                {
+                    IsError = true,
+                    Message = $"No active UPI account found for currency type: {currencyType}"
+                });
+            }
+            catch (Exception ex)
+            {
+                // Handle unexpected exceptions
+                return (null, new ErrorHandleDTO
+                {
+                    IsError = true,
+                    Message = "An error occurred while fetching the UPI account.",
+                    TechnicalMessage = ex.Message
+                });
+            }
         }
 
         public async Task AddUpiAccountAsync(AdminUpiAccount upiAccount)
