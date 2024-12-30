@@ -77,6 +77,9 @@ builder.Services.AddSingleton<ExchangeTransactionService>();
 builder.Services.AddScoped<IAdminBankAccountService, AdminBankAccountService>();
 builder.Services.AddScoped<CheckTransactionStatus>();
 builder.Services.AddScoped<BankAccountService>();
+builder.Services.AddScoped<IAdminTetherWalletAccountService, AdminTetherWalletAccountService>();
+builder.Services.AddScoped<IAdminUpiAccountService, AdminUpiAccountService>();
+
 
 //................................
 builder.Services.AddScoped<ITetherWalletService, TetherWalletService>();

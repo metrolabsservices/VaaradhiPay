@@ -18,6 +18,8 @@ namespace VaaradhiPay.Data
         public DbSet<Currency> Currencies { get; set; } 
         public DbSet<CurrencyExtractionAudit> CurrencyExtractionAudits { get; set; }
         public DbSet<AdminBankAccount> AdminBankAccounts { get; set; }
+        public DbSet<AdminUpiAccount> AdminUpiAccounts { get; set; }
+        public DbSet<AdminTetherWalletAccount> AdminTetherWalletAccounts { get; set; }
         public DbSet<ExchangeRateHistory> ExchangeRateHistories { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
