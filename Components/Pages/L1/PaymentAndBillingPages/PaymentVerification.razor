@@ -7,6 +7,7 @@
 
 @inject ILoggedInUserService LoggedInUserService
 @inject IBankAccountService BankAccountService
+@inject IUPIAddressService UpiAddressService
 @inject PreloadService Loader
 
 <div class="container">
@@ -14,23 +15,38 @@
     {
         <AlertMessageBoxL1 Content="@error.Message" />
     }
-    else if (!userAccounts.Any())
+    else if (selectedPayment == "Bank Transfer")
     {
-        <ExchangeReceiveBankNotFound Content="@((MarkupString)$"No bank accounts are linked to your profile. Please add a bank account to proceed.")" />
+        if (!userAccounts.Any())
+        {
+            <ExchangeReceiveBankNotFound Content="@((MarkupString)$"No bank accounts are linked to your profile. Please add a bank account to proceed.")" />
+        }
+        else if (!userAccounts1.Any())
+        {
+            <ExchangeReceiveBankNotFound Content="@((MarkupString)$"It seems like you don’t have a bank account for receiving currency <strong>{TransactionData?.ReceiveCurrency ?? "N/A"}</strong>. Please add a bank account to proceed with the exchange.")" />
+        }
+        else if (!userAccounts1.Any(account => account.IsVerified))
+        {
+            <ExchangeReceiveBankNotFound Content="@((MarkupString)$"Well you don’t have any verified bank account for receiving currency <strong>{TransactionData?.ReceiveCurrency ?? "N/A"}</strong>. Please verify at least one bank account to proceed with the exchange.")" />
+        }
+        else if (userAccounts1.Any(account => account.IsVerified))
+        {
+            <PaymentVerificationRootIndex AccountsData="userAccounts1" OnValidationState="HandleValidationStateChanged" ReceiveCurrency="@TransactionData?.ReceiveCurrency" />
+        }
     }
-    else if (!userAccounts1.Any())
+    else if(selectedPayment == "UPI")
     {
-        <ExchangeReceiveBankNotFound Content="@((MarkupString)$"It seems like you don’t have a bank account for receiving currency <strong>{TransactionData?.ReceiveCurrency ?? "N/A"}</strong>. Please add a bank account to proceed with the exchange.")" />
+        if (!upiAddresses.Any())
+        {
+            <ExchangeReceiveBankNotFound Content="@((MarkupString)$"No active UPI accounts are linked to your profile. Please add a UPI account to proceed.")" />
+        }
+        else
+        {
+            <p>UPI Found</p>
+        }
     }
-    else if (!userAccounts1.Any(account => account.IsVerified))
+    else
     {
-        <ExchangeReceiveBankNotFound Content="@((MarkupString)$"Well you don’t have any verified bank account for receiving currency <strong>{TransactionData?.ReceiveCurrency ?? "N/A"}</strong>. Please verify at least one bank account to proceed with the exchange.")" />
-    }
-    else if (userAccounts1.Any(account => account.IsVerified))
-    {
-        <PaymentVerificationRootIndex AccountsData="userAccounts1" OnValidationState="HandleValidationStateChanged" ReceiveCurrency="@TransactionData?.ReceiveCurrency" />
-    }
-    else{
         <AlertMessageBoxL1 Content="Unexpected Failure Contact Admin" />
     }
 </div>
@@ -38,9 +54,11 @@
 @code {
     [Parameter] public ExchangeTransactionDTO? TransactionData { get; set; }
     [Parameter] public EventCallback<bool> OnValidationStateChanged { get; set; }
+    [Parameter] public string selectedPayment { get; set; }
 
     private List<BankAccount> userAccounts = new();
     private List<BankAccount> userAccounts1 = new();
+    private List<UPIAddress> upiAddresses = new();
     private ErrorHandleDTO error = new();
 
     protected override async Task OnInitializedAsync()
@@ -71,22 +89,8 @@
                 return;
             }
 
-            userAccounts = await BankAccountService.GetBankAccountsByUserIdAsync(userId);
-            if (userAccounts.Any())
-            {
-                 userAccounts1 = await BankAccountService.GetActiveBankAccountsByCurrencyUserIdAsync(TransactionData.ReceiveCurrency, userId);
-
-                if (!userAccounts1.Any() || !userAccounts1.Any(account => account.IsVerified))
-                {
-                    await EmitValidationState(false);
-                    return;
-                }
-            }
-            else
-            {
-                await EmitValidationState(false);
-                return;
-            }
+            await GetBankAccounts(userId);
+            await GetUpiAccounts(userId);
 
             await EmitValidationState(true);
         }
@@ -106,6 +110,31 @@
         }
     }
 
+    private async Task GetBankAccounts(string userId)
+    {
+        userAccounts = await BankAccountService.GetBankAccountsByUserIdAsync(userId);
+        if (userAccounts.Any())
+        {
+            userAccounts1 = await BankAccountService.GetActiveBankAccountsByCurrencyUserIdAsync(TransactionData.ReceiveCurrency, userId);
+
+            if (!userAccounts1.Any() || !userAccounts1.Any(account => account.IsVerified))
+            {
+                await EmitValidationState(false);
+                return;
+            }
+        }
+        else
+        {
+            await EmitValidationState(false);
+            return;
+        }
+    }
+
+    private async Task GetUpiAccounts(string userId)
+    {
+        upiAddresses = await UpiAddressService.GetActiveUPIAddressesByUserAsync(userId);
+    }
+
     private async Task HandleValidationStateChanged(bool isValid)
     {
         await EmitValidationState(isValid);
@@ -115,4 +144,5 @@
     {
         await OnValidationStateChanged.InvokeAsync(isValid);
     }
+
 }

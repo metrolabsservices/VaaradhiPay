@@ -143,14 +143,8 @@
                     .FirstOrDefault();
             inrRate = inrRates.ToString();
             inrRate = UtilityMethods.TruncateDecimalString(inrRate, 2);
-            exchangeRateHistories = await DbContext.ExchangeRateHistories.OrderByDescending(e => e.Id).FirstOrDefaultAsync();
-
-            if (exchangeRateHistories == null)
-            {
-                // Handle case where exchangeRateHistories is null
-                exchangeRateHistories = new ExchangeRateHistory(); // Provide a default instance
-            }
-
+            exchangeRateHistories = await DbContext.ExchangeRateHistories.OrderByDescending(e => e.Id).AsNoTracking().FirstOrDefaultAsync() 
+                                        ?? new ExchangeRateHistory();
         }
         catch (Exception ex)
         {
@@ -166,7 +160,11 @@
     {
         try
         {
-            var eh = new ExchangeRateHistory
+            if(exchangeRateHistories.Id == 0)
+            {
+                Console.WriteLine("invoked");
+            }
+            var newExchangeRateHistory = new ExchangeRateHistory
                 {
                     BuyRateNafa = exchangeRateHistories.BuyRateNafa,
                     BuyRateUsdt = exchangeRateHistories.BuyRateUsdt,
@@ -180,7 +178,7 @@
                     ModifiedBy = LocalStorage.LoggedInInfo.Email,
                     ModifiedID = LocalStorage.LoggedInInfo.Id
                 };
-            await DbContext.ExchangeRateHistories.AddAsync(eh);
+            await DbContext.ExchangeRateHistories.AddAsync(newExchangeRateHistory);
             await DbContext.SaveChangesAsync();
             await CloseModal();
         }

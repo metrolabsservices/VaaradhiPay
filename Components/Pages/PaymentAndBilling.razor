@@ -4,11 +4,13 @@
 
 @using VaaradhiPay.Components.Pages.L1
 @using VaaradhiPay.Components.Pages.L1.PaymentAndBillingPages
+@using VaaradhiPay.DTOs
 @using VaaradhiPay.Services.Implementations
 
 @inject ExchangeTransactionService ExchangeTransactionService
 @inject PreloadService Load
 @inject ToastService Toast
+@inject NavigationManager navigationManager
 
 
 
@@ -21,11 +23,12 @@
 
 <div class="d-flex justify-content-center w-100">
     <div class="rounded-3 w-75 bg-white p-5">
+        <VaaradhiPay.Components.Pages.TestingByChandu.PaymentButtons T="CustomButtonModel" ButtonItems="PaymentMethods" OnButtonSelected="HandleButtonClick"/>
             <StepperTransaction CurrentStep="currentStep" />
             <div class="d-flex justify-content-center align-items-center my-3">
             @if (currentStep == 1)
             {
-                <PaymentVerification TransactionData="ExchangeTransactionService.CurrentTransaction" OnValidationStateChanged="HandleValidationStateChanged" />
+                <PaymentVerification selectedPayment="@selectedPayment" TransactionData="ExchangeTransactionService.CurrentTransaction" OnValidationStateChanged="HandleValidationStateChanged" />
             }
             else if (currentStep == 2)
             {
@@ -71,17 +74,12 @@
     </div>
 </div>
 
-
-
-
-
-
-
 @code {
     private int currentStep = 1;
     private bool canProceed = true; // Tracks if the user can proceed
     private bool IsPreviousDisabled => currentStep == 1 || currentStep == 3; // Dynamically determine if "Previous" is disabled
     private bool IsNextDisabled => currentStep == 3;     // Dynamically determine if "Next" is disabled
+    private string selectedPayment = "Bank Transfer";
 
     private void HandlePreBtn()
     {
@@ -111,6 +109,7 @@
             StateHasChanged(); 
         }
     }
+
     private void HandleValidationStateChanged(bool isValid)
     {
         canProceed = isValid;
@@ -119,10 +118,54 @@
             Toast.Notify(new ToastMessage { Type = ToastType.Danger, Message = $"Validation failed. Please check the current step and resolve the issues." });
         }
     }
+
     private void FinalSucessPage()
     {
         HandleNexBtn();
     }
+
+    private void HandleButtonClick(CustomButtonModel button)
+    {
+        selectedPayment = button.DisplayText;
+        // navigationManager.NavigateTo(button.NavigationLink);
+        currentStep = 1;
+    }
+
+    public List<CustomButtonModel> PaymentMethods = new List<CustomButtonModel>
+      {
+          new CustomButtonModel
+          {
+              DisplayText = "Bank Transfer",
+              NavigationLink = "bank-transfer-link",
+              Icon = "bank-icon-class",
+              IsButtonDisabled = false,
+              IsButtonActive = true
+          },
+          new CustomButtonModel
+          {
+              DisplayText = "UPI",
+              NavigationLink = "upi-transfer-link",
+              Icon = "upi-icon-class",
+              IsButtonDisabled = false,
+              IsButtonActive = false
+          },
+          new CustomButtonModel
+          {
+              DisplayText = "Binance Pay",
+              NavigationLink = "binance-pay-link",
+              Icon = "binance-icon-class",
+              IsButtonDisabled = true,
+              IsButtonActive = false
+          },
+          new CustomButtonModel
+          {
+              DisplayText = "Wazirx",
+              NavigationLink = "wazirx-link",
+              Icon = "wazirx-icon-class",
+              IsButtonDisabled = true,
+              IsButtonActive = false
+          }
+      };
 
 }
 

@@ -1,0 +1,56 @@
+﻿@using VaaradhiPay.DTOs;
+
+@typeparam T;
+
+
+<div class="payment-custom-button-group-container">
+    @foreach (var button in ButtonItems)
+    {
+        <button class="payment-custom-button btn @GetActiveButtonClass(button)" @onclick="(() => OnButtonClick(button))">
+            @button.DisplayText
+        </button>
+    }
+</div>
+
+@code {
+    [Parameter] public List<CustomButtonModel> ButtonItems { get; set; } = new();
+    [Parameter] public EventCallback<CustomButtonModel> OnButtonSelected { get; set; }
+
+    private CustomButtonModel? ActiveButton;
+
+    private void OnButtonClick(CustomButtonModel button)
+    {
+        ActiveButton = button;
+        if (OnButtonSelected.HasDelegate)
+        {
+            OnButtonSelected.InvokeAsync(button);
+        }
+    }
+
+    private string GetActiveButtonClass(CustomButtonModel button)
+    {
+        return ActiveButton == button ? "payment-custom-active-button" : "";
+    }
+}
+
+<style>
+    .payment-custom-button-group-container{
+        display:flex;
+        justify-content:space-between;
+        background-color:white;
+    }
+
+    .payment-custom-button{
+        border:1px solid black;
+        border-radius:10px;
+        background-color:white;
+        color:black;
+        width:150px;
+    }
+
+    .payment-custom-active-button{
+        border: 1px solid #DF0A0A;
+        background-color:#FFF5F4;
+    }
+
+</style>

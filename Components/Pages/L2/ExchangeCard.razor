@@ -1,12 +1,15 @@
 ﻿@page "/exc"
 
+@using Microsoft.EntityFrameworkCore
 @using VaaradhiPay.Components.Layout
 @using VaaradhiPay.Components.Pages.L1
 @using VaaradhiPay.DTOs
+@using VaaradhiPay.Data
 @using VaaradhiPay.Services.Implementations
 
 @inject NavigationManager NavigationManager
 @inject ExchangeTransactionService ExchangeTransactionService
+@inject ApplicationDbContext DbContext
 
 @rendermode InteractiveServer
 
@@ -28,9 +31,19 @@
     <div class="exchange-card-body p-3">
 
         @* exchange rate display *@
-        <div class="text-dark">
-            1 USDT is Roughly <span class="text-dark fw-bold fs-4">@INRprice</span><span class="fw-bold fst-italic fs-6">INR</span>
-        </div>
+        @if (IsBuyTab)
+        {
+            <div class="text-dark">
+                1 USDT is Roughly <span class="text-dark fw-bold fs-4">@BuyInrRateUSDT</span><span class="fw-bold fst-italic fs-6">INR</span>
+            </div>
+        }
+        else if (!IsBuyTab)
+        {
+            <div class="text-dark">
+                1 USDT is Roughly <span class="text-dark fw-bold fs-4">@SellInrRateUSDT</span><span class="fw-bold fst-italic fs-6">INR</span>
+            </div>
+        }
+
 
         @* exchange Form *@
         <ExchangeForm OnTransactionCompleted="HandleTransactionCompleted" IsBuyTab="IsBuyTab" />
@@ -45,8 +58,19 @@
 <Preload LoadingText="Loading..." />
 
 @code {
-    private string INRprice = "90.80";
+    private string BuyInrRateUSDT = "82";
+    private string SellInrRateUSDT = "89";
     private bool IsBuyTab = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var ex = await DbContext.ExchangeRateHistories.OrderByDescending(e => e.Id).FirstOrDefaultAsync();
+        if(ex != null)
+        {
+            BuyInrRateUSDT = ex.BuyRateUsdt.ToString();
+            SellInrRateUSDT = ex.SellRateUsdt.ToString();
+        }
+    }
 
     private void HandleTabChange(bool isBuy)
     {

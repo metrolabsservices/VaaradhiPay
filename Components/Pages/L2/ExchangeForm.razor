@@ -1,29 +1,32 @@
 ﻿@page "/excform"
 
+@using Microsoft.EntityFrameworkCore
 @using VaaradhiPay.Components.Pages.L1
 @using VaaradhiPay.Components.Pages.L1.ErrorTemplates
 @using VaaradhiPay.DTOs
 @using VaaradhiPay.Data
 @using VaaradhiPay.Services.Interfaces
+@using VaaradhiPay.Utilities
 
 @inject ILoggedInUserService LoggedInUserService
 @inject ICoinTypeService CoinTypeService
 @inject ToastService Toast
 @inject PreloadService Load
+@inject ApplicationDbContext DbContext
 
 @inherits ComponentBase
 
 <div class="exchangeform-container">
     <div class="input-container">
-        <div class="input-wrapper input-field-exc-card">
+        <div class="input-wrapper">
             <p class="input-label-text">You Pay</p>
             <input class="main-input-field" type="number" @bind="youPayValue" @bind:event="oninput" @onkeyup="CalculateReceivedValue" />
         </div>
         <div class="input-dropdown">
             <select class="form-select form-select-sm" @bind="selectedCurrencyPay" @bind:event="oninput" @onchange="CalculateReceivedValue">
-                @foreach (var coin in AvailableCoins)
+                @foreach (var coin in ExchangeSet1)
                 {
-                    <option value="@coin.Symbol">@coin.Symbol</option>
+                    <option value="@coin.Key">@coin.Value</option>
                 }
             </select>
 
@@ -31,16 +34,19 @@
     </div>
 
     <div class="input-container">
-        <div class="input-wrapper input-field-exc-card">
+        <div class="input-wrapper">
             <p class="input-label-text">You will receive Roughly</p>
+            <input class="main-input-field" type="number" @bind="youReceiveValue" @bind:event="oninput" @onkeyup="CalculateReceivedValue2" />
             @* <input class="main-input-field" type="number" value="@youReceiveValue" readonly /> *@
-            <p class="main-input-field m-0 p-0">@youReceiveValue.ToString("F2")</p>
+            @* <p class="main-input-field m-0 p-0">@youReceiveValue.ToString("F2")</p> *@
+            @* <p class="main-input-field m-0 p-0">@((Math.Floor(youReceiveValue * 1000) / 1000).ToString("F3"))</p> *@
+
         </div>
         <div class="input-dropdown">
             <select class="form-select form-select-sm" @bind="selectedCurrencyReceive" @bind:event="oninput" @onchange="CalculateReceivedValue">
-                @foreach (var coin in AvailableCoins)
+                @foreach (var coin in ExchangeSet2)
                 {
-                    <option value="@coin.Symbol">@coin.Symbol</option>
+                    <option value="@coin.Key">@coin.Value</option>
                 }
             </select>
 
@@ -59,15 +65,39 @@
 
     private Modal UserLogRequired = default!;
     private List<CoinType> AvailableCoins = new();
-    private string selectedCurrencyPay = "AUD"; 
-    private string selectedCurrencyReceive = "INR"; 
-    private decimal youPayValue = 0;  
-    private decimal youReceiveValue = 0;  
-    private ErrorHandleDTO errorDetails = new(); 
+    private string selectedCurrencyPay = "INR";
+    private string selectedCurrencyReceive = "USDT";
+    private decimal youPayValue = 0;
+    private decimal youReceiveValue = 0;
+    private ErrorHandleDTO errorDetails = new();
+
+    private Dictionary<string, string> ExchangeSet1 = CurrencySets.DigitalCurrencySet;
+    private Dictionary<string, string> ExchangeSet2 = CurrencySets.PaperCurrencySet;
+
+    private decimal LiveINR;
+    private decimal LiveAED;
+    private decimal LiveUSD = 1;
+    private ExchangeRateHistory exchangeRateHistory;
 
     protected override Task OnParametersSetAsync()
     {
         Console.WriteLine($"IsBuyTab: {IsBuyTab}"); // Log the current tab status to the console
+        if (IsBuyTab)
+        {
+            ExchangeSet1 = CurrencySets.PaperCurrencySet;
+            ExchangeSet2 = CurrencySets.DigitalCurrencySet;
+        }
+        else if (!IsBuyTab)
+        {
+            ExchangeSet2 = CurrencySets.PaperCurrencySet;
+            ExchangeSet1 = CurrencySets.DigitalCurrencySet;
+        }
+        else
+        {
+            Console.WriteLine("Unable to load Options");
+        }
+        youPayValue = 0;
+        youReceiveValue = 0;
         return Task.CompletedTask;
     }
 
@@ -77,6 +107,9 @@
         try
         {
             AvailableCoins = await CoinTypeService.GetActiveCoinsAsync();
+            LiveINR = await DbContext.Currencies.Where(e => e.ISOCode == "INR").Select(e => e.Rate).FirstOrDefaultAsync();
+            LiveAED = await DbContext.Currencies.Where(e => e.ISOCode == "AED").Select(e => e.Rate).FirstOrDefaultAsync();
+            exchangeRateHistory = await DbContext.ExchangeRateHistories.OrderByDescending(e => e.CreatedDate).FirstOrDefaultAsync();
         }
         catch (Exception ex)
         {
@@ -106,58 +139,106 @@
 
         try
         {
-
-            var baseCurrency = AvailableCoins.FirstOrDefault(c => c.Symbol == selectedCurrencyPay);
-            var targetCurrency = AvailableCoins.FirstOrDefault(c => c.Symbol == selectedCurrencyReceive);
-
-            if (baseCurrency == null || targetCurrency == null)
+            decimal USDT = 1;
+            decimal NAFA = 1;
+            if (IsBuyTab)
             {
-                errorDetails = new ErrorHandleDTO
+                if (selectedCurrencyReceive == "USDT")
+                {
+                    decimal inr = exchangeRateHistory.BuyRateUsdt;
+                    if (selectedCurrencyPay == "INR")
                     {
-                        IsError = true,
-                        Message = "Selected currency is invalid. Please check your selection.",
-                    };
-                return;
-            }
+                        var payAmount = youPayValue - (youPayValue * (exchangeRateHistory.TaxAmountUsdt / 100));
+                        youReceiveValue = (decimal)((payAmount * USDT) / inr);
+                    }
 
-            if (baseCurrency == targetCurrency)
+                    if (selectedCurrencyPay == "USD")
+                    {
+                        decimal usd = (inr * LiveUSD) / LiveINR;
+                        var payAmount = youPayValue - (youPayValue * (exchangeRateHistory.TaxAmountUsdt / 100));
+                        youReceiveValue = (decimal)((payAmount * USDT) / usd);
+                    }
+
+                    if (selectedCurrencyPay == "AED")
+                    {
+                        decimal aed = (inr * LiveAED) / LiveINR;
+                        var payAmount = youPayValue - (youPayValue * (exchangeRateHistory.TaxAmountUsdt / 100));
+                        youReceiveValue = (decimal)((payAmount * USDT) / aed);
+                    }
+                }
+                else if (selectedCurrencyReceive == "NAFA")
+                {
+                    decimal inr = exchangeRateHistory.BuyRateNafa;
+                    if (selectedCurrencyPay == "INR")
+                    {
+                        var payAmount = youPayValue - (youPayValue * (exchangeRateHistory.TaxAmountNafa / 100));
+                        youReceiveValue = (decimal)((payAmount * NAFA) / inr);
+                    }
+
+                    if (selectedCurrencyPay == "USD")
+                    {
+                        decimal usd = (inr * LiveUSD) / LiveINR;
+                        var payAmount = youPayValue - (youPayValue * (exchangeRateHistory.TaxAmountNafa / 100));
+                        youReceiveValue = (decimal)((payAmount * NAFA) / usd);
+                    }
+
+                    if (selectedCurrencyPay == "AED")
+                    {
+                        decimal aed = (inr * LiveAED) / LiveINR;
+                        var payAmount = youPayValue - (youPayValue * (exchangeRateHistory.TaxAmountNafa / 100));
+                        youReceiveValue = (decimal)((payAmount * NAFA) / aed);
+                    }
+                }
+            }
+            else
             {
-                errorDetails = new ErrorHandleDTO
+                if (selectedCurrencyReceive == "USDT")
+                {
+                    decimal inr = exchangeRateHistory.SellRateUsdt;
+                    if (selectedCurrencyPay == "INR")
                     {
-                        IsError = true,
-                        Message = "Selected currency is the same. Please check your selection.",
-                    };
-                return;
-            }
+                        var receiveAmount = (youPayValue * inr) / USDT;
+                        youReceiveValue = (decimal)(receiveAmount - (receiveAmount * (exchangeRateHistory.TaxAmountUsdt / 100)));
+                    }
 
-            if (baseCurrency.ExchangeRateToBaseCurrency == null || targetCurrency.ExchangeRateToBaseCurrency == null)
-            {
-                errorDetails = new ErrorHandleDTO
+                    if (selectedCurrencyPay == "USD")
                     {
-                        IsError = true,
-                        Message = "Exchange rate data is missing for the selected currency. Please try again later."
-                    };
-                return;
-            }
+                        decimal usd = (inr * LiveUSD) / LiveINR;
+                        var receiveAmount = (youPayValue * usd) / USDT;
+                        youReceiveValue = (decimal)(receiveAmount - (receiveAmount * (exchangeRateHistory.TaxAmountUsdt / 100)));
+                    }
 
-            if (youPayValue < 1)
-            {
-                errorDetails = new ErrorHandleDTO
+                    if (selectedCurrencyPay == "AED")
                     {
-                        IsError = true,
-                        Message = "The entered amount must be greater than 0. Please enter a valid amount to proceed."
-                    };
-                return;
+                        decimal aed = (inr * LiveAED) / LiveINR;
+                        var receiveAmount = (youPayValue * aed) / USDT;
+                        youReceiveValue = (decimal)(receiveAmount - (receiveAmount * (exchangeRateHistory.TaxAmountUsdt / 100)));
+                    }
+                }
+                else if (selectedCurrencyReceive == "NAFA")
+                {
+                    decimal inr = exchangeRateHistory.SellRateNafa;
+                    if (selectedCurrencyPay == "INR")
+                    {
+                        var receiveAmount = (youPayValue * inr) / USDT;
+                        youReceiveValue = (decimal)(receiveAmount - (receiveAmount * (exchangeRateHistory.TaxAmountNafa / 100)));
+                    }
+
+                    if (selectedCurrencyPay == "USD")
+                    {
+                        decimal usd = (inr * LiveUSD) / LiveINR;
+                        var receiveAmount = (youPayValue * usd) / USDT;
+                        youReceiveValue = (decimal)(receiveAmount - (receiveAmount * (exchangeRateHistory.TaxAmountNafa / 100)));
+                    }
+
+                    if (selectedCurrencyPay == "AED")
+                    {
+                        decimal aed = (inr * LiveAED) / LiveINR;
+                        var receiveAmount = (youPayValue * aed) / USDT;
+                        youReceiveValue = (decimal)(receiveAmount - (receiveAmount * (exchangeRateHistory.TaxAmountNafa / 100)));
+                    }
+                }
             }
-
-
-            // Calculate the exchange rate from PayCurrency to ReceiveCurrency
-            var payToUSD = 1 / baseCurrency.ExchangeRateToBaseCurrency.Value; // Convert PayCurrency to USD
-            var usdToReceive = targetCurrency.ExchangeRateToBaseCurrency.Value; // Convert USD to ReceiveCurrency
-            var payToReceiveRate = payToUSD * usdToReceive; // Combined rate
-
-            // Calculate "You will receive" value
-            youReceiveValue = youPayValue * payToReceiveRate;
 
             // Error Free
             errorDetails = new ErrorHandleDTO { IsError = false };
@@ -184,6 +265,137 @@
         }
     }
 
+    private async Task CalculateReceivedValue2()
+    {
+
+        Console.WriteLine($"{selectedCurrencyPay} , {selectedCurrencyReceive}");
+        Load.Show(); // Display loading spinner
+
+        try
+        {
+            decimal USDT = 1;
+            decimal NAFA = 1;
+            if (IsBuyTab)
+            {
+                if (selectedCurrencyReceive == "USDT")
+                {
+                    decimal inr = exchangeRateHistory.BuyRateUsdt;
+                    if (selectedCurrencyPay == "INR")
+                    {
+                        var receiveAmount = (youReceiveValue * inr) / USDT;
+                        youPayValue = (decimal)(receiveAmount - (receiveAmount * (exchangeRateHistory.TaxAmountUsdt / 100)));
+                    }
+
+                    if (selectedCurrencyPay == "USD")
+                    {
+                        decimal usd = (inr * LiveUSD) / LiveINR;
+                        var receiveAmount = (youReceiveValue * usd) / USDT;
+                        youPayValue = (decimal)(receiveAmount - (receiveAmount * (exchangeRateHistory.TaxAmountUsdt / 100)));
+                    }
+
+                    if (selectedCurrencyPay == "AED")
+                    {
+                        decimal aed = (inr * LiveAED) / LiveINR;
+                        var receiveAmount = (youReceiveValue * aed) / USDT;
+                        youPayValue = (decimal)(receiveAmount - (receiveAmount * (exchangeRateHistory.TaxAmountUsdt / 100)));
+                    }
+                }
+                else if (selectedCurrencyReceive == "NAFA")
+                {
+                    decimal inr = exchangeRateHistory.BuyRateNafa;
+                    if (selectedCurrencyPay == "INR")
+                    {
+                        var receiveAmount = (youReceiveValue * inr) / USDT;
+                        youPayValue = (decimal)(receiveAmount - (receiveAmount * (exchangeRateHistory.TaxAmountNafa / 100)));
+                    }
+
+                    if (selectedCurrencyPay == "USD")
+                    {
+                        decimal usd = (inr * LiveUSD) / LiveINR;
+                        var receiveAmount = (youReceiveValue * usd) / USDT;
+                        youPayValue = (decimal)(receiveAmount - (receiveAmount * (exchangeRateHistory.TaxAmountNafa / 100)));
+                    }
+
+                    if (selectedCurrencyPay == "AED")
+                    {
+                        decimal aed = (inr * LiveAED) / LiveINR;
+                        var receiveAmount = (youReceiveValue * aed) / USDT;
+                        youPayValue = (decimal)(receiveAmount - (receiveAmount * (exchangeRateHistory.TaxAmountNafa / 100)));
+                    }
+                }
+            }
+            else
+            {
+                if (selectedCurrencyReceive == "USDT")
+                {
+                    decimal inr = exchangeRateHistory.SellRateUsdt;
+                    if (selectedCurrencyPay == "INR")
+                    {
+                        var payAmount = youReceiveValue - (youReceiveValue * (exchangeRateHistory.TaxAmountUsdt / 100));
+                        youPayValue = (decimal)((payAmount * USDT) / inr);
+                    }
+
+                    if (selectedCurrencyPay == "USD")
+                    {
+                        decimal usd = (inr * LiveUSD) / LiveINR;
+                        var payAmount = youReceiveValue - (youReceiveValue * (exchangeRateHistory.TaxAmountUsdt / 100));
+                        youPayValue = (decimal)((payAmount * USDT) / usd);
+                    }
+
+                    if (selectedCurrencyPay == "AED")
+                    {
+                        decimal aed = (inr * LiveAED) / LiveINR;
+                        var payAmount = youReceiveValue - (youReceiveValue * (exchangeRateHistory.TaxAmountUsdt / 100));
+                        youPayValue = (decimal)((payAmount * USDT) / aed);
+                    }
+                }
+                else if (selectedCurrencyReceive == "NAFA")
+                {
+                    decimal inr = exchangeRateHistory.BuyRateNafa;
+                    if (selectedCurrencyPay == "INR")
+                    {
+                        var payAmount = youReceiveValue - (youReceiveValue * (exchangeRateHistory.TaxAmountNafa / 100));
+                        youPayValue = (decimal)((payAmount * NAFA) / inr);
+                    }
+
+                    if (selectedCurrencyPay == "USD")
+                    {
+                        decimal usd = (inr * LiveUSD) / LiveINR;
+                        var payAmount = youReceiveValue - (youReceiveValue * (exchangeRateHistory.TaxAmountNafa / 100));
+                        youPayValue = (decimal)((payAmount * NAFA) / usd);
+                    }
+
+                    if (selectedCurrencyPay == "AED")
+                    {
+                        decimal aed = (inr * LiveAED) / LiveINR;
+                        var payAmount = youReceiveValue - (youReceiveValue * (exchangeRateHistory.TaxAmountNafa / 100));
+                        youPayValue = (decimal)((payAmount * NAFA) / aed);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            Toast.Notify(new ToastMessage
+                {
+                    Type = ToastType.Danger,
+                    Message = "An error occurred while calculating the exchange value. Please try again."
+                });
+            errorDetails = new ErrorHandleDTO
+                {
+                    IsError = true,
+                    Message = "An error occurred while calculating the exchange value. Please try again.",
+                    TechnicalMessage = ex.Message
+                };
+
+        }
+        finally
+        {
+            Load.Hide(); // Hide loading spinner
+        }
+
+    }
 
     private async Task HandleSubmit()
     {
@@ -238,7 +450,7 @@
 
             await OnTransactionCompleted.InvokeAsync(transaction);
 
-            
+
         }
         catch (Exception ex)
         {
@@ -255,7 +467,7 @@
 
 <style>
 
-    .exchangeform-container{
+    .exchangeform-container {
         height: 80%;
         display: flex;
         justify-content: space-evenly;
@@ -274,18 +486,18 @@
         padding: 5px 15px 5px 5px;
     }
 
-    .input-label-text{
+    .input-label-text {
         padding: 0px;
         margin: 0px 0px 0px 2px;
         font-size: 13px;
         font-weight: 500;
     }
 
-    .input-dropdown{
-      min-width: 32px;
+    .input-dropdown {
+        min-width: 32px;
     }
 
-    .main-input-field{
+    .main-input-field {
         border: none;
         font-size: 14px;
         font-weight: bold;

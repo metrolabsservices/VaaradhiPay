@@ -3,14 +3,16 @@
 @inject ApplicationDbContext DbContext
 
 
-<div>
-    <table class="table">
+<div class="table-responsive logs-table-div">
+    <h5 class="text-danger fw-bold pb-2">Logs</h5>
+    <table class="table cust-table-logs">
         <thead>
             <tr>
-                <th>USDT</th>
-                <th>NAFA</th>
-                <th>Changed By</th>
-                <th>Date Time</th>
+                <th class="text-center">USDT</th>
+                <th class="text-center">NAFA</th>
+                <th class="text-center">INR</th>
+                <th class="text-center">Changed By</th>
+                <th class="text-center">Date Time</th>
             </tr>
         </thead>
         <tbody>
@@ -18,18 +20,24 @@
             {
 
                 @foreach (var er in exchangeRateHistories)
+
                 {
-                    <tr>
-                        <td>
-                            @er.BuyRateUsdt @er.SellRateUsdt
+                    <tr class="cust-tr cust-top">
+                        <td class="text-center">
+                            <span class="buy-text-color"><i class="bi bi-arrow-up"></i>@er.BuyRateUsdt.ToString("F2")</span>
+                            <span class="sell-text-color"><i class="bi bi-arrow-down"></i>@er.SellRateUsdt.ToString("F2")</span>
                         </td>
-                        <td>
-                            @er.BuyRateNafa @er.SellRateNafa
+                        <td class="text-center">
+                            <span class="buy-text-color"><i class="bi bi-arrow-up"></i>@er.BuyRateNafa.ToString("F2")</span>
+                            <span class="sell-text-color"><i class="bi bi-arrow-down"></i>@er.SellRateNafa.ToString("F2")</span>
                         </td>
-                        <td>
+                        <td class="text-center">
+                            @er.CurrentInrRate
+                        </td>
+                        <td class="text-center">
                             @er.ModifiedBy
                         </td>
-                        <td>
+                        <td class="text-center">
                             @er.CreatedDate
                         </td>
                     </tr>
@@ -42,8 +50,37 @@
 @code {
     private List<ExchangeRateHistory> exchangeRateHistories;
 
+
+
     protected override async Task OnInitializedAsync()
+
     {
+
         exchangeRateHistories = await DbContext.ExchangeRateHistories.OrderByDescending(e => e.CreatedDate).ToListAsync();
+
     }
 }
+
+<style>
+    .buy-text-color {
+        color: #26a17b;
+    }
+
+    .sell-text-color {
+        color: #df0a0a;
+    }
+
+    .cust-table-logs td {
+        white-space: nowrap;
+        padding-right: 1.5rem;
+        padding-left: 1.5rem;
+    }
+
+    .cust-tr {
+        border-style: hidden;
+    }
+
+    .cust-top {
+        border-top: 1px solid black;
+    }
+</style>
