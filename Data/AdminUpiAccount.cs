@@ -11,7 +11,7 @@ namespace VaaradhiPay.Data
         public string AccountHolderName { get; set; } 
         public decimal Balance { get; set; }
         public string? TransactionReference { get; set; }
-        public AdminCurrencyType CurrencyType { get; set; } = AdminCurrencyType.INR; // Currency type, defaulting to INR
+        public string CurrencyType { get; set; } = "INR"; // Currency type, defaulting to INR, USD, AED
         public AdminUpiStatus Status { get; set; } = AdminUpiStatus.Active; // Account status (e.g., Active, Inactive)
         public bool IsDeleted { get; set; } = false; 
         public DateTime CreatedOn { get; private set; } = DateTime.UtcNow; 
@@ -25,10 +25,10 @@ namespace VaaradhiPay.Data
         Suspended
     }
 
-    public enum AdminCurrencyType
-    {
-        INR,
-        AED,
-        USD
-    }
+    //public enum AdminCurrencyType
+    //{
+    //    INR,
+    //    AED,
+    //    USD
+    //}
 }

@@ -55,7 +55,7 @@ namespace VaaradhiPay.Services.Implementations
                 var activeAccounts = await _context.AdminUpiAccounts
                     .Where(a => a.Status == AdminUpiStatus.Active &&
                                 !a.IsDeleted &&
-                                a.CurrencyType.ToString() == currencyType)
+                                a.CurrencyType == currencyType)
                     .ToListAsync();
 
                 if (activeAccounts.Any())

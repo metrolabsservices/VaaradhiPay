@@ -10,7 +10,7 @@
         <div class=" px-3 pt-3" style="font-size: 12px">
             <p class="mb-3">Choose an account from the list of existing Accounts to Settle the Amount of Your currency type.</p>
             <p class="fw-bold mb-3">Your Currency Exchange Value lies in :</p>
-            <p class="mb-3 fw-bold">BUY - USD <span class="fw-normal">with</span> INR</p>
+            <p class="mb-3 fw-bold">BUY - @ExchangeTransactionService.CurrentTransaction?.ReceiveCurrency <span class="fw-normal">with</span> @ExchangeTransactionService.CurrentTransaction?.PayCurrency</p>
             <p class="text-muted fw-bold mb-0">NOTE: No Payment is Refunded Check twice before Pay.</p>
         </div>
     </div>
@@ -18,7 +18,9 @@
         <div class="vr h-100 mx-2"></div>
     </div>
     <div class="col-7 p-0">
-    
+
+        @if (AccountsData != null)
+        {
             <SortableList TItem="BankAccount" Data="@AccountsData" AllowSorting="false" Context="account" Class="w-100 sortable-container">
                 <ItemTemplate>
                     <div class="form-check hstack gap-4">
@@ -34,16 +36,37 @@
 
                 </ItemTemplate>
             </SortableList>
+        }
+        else if (upiAddresses != null)
+        {
+            <SortableList TItem="UPIAddress" Data="@upiAddresses" AllowSorting="true" Context="account" Class="w-100 sortable-container">
+                <ItemTemplate>
+                    <div class="form-check hstack gap-4">
+                        <div>
+                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="UpiAccountRadioCheck_@account.UPIAddressId" @onchange="() => OnUPISelected(account)">
+                        </div>
+                        <label class="form-check-label" for="UpiAccountRadioCheck_@account.UPIAddressId">
+                            <p class="mb-0 fw-bold">@account.UpiUserName</p>
+                            <p class="mb-0 text-muted">@account.Address</p>
+                        </label>
+                    </div>
+                </ItemTemplate>
+            </SortableList>
+        }
 
     </div>
 </div>
 
 @code {
     [Parameter] public List<BankAccount>? AccountsData { get; set; }
+    [Parameter] public List<UPIAddress>? upiAddresses { get; set; }
     [Parameter] public EventCallback<bool> OnValidationState { get; set; }
     [Parameter] public string? ReceiveCurrency { get; set; }
 
     private BankAccount? SelectedBankAccount { get; set; }
+    private UPIAddress? SelectedUPIAccount { get; set; }
+
+    // private string buyCurrency = ExchangeTransactionService.CurrentTransaction?.ReceiveCurrency;
 
     private async Task OnAccountSelected(BankAccount bankAccount)
     {
@@ -63,9 +86,30 @@
                     BankName = SelectedBankAccount.BankName,
                     AccountHolderName = SelectedBankAccount.AccountHolderName,
                     CurrencyType = SelectedBankAccount.CurrencyType,
-                    
+
                 };
             ExchangeTransactionService.SelectedBank = BankData;
+        }
+    }
+
+    private async Task OnUPISelected(UPIAddress upi)
+    {
+        SelectedUPIAccount = upi;
+
+        if (SelectedUPIAccount.CurrencyType != ReceiveCurrency)
+        {
+            await EmitValidationState(false);
+        }
+        else
+        {
+            var UPIData = new SelectedBankDTO
+                {
+                    BankAccountId = SelectedUPIAccount.UPIAddressId,
+                    BankName = SelectedUPIAccount.Address,
+                    AccountHolderName = SelectedUPIAccount.UpiUserName,
+                    CurrencyType = SelectedUPIAccount.CurrencyType,
+                };
+            ExchangeTransactionService.SelectedBank = UPIData;
         }
     }
 
@@ -77,14 +121,14 @@
 
 <style>
     .sortable-container {
-        max-height: 270px; 
-        overflow-y: scroll; 
-        -ms-overflow-style: none; 
+        max-height: 270px;
+        overflow-y: scroll;
+        -ms-overflow-style: none;
         scrollbar-width: none;
     }
 
         .sortable-container::-webkit-scrollbar {
-        display: none;
-    }
+            display: none;
+        }
 
 </style>

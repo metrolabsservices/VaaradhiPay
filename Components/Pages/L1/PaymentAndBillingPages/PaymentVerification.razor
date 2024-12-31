@@ -42,7 +42,7 @@
         }
         else
         {
-            <p>UPI Found</p>
+            <PaymentVerificationRootIndex upiAddresses="upiAddresses" OnValidationState="HandleValidationStateChanged" ReceiveCurrency="@TransactionData?.ReceiveCurrency" />
         }
     }
     else

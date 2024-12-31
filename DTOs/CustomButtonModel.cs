@@ -7,5 +7,6 @@
         public string Icon { get; set; } = string.Empty; // Icon associated with the button
         public bool IsButtonDisabled { get; set; } = false; // Flag to disable navigation link
         public bool? IsButtonActive { get; set; }
+        public bool IsVisible { get; set; } = true; //Flag to visible or not
     }
 }

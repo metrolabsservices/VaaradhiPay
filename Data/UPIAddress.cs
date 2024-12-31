@@ -11,7 +11,7 @@ namespace VaaradhiPay.Data
         public string UpiUserName { get; set; } 
         public bool IsActive { get; set; } = true; 
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
-
+        public string CurrencyType { get; set; }  // USD - INR - AED 
 
         [Required]
         public string UserId { get; set; } 

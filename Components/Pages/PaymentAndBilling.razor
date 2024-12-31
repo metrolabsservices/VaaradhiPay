@@ -12,27 +12,27 @@
 @inject ToastService Toast
 @inject NavigationManager navigationManager
 
-
+@inject ExchangeTransactionService ExchangeTransactionService
 
 <h3 class="text-center text-white mb-4">Payment & Bill</h3>
 
-<Preload LoadingText="..Loading"/>
+<Preload LoadingText="..Loading" />
 <Toasts class="p-3" AutoHide="true" Delay="4000" Placement="ToastsPlacement.MiddleRight" />
 
 
 
 <div class="d-flex justify-content-center w-100">
     <div class="rounded-3 w-75 bg-white p-5">
-        <VaaradhiPay.Components.Pages.TestingByChandu.PaymentButtons T="CustomButtonModel" ButtonItems="PaymentMethods" OnButtonSelected="HandleButtonClick"/>
-            <StepperTransaction CurrentStep="currentStep" />
-            <div class="d-flex justify-content-center align-items-center my-3">
+        <VaaradhiPay.Components.Pages.TestingByChandu.PaymentButtons T="CustomButtonModel" ButtonItems="PaymentMethods" OnButtonSelected="HandleButtonClick" />
+        <StepperTransaction CurrentStep="currentStep" />
+        <div class="d-flex justify-content-center align-items-center my-3">
             @if (currentStep == 1)
             {
                 <PaymentVerification selectedPayment="@selectedPayment" TransactionData="ExchangeTransactionService.CurrentTransaction" OnValidationStateChanged="HandleValidationStateChanged" />
             }
             else if (currentStep == 2)
             {
-                <PaymentPage OnValidationStateChanged="HandleValidationStateChanged" OnFinal="FinalSucessPage" />
+                <PaymentPage selectedPayment="@selectedPayment" OnValidationStateChanged="HandleValidationStateChanged" OnFinal="FinalSucessPage" />
             }
             else if (currentStep == 3)
             {
@@ -42,8 +42,8 @@
             {
 
             }
-            </div>
-       
+        </div>
+
         <div class="w-100 d-flex justify-content-between">
 
             @if (!IsPreviousDisabled)
@@ -62,7 +62,7 @@
             {
                 <button class="btn btn-sm btn-danger"
                         @onclick="HandleNexBtn">
-                    Next
+                    @displayButton
                 </button>
             }
             else
@@ -80,13 +80,14 @@
     private bool IsPreviousDisabled => currentStep == 1 || currentStep == 3; // Dynamically determine if "Previous" is disabled
     private bool IsNextDisabled => currentStep == 3;     // Dynamically determine if "Next" is disabled
     private string selectedPayment = "Bank Transfer";
-
+    private string displayButton = "Next";
     private void HandlePreBtn()
     {
         if (currentStep > 1)
         {
             currentStep--;
-            StateHasChanged(); 
+            ButtonVisibilityCheck();
+            StateHasChanged();
         }
     }
 
@@ -106,7 +107,8 @@
         if (currentStep < 3)
         {
             currentStep++;
-            StateHasChanged(); 
+            ButtonVisibilityCheck();
+            StateHasChanged();
         }
     }
 
@@ -126,9 +128,43 @@
 
     private void HandleButtonClick(CustomButtonModel button)
     {
+        foreach (var p in PaymentMethods)
+        {
+            if (p.IsButtonActive == true)
+            {
+                p.IsButtonActive = false;
+            }
+        }
+        button.IsButtonActive = true;
         selectedPayment = button.DisplayText;
-        // navigationManager.NavigateTo(button.NavigationLink);
         currentStep = 1;
+    }
+
+    private void ButtonVisibilityCheck()
+    {
+        if (currentStep == 1)
+        {
+            displayButton = "Next";
+            foreach (var p in PaymentMethods)
+            {
+                if (p.IsVisible == false)
+                {
+                    p.IsVisible = true;
+                }
+            }
+            ExchangeTransactionService.SelectedBank = null;
+        }
+        if (currentStep == 2)
+        {
+            displayButton = "Continue";
+            foreach (var p in PaymentMethods)
+            {
+                if (p.IsVisible == true && p.DisplayText != selectedPayment)
+                {
+                    p.IsVisible = false;
+                }
+            }
+        }
     }
 
     public List<CustomButtonModel> PaymentMethods = new List<CustomButtonModel>
@@ -139,7 +175,8 @@
               NavigationLink = "bank-transfer-link",
               Icon = "bank-icon-class",
               IsButtonDisabled = false,
-              IsButtonActive = true
+              IsButtonActive = true,
+              IsVisible = true
           },
           new CustomButtonModel
           {
@@ -147,7 +184,8 @@
               NavigationLink = "upi-transfer-link",
               Icon = "upi-icon-class",
               IsButtonDisabled = false,
-              IsButtonActive = false
+              IsButtonActive = false,
+              IsVisible = true
           },
           new CustomButtonModel
           {
@@ -155,7 +193,8 @@
               NavigationLink = "binance-pay-link",
               Icon = "binance-icon-class",
               IsButtonDisabled = true,
-              IsButtonActive = false
+              IsButtonActive = false,
+              IsVisible = true
           },
           new CustomButtonModel
           {
@@ -163,7 +202,8 @@
               NavigationLink = "wazirx-link",
               Icon = "wazirx-icon-class",
               IsButtonDisabled = true,
-              IsButtonActive = false
+              IsButtonActive = false,
+              IsVisible = true
           }
       };
 

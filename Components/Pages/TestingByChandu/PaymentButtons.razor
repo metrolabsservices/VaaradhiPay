@@ -6,9 +6,12 @@
 <div class="payment-custom-button-group-container">
     @foreach (var button in ButtonItems)
     {
-        <button class="payment-custom-button btn @GetActiveButtonClass(button)" @onclick="(() => OnButtonClick(button))">
-            @button.DisplayText
-        </button>
+        if (button.IsVisible)
+        {
+            <button class="payment-custom-button btn @(button.IsButtonActive == true ? "payment-custom-active-button":"")" @onclick="(() => OnButtonClick(button))" disabled="@button.IsButtonDisabled">
+                @button.DisplayText
+            </button>
+        }
     }
 </div>
 
