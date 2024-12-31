@@ -79,6 +79,7 @@ builder.Services.AddScoped<CheckTransactionStatus>();
 builder.Services.AddScoped<BankAccountService>();
 builder.Services.AddScoped<IAdminTetherWalletAccountService, AdminTetherWalletAccountService>();
 builder.Services.AddScoped<IAdminUpiAccountService, AdminUpiAccountService>();
+builder.Services.AddScoped<QRServices>();
 
 
 //................................

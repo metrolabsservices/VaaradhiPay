@@ -24,5 +24,7 @@ namespace VaaradhiPay.Services
         Task UpdateTransactionStatusAsync(int transactionId, TransactionStatus status);
 
         Task DeleteTransactionAsync(int id);
+
+        Task<int> GetAllTransactionAsync();
     }
 }

@@ -1,13 +1,17 @@
-﻿@using VaaradhiPay.DTOs
+﻿@using System.Text
+@using Microsoft.Extensions.Hosting
+@using VaaradhiPay.DTOs
 @using VaaradhiPay.Data
 @using VaaradhiPay.Services
 @using VaaradhiPay.Services.Implementations
 @using VaaradhiPay.Services.Interfaces
 
+@inject QRServices Qrservice
+@inject IWebHostEnvironment _hostEnvironment
 @inject ExchangeTransactionService LocalStorage
 @inject AdminBankAccountService AdminServ
 @inject IAdminUpiAccountService AdminUpiServ
-@inject ITransactionService TransacServ 
+@inject ITransactionService TransacServ
 @inject ToastService Toast
 @inject PreloadService Loader
 @inject IFileStorageService fileStorageService
@@ -30,13 +34,36 @@
                     <KeyValueDisplay Key="Branch Code" Value="@adminBankAccount?.BranchCode" />
                     <KeyValueDisplay Key="IFSC Code" Value="@adminBankAccount?.IfscCode" />
                 }
-                else if(selectedPayment == "UPI")
+                else if (selectedPayment == "UPI")
                 {
-                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="UPI" @onchange="() => OnModeChanged(true)" checked="@UpiMode"/>
+                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="UPI" @onchange="() => OnModeChanged(true)" checked="@UpiMode" />
                     <label>UPI ID:</label>
-                    @if(UpiMode){
+                    @if (UpiMode)
+                    {
                         <KeyValueDisplay Key="UPI ID" Value="@adminUpiAccount?.UpiId" />
                         <p>or Pay using QR</p>
+
+                        @* Scanner *@
+
+                        @if (showUpiDetailsShow)
+                        {
+
+                            <div class="col-12 d-flex justify-content-center p-1">
+                                <img class="border border-1" src="data:image/svg+xml;base64,@(Convert.ToBase64String(Encoding.UTF8.GetBytes(Qrservice.GenerateQrCodeSvg(UPILink, _hostEnvironment.WebRootPath + "/tradefxplogo.png"))))"
+                                     style="width:150px;height:150px;" alt="UPI QR Code" />
+                            </div>
+
+                            <div class="col-md-12 d-flex justify-content-center align-self-center">
+                                <figcaption class="blockquote-footer m-0 p-1 text-primary1">
+                                    <strong>Make Sure:  </strong> After successfull payment click to upload screenshot fo further approval.
+                                </figcaption>
+
+                            </div>
+
+                        }
+
+                        @* end scanner*@
+
                     }
                     <br />
                     <input class="form-check-input" type="radio" name="flexRadioDefault" id="UPI" @onchange="() => OnModeChanged(false)" />
@@ -50,7 +77,7 @@
                         <KeyValueDisplay Key="IFSC Code" Value="@adminBankAccount?.IfscCode" />
                     }
                 }
-                
+
             </div>
             <hr class="px-2 my-3" />
             <div>
@@ -84,7 +111,7 @@
                 <p class="text-muted fw-bold">Convenience Fee:</p>
                 <p class="">@ChargedFee.ToString("F2") @LocalStorage.CurrentTransaction?.ReceiveCurrency</p>
             </div>
-    
+
             <hr class="px-2 my-3" />
 
             <div class="d-flex justify-content-between mainFontSize">
@@ -97,7 +124,7 @@
             </div>
         </div>
     }
-    
+
 </div>
 
 <Modal @ref="TransactionUploadBox" UseStaticBackdrop="true" CloseOnEscape="false" IsVerticallyCentered="true" Title="Upload Proof">
@@ -128,7 +155,7 @@
 
 @code {
     [Parameter] public EventCallback<bool> OnValidationStateChanged { get; set; }
-    [Parameter] public EventCallback OnFinal { get; set; }
+    [Parameter] public EventCallback<bool> OnFinal { get; set; }
     [Parameter] public string selectedPayment { get; set; }
     private bool UpiMode = true;
 
@@ -150,17 +177,25 @@
     private string UserTransactionId { get; set; } = string.Empty;
     private IBrowserFile? UploadedFile { get; set; }
 
+    private string UPILink;
+    private bool showUpiDetailsShow = false;
+    private bool isClickPayDisabled = true;
+    private bool IsUploaded = false;
+
     protected override async Task OnInitializedAsync()
     {
         Console.WriteLine(selectedPayment);
         UpiMode = true;
         ReceCurrtype = LocalStorage.CurrentTransaction?.ReceiveCurrency;
         PayCurrtype = LocalStorage.CurrentTransaction?.PayCurrency;
-
-        if(ReceCurrtype == null)
+        if (string.IsNullOrEmpty(selectedPayment))
+        {
+            LocalStorage.CurrentTransaction.FromPay = selectedPayment;
+        }
+        if (ReceCurrtype == null)
         {
             error = new ErrorHandleDTO
-                {   
+                {
                     IsError = true,
                     Message = "Currency information is missing. Unable to proceed with the transaction."
                 };
@@ -168,17 +203,18 @@
         }
         else
         {
-            if(selectedPayment == "Bank Transfer")
+            if (selectedPayment == "Bank Transfer")
             {
                 await LoadAdminBank();
             }
-            else if(selectedPayment == "UPI")
+            else if (selectedPayment == "UPI")
             {
                 await LoadAdminUpi();
             }
         }
 
     }
+
     private async Task LoadAdminBank()
     {
         var result = await AdminServ.GetRandomAdminBankAccountAsync(ReceCurrtype);
@@ -194,6 +230,7 @@
         }
         else
         {
+            LocalStorage.CurrentTransaction.ToPay = selectedPayment;
             adminBankAccount = result.Account;
             BaseConvertionValue = (LocalStorage.CurrentTransaction?.YouReceive / LocalStorage.CurrentTransaction?.YouPay)?.ToString("F2");
 
@@ -220,6 +257,9 @@
         }
         else
         {
+            var TransactionUniqueID = await GenerateTransactionIdAsync();
+
+            UPILink = $"upi://pay?pa={upiResult.Account.UpiId}&pn={upiResult.Account.AccountHolderName}&am={LocalStorage.CurrentTransaction?.YouPay}&tn={TransactionUniqueID}";
             adminUpiAccount = upiResult.Account;
             BaseConvertionValue = (LocalStorage.CurrentTransaction?.YouReceive / LocalStorage.CurrentTransaction?.YouPay)?.ToString("F2");
 
@@ -227,6 +267,7 @@
             ChargedFee = (ConvenienceFee / 100) * LocalStorage.CurrentTransaction.YouReceive;
             TotalReceive = ChargedFee - LocalStorage.CurrentTransaction.YouReceive;
             TotalReceive = TotalReceive < 0 ? TotalReceive * -1 : TotalReceive;
+            ShowUpiScanner();
         }
     }
 
@@ -274,7 +315,7 @@
                     AdminTransactionRefId = Guid.NewGuid().ToString(), // Generate a unique admin reference ID
                     PayCurrency = LocalStorage.CurrentTransaction?.PayCurrency ?? string.Empty,
                     ReceiveCurrency = LocalStorage.CurrentTransaction?.ReceiveCurrency ?? string.Empty,
-                    IsBuy = LocalStorage.CurrentTransaction.IsBuy, 
+                    IsBuy = LocalStorage.CurrentTransaction.IsBuy,
                     AmountPaid = LocalStorage.CurrentTransaction?.YouPay ?? 0m,
                     AmountReceived = LocalStorage.CurrentTransaction?.YouReceive ?? 0m,
                     ConversionRate = LocalStorage.CurrentTransaction?.YouReceive / LocalStorage.CurrentTransaction?.YouPay ?? 1m,
@@ -294,7 +335,7 @@
             ShowToast("Transaction proof submitted successfully!", ToastType.Success);
 
             await EmitValidationState(true);
-            await OnFinal.InvokeAsync();
+            await OnFinal.InvokeAsync(true);
             await TransactionUploadBox.HideAsync();
         }
         catch (InvalidOperationException ex)
@@ -327,7 +368,6 @@
         }
     }
 
-
     // Helper method to show toast notifications
     private void ShowToast(string message, ToastType type)
     {
@@ -351,7 +391,11 @@
 
     private async Task MinioUpload()
     {
-        await fileStorageService.UploadingFiles(UploadedFile,"Payment Proof");
+        string obj = await fileStorageService.UploadingFiles(UploadedFile, "Payment Proof");
+        if (string.IsNullOrEmpty(obj))
+        {
+            IsUploaded = true;
+        }
     }
 
     private async Task EmitValidationState(bool isValid)
@@ -366,24 +410,44 @@
         {
             await LoadAdminBank();
         }
+        else
+        {
+            await LoadAdminUpi(); 
+        }
+    }
+
+    public async Task<string> GenerateTransactionIdAsync()
+    {
+        var ID = LocalStorage.LoggedInInfo.Id;
+        var sequenceNumber = await TransacServ.GetAllTransactionAsync();
+        var prefix = "TRX";
+        var date = DateTime.UtcNow.ToString("yyyyMMdd");
+        var transactionId = $"{prefix}{ID}{date}{sequenceNumber + 1}";
+        return transactionId;
+    }
+
+    private void ShowUpiScanner()
+    {
+        showUpiDetailsShow = true;
+        isClickPayDisabled = false;
     }
 }
 
-
 <style>
-    .mainFontSize{
+    .mainFontSize {
         font-size: 15px;
         font-weight: bold;
     }
-    .secondaryFontSize{
+
+    .secondaryFontSize {
         font-size: 13px;
     }
-    .transaction_upload-form-container{
-        padding: 15px;
 
+    .transaction_upload-form-container {
+        padding: 15px;
     }
 
-        .transaction_upload-form-label {
+    .transaction_upload-form-label {
         font-weight: bold;
         font-size: 16px;
         margin-bottom: 10px;
@@ -448,7 +512,5 @@
         .transaction_upload-btn-danger:hover {
             background-color: #b02a37;
         }
-
-
 
 </style>

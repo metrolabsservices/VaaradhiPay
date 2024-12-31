@@ -195,5 +195,11 @@ namespace VaaradhiPay.Services
                 throw new InvalidOperationException("Conversion rate must be greater than zero.");
             }
         }
+
+        //Get all transactions count
+        public async Task<int> GetAllTransactionAsync()
+        {
+            return await _context.FinancialTransactions.CountAsync();
+        }
     }
 }

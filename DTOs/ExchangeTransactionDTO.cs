@@ -8,5 +8,7 @@
         public decimal YouReceive { get; set; }
         public string UserId { get; set; } = string.Empty;
         public bool IsBuy { get; set; }
+        public string? FromPay { get; set; }
+        public string? ToPay { get; set; }
     }
 }

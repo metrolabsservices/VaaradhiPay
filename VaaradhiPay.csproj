@@ -27,6 +27,7 @@
     <PackageReference Include="MimeKit" Version="4.8.0" />
     <PackageReference Include="Minio" Version="6.0.3" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
+    <PackageReference Include="QRCoder" Version="1.6.0" />
   </ItemGroup>
 
   <ItemGroup>

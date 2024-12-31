@@ -61,7 +61,7 @@
             @if (!IsNextDisabled)
             {
                 <button class="btn btn-sm btn-danger"
-                        @onclick="HandleNexBtn">
+                        @onclick="HandleNexBtn" disabled="@(displayButton == "Continue" && !IsUploaded)">
                     @displayButton
                 </button>
             }
@@ -81,6 +81,7 @@
     private bool IsNextDisabled => currentStep == 3;     // Dynamically determine if "Next" is disabled
     private string selectedPayment = "Bank Transfer";
     private string displayButton = "Next";
+    private bool IsUploaded = false;
     private void HandlePreBtn()
     {
         if (currentStep > 1)
@@ -121,8 +122,14 @@
         }
     }
 
-    private void FinalSucessPage()
+    private void FinalSucessPage(bool IsUploaded)
     {
+        canProceed = IsUploaded;
+        if (!canProceed)
+        {
+            Toast.Notify(new ToastMessage { Type = ToastType.Danger, Message = $"Upload Failed. Please Try again later" });
+        }
+        this.IsUploaded = IsUploaded;
         HandleNexBtn();
     }
 
