@@ -258,7 +258,14 @@
         else
         {
             var TransactionUniqueID = await GenerateTransactionIdAsync();
-
+            if (UpiMode)
+            {
+                LocalStorage.CurrentTransaction.ToPay = "UPI";
+            }
+            else
+            {
+                LocalStorage.CurrentTransaction.ToPay = "Bank Transfer";
+            }
             UPILink = $"upi://pay?pa={upiResult.Account.UpiId}&pn={upiResult.Account.AccountHolderName}&am={LocalStorage.CurrentTransaction?.YouPay}&tn={TransactionUniqueID}";
             adminUpiAccount = upiResult.Account;
             BaseConvertionValue = (LocalStorage.CurrentTransaction?.YouReceive / LocalStorage.CurrentTransaction?.YouPay)?.ToString("F2");
