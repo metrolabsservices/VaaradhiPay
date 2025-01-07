@@ -11,95 +11,6 @@
 @inject TetherWalletService tetherwalletservice
 @inject UPIAddressService UpiAddressService
 
-<!-- #region Profile cart css -->
-
-
-<style>
-    .user-profile-profile-crypto-wallet {
-        display: flex;
-        justify-content: space-between;
-    }
-
-    .user-profile-profile-crypto-wallet-header h2 {
-        font-size: 14px;
-        font-weight: 400;
-        text-transform: uppercase;
-        color: #000000;
-        letter-spacing: 3px;
-        padding: 10px 0 0 35px;
-    }
-
-    .user-profile-profile-crypto-wallet-header p {
-        font-size: 14px;
-        font-weight: 600;
-        color: #67757C;
-        padding: 8px 0 0 35px;
-    }
-
-    .user-profile-profile-crypto-wallet-add {
-        cursor: pointer;
-        display: flex;
-        padding-right: 80px;
-        flex-wrap: wrap;
-        align-items: center;
-    }
-
-        .user-profile-profile-crypto-wallet-add h1 {
-            font-weight: 600;
-            font-size: 14px;
-            columns: #000000;
-            text-transform: uppercase;
-            margin: 0%;
-        }
-
-        .user-profile-profile-crypto-wallet-add i {
-            font-size: 2rem;
-        }
-
-    .user-profile-profile-hr1 {
-        width: 90%;
-        margin: 0 0 0 30px;
-    }
-
-    .hashed-background {
-         border-radius:4px;
-         font-size: 13px;
-        margin-bottom:-5px;
-        color:#67757C;
-        
-    }
-    /* Custom class for hr element */
-.custom-hr {
-    margin: 1rem 0;               /* Space above and below the horizontal line */
-    color: #D4D9E2;          /* Color of the horizontal line */
-    border: 0;                    /* Removes the default border */
-    border-bottom: 2px solid #333;  /* Custom solid line with thickness and color */
-    margin-bottom:0px;
-    min-width: 280px
-
-}
-
-    .user-profile-profile-scroller  {
-        max-height: 75px;
-        overflow: hidden;
-        -ms-overflow-style: none; /* hide scrollbar in ie and edge */
-        scrollbar-width: none; /* hide scrollbar in firefox */
-    }
-
-    .user-profile-profile-scroller::-webkit-scrollbar {
-            display: none; /* hide scrollbar in chrome, safari, and opera */
-        }
-
-
-    .user-profile-profile-icon i:hover {
-        color: #007bff; /* change color on hover */
-        transition: color 0.3s ease;
-    }
-
-
-</style>
-
-<!-- #endregion -->
 
 <div class="user-profile-profile-crypto-wallet">
     <div class="user-profile-profile-crypto-wallet-header">
@@ -291,7 +202,7 @@
                         </span>
 
                         <!-- Info Icon: Hover or click to set modal data -->
-                       <span class="user-profile-profile-icon ms-2" style="cursor: pointer;" 
+                        <span class="user-profile-profile-icon ms-2" style="cursor: pointer;"
                               @onmouseover="() => SetSelectedUPI(upi)">
                             <i class="bi bi-info-circle text-secondary me-2"></i>
                         </span>
@@ -341,9 +252,9 @@
     </div>
 </div>
 
- <Modal @ref="UpiModal" IsScrollable="true"/>
- <Modal @ref="BankModal" IsScrollable="true"/>
- <Modal @ref="CryptoModal" IsScrollable="true"/>
+<Modal @ref="UpiModal" IsScrollable="true" />
+<Modal @ref="BankModal" IsScrollable="true" />
+<Modal @ref="CryptoModal" IsScrollable="true" />
 
 
 
@@ -391,7 +302,7 @@
             var parameters = new Dictionary<string, object>
             {
                 { "OnFormSubmit", EventCallback.Factory.Create(this, CloseUPIModal) }
-            }; 
+            };
 
             await UpiModal.ShowAsync<ProfileUPIBlock>(title: "Upi Form", parameters: parameters);
         }
@@ -400,7 +311,7 @@
             var parameters = new Dictionary<string, object>
             {
                 { "OnFormSubmit", EventCallback.Factory.Create(this, CloseBankModal) }
-            }; 
+            };
 
             await BankModal.ShowAsync<ProfileBankBlock>(title: "Bank Form", parameters: parameters);
 
@@ -410,7 +321,7 @@
             var parameters = new Dictionary<string, object>
             {
                 { "OnFormSubmit", EventCallback.Factory.Create(this, CloseCryptoModal) }
-            }; 
+            };
 
             await CryptoModal.ShowAsync<ProfileCryptoWalletBlock>(title: "CryptoWallet Form", parameters: parameters);
 
@@ -440,6 +351,91 @@
         UPIAddressList = await UpiAddressService.GetActiveUPIAddressesByUserAsync(userDetails.Id);
     }
 }
+
+
+<style>
+    .user-profile-profile-crypto-wallet {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .user-profile-profile-crypto-wallet-header h2 {
+        font-size: 14px;
+        font-weight: 400;
+        text-transform: uppercase;
+        color: #000000;
+        letter-spacing: 3px;
+        padding: 10px 0 0 35px;
+    }
+
+    .user-profile-profile-crypto-wallet-header p {
+        font-size: 14px;
+        font-weight: 600;
+        color: #67757C;
+        padding: 8px 0 0 35px;
+    }
+
+    .user-profile-profile-crypto-wallet-add {
+        cursor: pointer;
+        display: flex;
+        padding-right: 80px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+        .user-profile-profile-crypto-wallet-add h1 {
+            font-weight: 600;
+            font-size: 14px;
+            columns: #000000;
+            text-transform: uppercase;
+            margin: 0%;
+        }
+
+        .user-profile-profile-crypto-wallet-add i {
+            font-size: 2rem;
+        }
+
+    .user-profile-profile-hr1 {
+        width: 90%;
+        margin: 0 0 0 30px;
+    }
+
+    .hashed-background {
+        border-radius: 4px;
+        font-size: 13px;
+        margin-bottom: -5px;
+        color: #67757C;
+    }
+    /* Custom class for hr element */
+    .custom-hr {
+        margin: 1rem 0; /* Space above and below the horizontal line */
+        color: #D4D9E2; /* Color of the horizontal line */
+        border: 0; /* Removes the default border */
+        border-bottom: 2px solid #333; /* Custom solid line with thickness and color */
+        margin-bottom: 0px;
+        min-width: 280px
+    }
+
+    .user-profile-profile-scroller {
+        max-height: 75px;
+        overflow: hidden;
+        -ms-overflow-style: none; /* hide scrollbar in ie and edge */
+        scrollbar-width: none; /* hide scrollbar in firefox */
+    }
+
+        .user-profile-profile-scroller::-webkit-scrollbar {
+            display: none; /* hide scrollbar in chrome, safari, and opera */
+        }
+
+
+    .user-profile-profile-icon i:hover {
+        color: #007bff; /* change color on hover */
+        transition: color 0.3s ease;
+    }
+
+</style>
+
+
 <script>
     function openModal(accountNumber) {
         var modal = new bootstrap.Modal(document.getElementById('bankAccountModal-' + accountNumber));

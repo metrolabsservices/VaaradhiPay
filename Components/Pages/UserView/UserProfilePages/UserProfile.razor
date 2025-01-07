@@ -1,5 +1,6 @@
 ﻿@page "/userprofile"
 @using VaaradhiPay.Components.Pages.L2
+@using VaaradhiPay.Components.Pages.TestingBlocks
 @using VaaradhiPay.Components.Pages.UserView.UserProfilePages.UserProfileBlocks
 @using VaaradhiPay.DTOs
 
@@ -42,7 +43,7 @@
     {
     TabId = 2,
     Name = "Profile",
-    Content = @<ProfileIndexPage />
+    Content = @<AccountsAndProfileBlock />
     },
     new TabItemDTO
     {

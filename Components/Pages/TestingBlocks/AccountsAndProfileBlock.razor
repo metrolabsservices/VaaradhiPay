@@ -1,0 +1,39 @@
+﻿@page "/testupiacc"
+
+
+
+<div class="userprofile-profile-container overflow-auto border border-success w-100">
+    @UserProfileHeaderALL("CRYPTO WALLET TYPE", "Crypto")
+    @UserProfileHeaderALL("BANK ACCOUNT DETAILS", "Bank")
+    @UserProfileHeaderALL("UPI DETAILS", "UPI")
+</div>
+
+
+
+@code {
+    RenderFragment UserProfileHeaderALL(string label, string type) => @<div class="d-flex justify-content-between align-items-center userprofile-profile-header">
+        <p class="mb-0 ">@label</p>
+        <button class="bi bi-plus btn userprofile-profile-header" @onclick="() => OpenAccountFormContainer(type)">ADD</button>
+    </div>
+    ;
+
+
+    private async Task OpenAccountFormContainer(string modaltype)
+    {
+        Console.WriteLine($"Processing Type... {modaltype}");
+    }
+
+}
+
+
+<style>
+
+    
+    .userprofile-profile-container{
+
+    }
+
+    .userprofile-profile-header {
+        font-size: 12px;
+    }
+</style>
